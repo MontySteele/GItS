@@ -111,8 +111,7 @@ public sealed class WaitForItPower
     {
         ("title", "Wait For It..."),
         ("description",
-            "The next time a [gold]Bomb[/gold] triggers an "
-          + "[gold]Elemental Reaction[/gold] this turn, draw "
+            "The next time a [gold]Bomb[/gold] reacts this turn, draw "
           + "[blue]{Amount}[/blue] cards and gain "
           + "{energyPrefix:energyIcons(" + ReactionEnergy + ")}."),
     };
@@ -294,9 +293,8 @@ public sealed class AftershockPower
     {
         ("title", "Aftershock"),
         ("description",
-            "The first time each turn a [gold]Bomb[/gold] of yours triggers an "
-          + "[gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that "
-          + "size on a random enemy."),
+            "The first time each turn one of your [gold]Bombs[/gold] reacts, "
+          + "place a [gold]Bomb[/gold] that size on a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;

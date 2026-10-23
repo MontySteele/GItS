@@ -35,7 +35,9 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoQuickFuse : CustomCardModel, ISetOffCard, ISparkPricedCard, IUnplayableReasonCard
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, false), this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForMine(ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, false), this), this), this), this)
+            : ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, false), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_quick_fuse");
 

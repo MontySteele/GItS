@@ -49,7 +49,7 @@ straightens before she can stop herself.*
 |---|---|---|
 | Perform for no one. | Lose 8 HP. Upgrade 2 random cards. | She plays every part and finally lands the high note in the second act. Nobody claps. She bows anyway, and makes a note about the lighting. |
 | Sit in the front row. | Heal 10 HP. | She has never actually sat out here. The seats are softer than she thought. She stays until her feet stop aching. |
-| Take a costume from the rack. | Gain a random relic. Add **Doubt**. | It fits perfectly. She would very much like to know who took her measurements. |
+| Take a costume from the rack. | Gain a random relic. Add **Doubt** to your deck. | It fits perfectly. She would very much like to know who took her measurements. |
 
 **Act 1. Rising Water** (a memory; every option priced). *Water is creeping up
 the stairs, ankle-deep and rising. Furina stops dead. For five hundred years
@@ -58,8 +58,8 @@ she waited for exactly this, and smiled at everyone the whole time.*
 | Option | Effect | Result |
 |---|---|---|
 | Run for the stairs. | Lose 10 HP. Remove a card. | She takes the stairs two at a time until they are dry and she can't breathe. Whatever she dropped on the way, she doesn't go back for it. |
-| Stand in it until it stops. | Add **Doubt**. Upgrade 3 random cards. | "It's over. It's been over for ages," she tells the water. It stops at her knees. She waits a long time anyway, to be sure. |
-| Hum the overture and wade on. | Gain 75 Gold. Add **Stage Fright**. | She hums all the way across, loudly. There are coins in the water, like at the Fountain of Lucine, and she takes a handful for luck. Her hands shake for an hour. |
+| Stand in it until it stops. | Add **Doubt** to your deck. Upgrade 3 random cards. | "It's over. It's been over for ages," she tells the water. It stops at her knees. She waits a long time anyway, to be sure. |
+| Hum the overture and wade on. | Gain 75 Gold. Add **Stage Fright** to your deck. | She hums all the way across, loudly. There are coins in the water, like at the Fountain of Lucine, and she takes a handful for luck. Her hands shake for an hour. |
 
 **Act 1. A Steambird Clipping** (all free). *An envelope is tucked under a
 stone on the landing, addressed in Charlotte's hand. Inside is a page of The
@@ -70,7 +70,7 @@ interview! —C."*
 | Option | Effect | Result |
 |---|---|---|
 | Read it aloud, twice. | Heal 12 HP. | She does all the voices, Charlotte's included. On the second reading she adds the exclamation marks Charlotte left out. |
-| Cast the sequel in the margin. | Choose 1 of 3 random Guest Stars. | Lead: Furina. Then a part for everyone she can think of. Charlotte gets a cameo, as a reporter, which serves her right. |
+| Cast the sequel in the margin. | Choose 1 of 3 random Guest Stars to add to your deck. | Lead: Furina. Then a part for everyone she can think of. Charlotte gets a cameo, as a reporter, which serves her right. |
 | Fold it into her glove. | Gain a random potion. | Folded along the old creases. She'll want it for the next person who doubts her. |
 
 Nothing in this event is sent anywhere: she reads it, writes on it, or keeps
@@ -89,7 +89,7 @@ the understudy. Nobody told me how it ends."
 | Option | Effect | Result |
 |---|---|---|
 | Teach her the ending. | Lose 6 HP. Choose 1 of 3 random upgraded Uncommon cards to add to your deck. | "You bow on the last note, not after. Chin up. Hands where they can see them. No, like this." By the fifth try the girl has it. "Are you ever scared?" "Again. From the top." |
-| Take the role back. | Remove a card. Add **Stage Fright**. | The girl hurries off, relieved. Furina takes her mark. She knows every line, and the first one still comes out a beat late. |
+| Take the role back. | Remove a card. Add **Stage Fright** to your deck. | The girl hurries off, relieved. Furina takes her mark. She knows every line, and the first one still comes out a beat late. |
 | Let her improvise. | Gain 50 Gold. | Her ending is completely wrong and the empty seats love it. Furina laughs so hard she has to sit down. |
 
 **Act 2. The Oratrice's Echo** (follows Rising Water; every option priced).
@@ -102,7 +102,7 @@ know. A plate reads: *State your case.*
 | Option | Effect | Result |
 |---|---|---|
 | Plead guilty. | Lose 12 HP. Gain a random relic. | "I lied to everyone for five hundred years." A pause. "And it kept them alive." The scale tips, and something drops into the tray. |
-| Plead innocent. | Heal 15 HP. Add **Stage Fright**. | "I did what I had to, and it worked." The scale doesn't move. "Well? Say something." It never could decide anything by itself. |
+| Plead innocent. | Heal 15 HP. Add **Stage Fright** to your deck. | "I did what I had to, and it worked." The scale doesn't move. "Well? Say something." It never could decide anything by itself. |
 | Give it a performance. | Lose 100 Gold. Transform 2 cards. Locked with less than 100 Gold. | There is a slot for an admission fee. She pays, under protest, then gives it the old monologue from the top. It's still good. The machine hands back something new. |
 
 **Act 2. A Letter from the Court** (home; follows A Steambird Clipping or no
@@ -119,7 +119,7 @@ in some weeks, and is concerned. N."
 |---|---|---|
 | Write back at length. | Upgrade a card. | Four pages: the stairs (too many), the lighting (dreadful), a very rude Ancient, and the cake situation, which she considers urgent. The courier tucks it away carefully. |
 | Order the cake anyway. | Lose 40 Gold. Heal 25 HP. Locked with less than 40 Gold. | She sends the courier off with the Mora and an order. On the next landing a box from Café Lutèce is waiting, still cold. She eats the whole thing on the stairs. |
-| Keep it for a hard night. | Choose 1 of 3 random Common Skills to add to your deck. | "Tell him I'll write." She reads it twice more on the way up. |
+| Keep it for a hard night. | Choose 1 of 3 random Common Skills to add to your deck. | "Tell him I'll write." She reads it again on every landing. |
 
 The courier is how a reply gets out, as Varka's couriers carry his satchels
 both ways. Melusines working at the Palais Mermonia is canon, but not in the
@@ -136,7 +136,7 @@ been waiting for her a long time.
 |---|---|---|
 | Give them the finale. | Lose 10 HP. Choose 1 of 3 random upgraded Rare cards to add to your deck. | Halfway through she changes the ending, because she has a better one. The orchestra, somehow, follows her. |
 | Bow and leave them wanting more. | Heal 30 HP. | One proper bow, and off while they're still clapping. Someone in the wings is grinning at her. |
-| Ask them to stay for an encore. | Upgrade 3 random cards. Add **Stage Fright**. | They stay. Her heart is pounding. She sends the orchestra back to the top twice, because the tempo is wrong. |
+| Ask them to stay for an encore. | Upgrade 3 random cards. Add **Stage Fright** to your deck. | They stay. Her heart is pounding. She sends the orchestra back to the top twice, because the tempo is wrong. |
 
 **Act 3. An Empty Throne** (home finale; follows The Oratrice's Echo, A
 Letter from the Court, or no act-2 event; price, free way out). Opening:

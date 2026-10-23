@@ -53,7 +53,7 @@ this.
 1 Strength, up to N times per combat." It counts per enemy. Within a turn, one hit per enemy feeds it. This keeps
 the punishment for leaving an enemy open and removes the multi-hit spiral.
 
-**Elemental Mark, new text:** "The first time each turn an enemy attack deals you unblocked damage, add a Burn to
+**Elemental Mark, new text:** "The first time each turn an enemy's attack deals you unblocked damage, add a Burn to
 your discard pile." Today a multi-hit attack can add several Burns in one turn.
 
 **Abyss Mage Shield, new text:** "Elites enter combat with a shield of this act's element, 6 hits deep, that

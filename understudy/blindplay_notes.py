@@ -1713,7 +1713,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # long history of both rows is in git.
     # 2026-10-18: Vulnerable raises it (suite 6 lane 5), and the jump short.
     "Bomb": ("Deals its size in Pyro damage when Set off. Vulnerable raises "
-             "it. Grows {growth} at the start of your turn. If its enemy "
+             "it. Grows by {growth} at the start of your turn. If its enemy "
              "dies, it jumps."),
     # 2026-10-13 (text-only fix): the other enemies' Bombs stay.
     "Set off": ("Every Bomb on the enemy goes off, oldest first. Bombs on "
@@ -1727,9 +1727,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # it waits on a turn its enemy does not attack.
     # 2026-10-13 (text-only fix): an attack leaves the plain Bombs.
     # 2026-10-23 ("On Klee - agreed on all."): it uses up the aura.
-    "Mine": ("A Bomb that also goes off when its enemy attacks you, and "
-             "uses up the enemy's aura. Its plain Bombs stay. Any Set off "
-             "spends it too."),
+    # 2026-10-23, the Klee text audit ("On Klee - agree on the defaults"):
+    # "by itself", and the Set off sentence left (a Mine is a Bomb).
+    "Mine": ("A Bomb that also goes off by itself when its enemy attacks "
+             "you, using up the enemy's aura. The enemy's other Bombs stay."),
     # THE 2026-09-25 TEXT PASS rewrote the word to two short sentences, in
     # step with `ArmKeywordTips.ForPlan` word for word: the old row carried
     # six seats' edge cases (the aim and its Minion exception, Strength
@@ -1782,14 +1783,16 @@ ARM_KEYWORDS: dict[str, str] = {
     # (`ArmKeywordTips.YaeFullShrineTip`); an Edit fills the temporary slot.
     # Yae review r6, item 5: which enemy it strikes (`YaeShrine.Aim`).
     # The Sakura Levels paper (2026-10-17, pick 1 (a)): 1 + 2 per Level.
-    "Sakura": ("At the end of your turn, strikes an enemy for 1 + 2 per "
+    # The Yae text audit (2026-10-23, pick 3 (a)): the tip in words.
+    "Sakura": ("At the end of your turn, deals 1 damage plus 2 for each "
                "Level. Lasts 3 turns, then strikes again. "
                + SAKURA_TARGET_RULE),
-    "Tenko": "Every Sakura acts now. Refresh them to at least 3 turns.",
-    "Foxfire Sakura": ("A Sakura that hits ALL enemies for 1 + its Level "
-                       "when it acts."),
-    "Kitsune Sakura": ("A fox decoy Sakura. When it acts, you gain 2 + its "
-                       "Level Block."),
+    "Tenko": ("Every Sakura acts now and goes back to at least 3 turns "
+              "left."),
+    "Foxfire Sakura": ("A Sakura that deals damage equal to 1 plus its "
+                       "Level to ALL enemies when it acts."),
+    "Kitsune Sakura": ("A fox decoy Sakura. When it acts, you gain Block "
+                       "equal to 2 plus its Level."),
     # Yae review r5, item 5.
     # 2026-10-17: the Sakura closest to withering, not the first planted;
     # the Sakura Levels paper (pick 1 (a)): Levels carry over on a replace.
@@ -1801,7 +1804,8 @@ ARM_KEYWORDS: dict[str, str] = {
              "to 2 cards opens one chooser: pick up to 2 different cards, "
              "fewer or none."),
     # 2026-10-14: Red Ink on a planting card reaches its Sakura too.
-    "Red Ink": ("This card deals 3 more damage and gives 3 more Block. If it "
+    "Red Ink": ("This card deals 3 additional damage and gives 3 additional "
+                "Block. If it "
                 "plants, its Sakura get it too. On a Sakura: the Sakura's "
                 "action is 3 bigger."),
     "Footnote": "When this card is played, draw 1 card.",
@@ -1883,7 +1887,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # trio, Bow, Cue, Rehearsal, the front performer, Ousia, Pneuma and six
     # guests) left with it; their history is in git.
     # The Spend paper (2026-10-10): "Spend up to X" pays X or all she has.
-    "Spend": ("Pay that much Fanfare. With less, you can't play the card "
+    "Spend": ("Pay that much Fanfare. With less, you cannot play the card "
               "or its Spend mode. "
               "Spend up to X pays X, or all you have if that is less."),
     # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain are
@@ -2501,8 +2505,8 @@ BASE_KEYWORDS: dict[str, str] = {
     # (`LightningOrb`, `DarkOrb`), which `IsPoweredAttack()` refuses, so the
     # page says so. Appended, so the C# twin's anchors still hold.
     "Vulnerable": (
-        f"An attack or card hit on it deals {VULNERABLE_TAKEN_PCT}% more, a "
-        f"Skill's too. A potion's does not. Loses 1 stack at the end of its "
+        f"Takes {VULNERABLE_TAKEN_PCT}% more damage from cards, Skills "
+        f"included, but not from potions. Loses 1 stack at the end of its "
         f"turn. Orb damage is not boosted."),
     # `EB-469`. THE GAME'S OWN STATUS LINE SAYS "Attacks deal 25% less damage
     # for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE --
@@ -2515,8 +2519,8 @@ BASE_KEYWORDS: dict[str, str] = {
     # says which, in the mod's own words -- this row and
     # `BaseKeywordTips.ForWeak` are one sentence, pinned to each other.
     "Weak": (
-        f"Every hit the wearer lands, a Skill's too, deals {WEAK_DEALT_PCT}% "
-        f"less. Loses 1 stack at the end of its turn."),
+        f"Deals {WEAK_DEALT_PCT}% less damage with every hit, Skills "
+        f"included. Loses 1 stack at the end of its turn."),
     "Frail": (
         f"The wearer gains {FRAIL_BLOCK_PCT}% less Block. One stack falls "
         f"off at the end of each of its turns."),
@@ -2543,7 +2547,7 @@ BASE_KEYWORDS: dict[str, str] = {
     # that cannot be read by somebody who does not know what Strength is.
     # The Furina full-run round (2026-10-10): and how long it lasts.
     "Strength": ("Adds its amount to every Attack hit the wearer lands. It "
-                 "does not decay; it lasts for the rest of this fight."),
+                 "lasts for the rest of this combat."),
     "Dexterity": ("Adds its amount to every Block the wearer gains. It does "
                   "not decay."),
     # The Repay floor (ruled 2026-10-09): Soothing Waters and Pneuma Tides
@@ -3008,7 +3012,7 @@ BOSS_ROOM = "boss"
 # what this build prints rather than what tier0 believes. The pattern follows
 # the tip's wording, capital G and all: a card face says "grows by N".
 _BOMB_GROWTH_RE = re.compile(
-    r"\bGrows (\d+) at the start of your turn\b")
+    r"\bGrows (?:by )?(\d+) at the start of your turn\b")
 
 
 def _every_string(blob: Any):

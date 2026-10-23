@@ -41,10 +41,10 @@ SHORT_CIRCUIT = ("Discard 2 cards. Draw 2 cards. Gain 1 Energy. Apply "
 BARBARA = "Gain 6 Block. Apply Hydro to an enemy. Next turn, gain 3 Block."
 KAEYA_KNIGHT = "Knight. Deal 7 damage. Apply 1 Weak."
 SWIRL_CARD = "Deal 6 damage. Swirl the enemy."
-BANNER_TEXT = ("Only Knights can change your current element. Whenever "
+BANNER_TEXT = ("Only Knights change your current element. Whenever "
                "another card would, gain 1 Oath of your current element "
                "instead.")
-ALL_FOUR_TEXT = "Your cards read your Oath of every element together."
+ALL_FOUR_TEXT = "Your cards read your total Oath."
 
 
 def _switch_lines(page, title):

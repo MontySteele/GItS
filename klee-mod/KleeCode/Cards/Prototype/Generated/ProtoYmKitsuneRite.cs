@@ -48,7 +48,7 @@ public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitsune Rite"),
-        ("description", "[gold]Tenko[/gold]{InCombat:{YaeTenko}|}. Draw 1 card."),
+        ("description", "[gold]Tenko[/gold]{InCombat:{YaeTenko}|}. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     /// <summary>This card's in-combat shrine clauses
@@ -81,6 +81,6 @@ public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

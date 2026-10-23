@@ -87,8 +87,7 @@ public class VarkaAncientsTests : IDisposable
         Assert.Equal(3, card.EnergyCost.Canonical);
         Assert.Equal(2, (int)Upgraded<AllFourWinds>().EnergyCost
             .GetWithModifiers(MegaCrit.Sts2.Core.Entities.Cards.CostModifiers.None));
-        Assert.Equal("Your cards read your [gold]Oath[/gold] of every element "
-                   + "together.", Face(card));
+        Assert.Equal("Your cards read your total [gold]Oath[/gold].", Face(card));
         var play = Il.Calls(Il.Method("AllFourWinds", "OnPlay"));
         Assert.Contains("VarkaOathLedger.ReadAllFourThisCombat", play);
         Assert.Contains(Il.CallSequence(Il.Method("AllFourWinds", "OnPlay")),
@@ -144,7 +143,7 @@ public class VarkaAncientsTests : IDisposable
         Assert.Contains(card.DynamicVars.Values, v => v is VarkaCurrentElementHitVar);
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. "
-          + "Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your "
+          + "Then deal {VkPer:diff()} damage for each [gold]Oath[/gold] of your "
           + "[gold]current element[/gold] to each, as that element."
           + "{InCombat:\n(Deals {VkHit:diff()} damage)|}",
             Face(card));

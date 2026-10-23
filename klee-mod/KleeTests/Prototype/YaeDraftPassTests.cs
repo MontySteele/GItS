@@ -173,7 +173,7 @@ public class YaeDraftPassTests : IDisposable
     {
         var card = new ProtoYmKitsunePounce();
         Assert.Equal("Deal {Damage:diff()} [gold]Electro[/gold] damage. "
-                     + "If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} more.",
+                     + "If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} additional damage.",
                      Face(card));
         var up = Upgraded<ProtoYmKitsunePounce>();
         Assert.Equal((8, 5), (Var(card, "Damage"), Var(card, "BranchDamage")));

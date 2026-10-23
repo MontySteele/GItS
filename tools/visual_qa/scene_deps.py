@@ -51,6 +51,32 @@ GATE = "scene-deps"
 #: applied to every scene (a gauge has no "hurt").
 CREATURE_STATES = ("idle", "attack", "hurt", "death")
 
+#: Base-game resources a pck-src scene may reference by `res://` path, because
+#: they are in `SlayTheSpire2.pck` and the game merges our pack over it (read
+#: out of the v0.107.1 pack, 2026-10-23). Only the card trails use them: each
+#: kit's `<kit>/vfx/card_trail.tscn` (tools/gen_card_trails.py) is the base
+#: trail scene recoloured, and `NCardTrailVfx.Create` CASTS the instance
+#: (`Instantiate<NCardTrailVfx>`) while each line is an `NCardTrail` whose
+#: `_Process` lays the points down -- so those two base scripts are the
+#: scene's behaviour, not ours, and BaseLib's root-only conversion cannot
+#: supply the child lines'. An explicit list, so SD-SCRIPT still catches any
+#: other script and a typo in a base path is still an error against a universe.
+#: Measured on MegaDot 4.5.1 headless the same day: a scratch project holding a
+#: trail scene imports and exports with a clean godot_log_sweep and packs the
+#: `.tscn` alone (no empty stand-ins shadowing these paths).
+BASE_GAME_SCRIPTS = frozenset({
+    "src/Core/Nodes/Vfx/NCardTrailVfx.cs",
+    "src/Core/Nodes/Vfx/NCardTrail.cs",
+})
+BASE_GAME_RESOURCES = BASE_GAME_SCRIPTS | frozenset({
+    "images/packed/vfx/trail.png",
+    "images/packed/vfx/trail2.png",
+    "images/vfx/brush_particle_2.png",
+    "images/vfx/vfx_ghostly_power_up/sparkle.png",
+    "images/packed/vfx/small_card_silhouette.png",
+    "themes/canvas_item_material_additive_shared.tres",
+})
+
 
 def _rel(path: Path, root: Path) -> str:
     try:
@@ -146,7 +172,9 @@ def check_scene(
     # --- external paths ---------------------------------------------------
     for res_id, section in sorted(scene.ext_resources.items()):
         path = section.attrs.get("path", "")
-        if section.attrs.get("type") == "Script":
+        base_game = path.startswith("res://") and path[len("res://"):] in BASE_GAME_RESOURCES
+        if section.attrs.get("type") == "Script" and not (
+                base_game and path[len("res://"):] in BASE_GAME_SCRIPTS):
             report.error(
                 "SD-SCRIPT", f"{where}:{section.line}",
                 "scene declares an ext_resource type=\"Script\". Script "
@@ -167,7 +195,7 @@ def check_scene(
             )
             continue
         relative = path[len("res://"):]
-        if universe is None:
+        if universe is None or base_game:
             continue
         if relative not in universe:
             report.error(

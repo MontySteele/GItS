@@ -68,6 +68,6 @@ public sealed class ProtoYmSakuraGrove : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        EnergyCost.UpgradeBy(-1);
     }
 }

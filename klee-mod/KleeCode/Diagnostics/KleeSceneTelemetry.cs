@@ -79,6 +79,13 @@ internal static class KleeSceneTelemetry
         "klee/vfx/bomb_lob.tscn",
         "klee/vfx/dodoco_pop.tscn",
         "furina/vfx/spotlight_shine.tscn",
+        // Each kit's card trail (tools/gen_card_trails.py, 2026-10-23); a
+        // miss falls back to the base trail the kit wore before.
+        "klee/vfx/card_trail.tscn",
+        "furina/vfx/card_trail.tscn",
+        "kokomi/vfx/card_trail.tscn",
+        "varka/vfx/card_trail.tscn",
+        "yae/vfx/card_trail.tscn",
     };
 
     /// <summary>

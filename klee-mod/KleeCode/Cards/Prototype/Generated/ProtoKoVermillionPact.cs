@@ -35,7 +35,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoVermillionPact : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_vermillion_pact");
 

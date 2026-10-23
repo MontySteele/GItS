@@ -125,8 +125,8 @@ public static class BaseKeywordTips
     public static IEnumerable<IHoverTip> ForVulnerable(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, VulnerableKey,
-            "An attack or card hit on it deals 50% more, a Skill's too. A "
-          + "potion's does not. Loses 1 stack at the end of its turn.");
+            "Takes 50% more damage from cards, Skills included, but not from "
+          + "potions. Loses 1 stack at the end of its turn.");
 
     /// <summary>
     /// The mirror one debuff over, and the one the Plan tip's second sentence
@@ -154,7 +154,7 @@ public static class BaseKeywordTips
     public static IEnumerable<IHoverTip> ForWeak(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, WeakKey,
-            "Every hit the wearer lands, a Skill's too, deals 25% less. Loses "
+            "Deals 25% less damage with every hit, Skills included. Loses "
           + "1 stack at the end of its turn.");
 
     /// <summary>The third duration debuff. No prototype face prints it
@@ -175,7 +175,7 @@ public static class BaseKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, StrengthKey,
             "Adds its amount to every Attack hit the wearer "
-          + "lands. It does not decay; it lasts for the rest of this fight.");
+          + "lands. It lasts for the rest of this combat.");
 
     /// <summary>Strength's Block twin.</summary>
     public static IEnumerable<IHoverTip> ForDexterity(

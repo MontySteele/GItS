@@ -122,9 +122,10 @@ def test_the_seat_glossary_splits_the_rows():
     assert "Red Ink" not in rows["Edit"] and "Tenko" not in rows["Sakura"]
     assert "Thunder" not in rows["Sakura"]
     # Review r3 (2026-10-14): Tenko is one plain rule again.
-    assert rows["Tenko"] == ("Every Sakura acts now. Refresh them to at "
-                             "least 3 turns.")
+    assert rows["Tenko"] == ("Every Sakura acts now and goes back to at "
+                             "least 3 turns left.")
     assert "Rite" not in rows and "Rite" not in rows["Sakura"]
     assert rows["Red Ink"].startswith(
-        "This card deals 3 more damage and gives 3 more Block. If it plants, "
+        "This card deals 3 additional damage and gives 3 additional Block. "
+        "If it plants, "
         "its Sakura get it too.")

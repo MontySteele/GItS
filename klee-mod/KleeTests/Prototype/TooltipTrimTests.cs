@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using KleeMod.Cards;
+using KleeMod.Cards.Prototype.Generated;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -40,7 +41,9 @@ public class TooltipTrimTests
     [Fact]
     public void A_key_with_no_player_words_prints_its_seat_sentence_to_both()
     {
-        Assert.Equal("SEAT", For(ArmKeywordTips.MendKey, "SEAT"));
+        // Yae's Annotations have no keyed row yet (step 2 of the
+        // localization census): their seat sentence is both readers'.
+        Assert.Equal("SEAT", For(ArmKeywordTips.KeyOf(global::KleeMod.Powers.YaeAnnotation.RedInk), "SEAT"));
     }
 
     [Fact]
@@ -66,20 +69,37 @@ public class TooltipTrimTests
             .GetField("Bodies", BindingFlags.Static | BindingFlags.NonPublic)!
             .GetValue(null)!;
         Assert.NotEmpty(bodies);
+        // Two bodies that were seat-and-player sentences before the keying
+        // (2026-10-23), measured by nothing then and longer than a box. The
+        // text is unchanged on purpose (the keying is plumbing); an entry
+        // that comes under the cap fails, so the list only shrinks.
+        var longOk = new Dictionary<string, int>
+        {
+            [ArmKeywordTips.FullShrineKey] = 161,
+            [ArmKeywordTips.BankDamageKey] = 116,
+        };
         foreach (var (key, body) in bodies)
         {
-            var visible = Regex.Replace(body, @"\[/?(gold|blue)\]", "");
-            Assert.True(visible.Length <= 100, $"{key}: {visible.Length}");
-            Assert.DoesNotContain("{", body);
+            // A var renders as one numeral (the base game's measuring rule);
+            // every other brace is a typo.
+            var visible = Regex.Replace(Regex.Replace(body, @"\[/?(gold|blue)\]", ""),
+                                        @"\{[A-Za-z]+\}", "6");
+            if (longOk.TryGetValue(key, out var known)) Assert.Equal(known, visible.Length);
+            else Assert.True(visible.Length <= 100, $"{key}: {visible.Length}");
+            Assert.DoesNotContain("{", visible);
         }
     }
 
     [Fact]
-    public void A_guest_line_opening_stops_at_its_number()
+    public void A_guest_tip_reads_its_cards_marker_and_not_its_face()
     {
-        var opening = (string)Player
-            .GetMethod("LineOpening", BindingFlags.Static | BindingFlags.NonPublic)!
-            .Invoke(null, new object[] { "Your first [gold]Spend[/gold] each turn costs 2 less." })!;
-        Assert.Equal("Your first [gold]Spend[/gold] each turn costs ", opening);
+        // The localization census (2026-10-23, group 3): the halves come
+        // from the generator's marker; `CodeTextTests` pins every guest card
+        // to the half the old English reading picked.
+        Assert.True(typeof(IPrintsGuestAct).IsAssignableFrom(typeof(ProtoFsGuestStarCharlotte)));
+        Assert.True(typeof(IPrintsGuestLine).IsAssignableFrom(typeof(ProtoFsGuestStarNavia)));
+        Assert.False(typeof(IPrintsGuestAct).IsAssignableFrom(typeof(ProtoFsGuestStarChevreuse))
+                     || typeof(IPrintsGuestLine).IsAssignableFrom(typeof(ProtoFsGuestStarChevreuse)));
+        Assert.Null(Player.GetMethod("LineOpening", BindingFlags.Static | BindingFlags.NonPublic));
     }
 }

@@ -131,9 +131,9 @@ public class LiveBurn20260902Tests
             typeof(ArmKeywordTips)
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
-        Assert.EndsWith("A [gold]Bomb[/gold] that also goes off when its enemy "
-                     + "attacks you, and uses up the enemy's aura. Its plain Bombs stay. Any "
-                     + "[gold]Set off[/gold] spends it too.", body);
+        Assert.EndsWith("A [gold]Bomb[/gold] that also goes off by itself when its "
+                     + "enemy attacks you, using up the enemy's aura. The enemy's other "
+                     + "Bombs stay.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
     }
 

@@ -114,10 +114,12 @@ public class AncientAuditTests
     }
 
     [Fact]
-    public void Alices_masterpiece_says_bombs_and_mines()
+    public void Alices_masterpiece_says_bombs()
     {
+        // The Klee text audit (2026-10-23, pick 5): a Mine is a Bomb, and
+        // `ProtoBombPower.Explode` leaves the half of either, so "Bombs".
         const string face =
-            "Whenever one of your [gold]Bombs[/gold] or [gold]Mines[/gold] goes off, "
+            "Whenever one of your [gold]Bombs[/gold] goes off, "
           + "it stays on the enemy at half its size, rounded down.";
         Assert.Equal(face, Face(new AlicesMasterpiece()));
         Assert.Equal(face, new AlicesMasterpiecePower().Localization!

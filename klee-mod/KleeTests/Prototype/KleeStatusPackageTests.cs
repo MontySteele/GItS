@@ -256,8 +256,8 @@ public class KleeStatusPackageTests
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. "
                      + "Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
                      Face(new ProtoKoBehindJeansDesk()));
-        Assert.Equal("ALL enemies lose 1 [gold]Strength[/gold]. "
-                     + "Exhaust every Status in your [gold]Hand[/gold]; they lose 1 more for each.",
+        Assert.Equal("Exhaust every Status in your [gold]Hand[/gold]. "
+                     + "ALL enemies lose 1 [gold]Strength[/gold], plus 1 for each Status Exhausted.",
                      Face(new ProtoKoKitchenAlchemy()));
     }
 

@@ -48,7 +48,7 @@ public sealed class ProtoYmInkedBranches : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Inked Branches"),
-        ("description", "[gold]Edit[/gold] every [gold]Sakura[/gold]{IfUpgraded:show: and a card in your hand|}: [gold]Red Ink[/gold]."),
+        ("description", "[gold]Edit[/gold] every [gold]Sakura[/gold]{IfUpgraded:show: and a card in your [gold]Hand[/gold]|}: [gold]Red Ink[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

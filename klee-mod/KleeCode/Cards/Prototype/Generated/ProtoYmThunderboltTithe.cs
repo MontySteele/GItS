@@ -51,7 +51,7 @@ public sealed class ProtoYmThunderboltTithe : CustomCardModel, IElementalCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thunderbolt Tithe"),
-        ("description", "Deal {YmBase:diff()} [gold]Electro[/gold] damage, plus {YmPer:diff()} for each [gold]Sakura[/gold] standing."),
+        ("description", "Deal {YmBase:diff()} [gold]Electro[/gold] damage, plus {YmPer:diff()} for each [gold]Sakura[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

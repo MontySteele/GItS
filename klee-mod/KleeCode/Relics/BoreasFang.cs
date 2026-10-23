@@ -115,8 +115,8 @@ public class BoreasFang : CustomRelicModel
         ("title", "Boreas's Fang"),
         ("description",
             "At the start of each combat, your starting [gold]Knight[/gold]'s "
-          + "element becomes current. Your [gold]Swirls[/gold] also pay your "
-          + "[gold]current element[/gold]."),
+          + "element becomes your [gold]current element[/gold]. Your "
+          + "[gold]Swirls[/gold] also pay it."),
     };
 
     /// <summary>The words the face leans on. Knight joined with the co-op
@@ -273,8 +273,8 @@ public sealed class WolfsGravestone : BoreasFang
         ("title", "Wolf's Gravestone"),
         ("description",
             "At the start of each combat, your starting [gold]Knight[/gold]'s "
-          + "element becomes current. Your [gold]Swirls[/gold] also pay your "
-          + "[gold]current element[/gold]. The first time each combat you "
+          + "element becomes your [gold]current element[/gold]. Your "
+          + "[gold]Swirls[/gold] also pay it. The first time each combat you "
           + "gain [gold]Oath[/gold], add an upgraded [gold]Four Winds' "
           + "Ascension[/gold] to your [gold]Hand[/gold]. It costs 0 this "
           + "turn."),

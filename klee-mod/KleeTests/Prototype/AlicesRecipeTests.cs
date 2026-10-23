@@ -35,8 +35,10 @@ public class AlicesRecipeTests
         Assert.Equal((CardType.Power, 3, CardRarity.Rare),
                      (card.Type, card.EnergyCost.Canonical, card.Rarity));
         Assert.Equal(2m, card.DynamicVars["PowerAmount"].BaseValue);
-        Assert.Equal("Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], "
-                   + "your other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by "
+        // The Klee text audit (2026-10-23, pick 5): a Mine is a Bomb, and
+        // the Recipe grows and counts both, so the face says Bomb alone.
+        Assert.Equal("Whenever you place a [gold]Bomb[/gold], "
+                   + "your other [gold]Bombs[/gold] grow by "
                    + "{PowerAmount:diff()}.",
                      ((CustomCardModel)card).Localization!
                          .First(r => r.Item1 == "description").Item2);

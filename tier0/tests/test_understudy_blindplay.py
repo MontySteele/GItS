@@ -6459,6 +6459,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     `ArmKeywordTips.cs` and not here goes red on the anchor it dropped."""
     tips_src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
                 / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    # A body both readers share is its keyed row (the localization census,
+    # 2026-10-23), so the player's rows are the tips' other half.
+    tips_src += (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+                 / "PlayerTips.cs").read_text(encoding="utf-8")
     # The re-founding (2026-10-04): a performer's tip IS its badge's
     # sentence, so the badges file is the other half of the mod's text.
     src = tips_src + (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
@@ -6504,8 +6508,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-436`: the hit is in the sentence now. Trimmed 2026-09-08 with
         # the Bomb row, and its last two sentences are the Bomb's word for
         # word, so the anchors above hold them for both.
-        "Mine": [" that also goes off when its enemy attacks ",
-                 "you, and uses up the enemy's aura. Its plain Bombs stay. Any "],
+        "Mine": [" that also goes off by itself when its enemy ",
+                 "attacks you, using up the enemy's aura. The enemy's other Bombs "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -6554,7 +6558,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # new. The anchors are the prose around the golded spans and the
         # interpolated numerals; the performers' rows are their badges'
         # sentences (`StagePerformerBadge.ActText`, in the badges file).
-        "Spend": ["Pay that much ", ". With less, you can't play ",
+        "Spend": ["Pay that much ", ". With less, you cannot play ",
                   "the card or its Spend mode. "],
         "Fanfare": ["Gain 1 for each HP you lose, ", " included, or ", ". ",
                     " uses it. Resets after each combat."],
@@ -6606,12 +6610,14 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # interpolated numeral.
         "Guest Star": ["Exhausts. Acts at the end of your turn. When it "
                        "leaves, this ", "card goes to your "],
+        # The localization census (2026-10-23): the line and the act are two
+        # keyed rows, so " card. Act: " straddles them; "Act: " opens the act.
         "Charlotte": ["The first time each turn one of your cards ",
-                      ", draw ", " card. Act: "],
+                      ", draw ", "Act: "],
         "Wriothesley": ["Whenever you ", ", deal that much ",
-                        "damage to a random enemy. Act: deal "],
+                        "damage to a random enemy.", "Act: deal "],
         "Lynette": ["The first time each turn you lose HP to an enemy, "
-                    "gain that much ", " again. Act: deal ",
+                    "gain that much ", " again.", "Act: deal ",
                     " damage to an enemy, aura first."],
         "Clorinde": ["Whenever you ", ", deal twice that much ",
                      " damage to a random enemy."],
@@ -6631,8 +6637,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Shrine r2 (2026-10-14): no Rite, the full-shrine plant, the kinds.
         # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
         # The Sakura Levels paper (2026-10-17): 1 + 2 per Level.
-        "Sakura": ["At the end of your turn, strikes an enemy for ",
-                   " per Level. Lasts ",
+        "Sakura": ["At the end of your turn, deals ",
+                   " for each Level. Lasts ",
                    " turns, then strikes again.",
                    "A Sakura strikes Kitsune Pounce's target when Pounce "
                    "makes it strike, ",
@@ -6641,10 +6647,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                    "the last enemy your Attacks hit, else a random enemy."],
         # Review r3 (2026-10-14): plain Tenko, the two kinds, the
         # full-shrine rule, and the Edit tip's two layers.
-        "Tenko": ["Every ", " acts now. Refresh them to at least "],
-        "Foxfire Sakura": [" that hits ALL enemies for ",
-                           " + its Level when it acts."],
-        "Kitsune Sakura": ["A fox decoy ", ". When it acts, you gain "],
+        # The Yae text audit (2026-10-23): Tenko's fix 7, the kinds in
+        # words (pick 3 (a)).
+        "Tenko": ["Every ", " acts now and goes back to at least "],
+        "Foxfire Sakura": [" that deals damage equal to ",
+                           " plus its Level to ALL enemies when it acts."],
+        "Kitsune Sakura": ["A fox decoy ", ". When it acts, you gain ",
+                           "equal to "],
         # Yae review r5, item 5: the long form.
         # The Sakura Levels paper (2026-10-17): Levels carry over.
         "Full shrine": ["Planting makes the Sakura closest to withering "
@@ -6656,7 +6665,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "its last. ", "Published ones stay and add up."],
         # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`
         # and `.SakuraRule` (YaeAnnotations.cs).
-        "Red Ink": ["This card deals ", " more damage and gives ",
+        "Red Ink": ["This card deals ", " additional damage and gives ",
                     "'s action is ", "bigger."],
         "Footnote": ["When this card is played, draw 1 card."],
         "Deadline Extension": ["This card has ", " does not wither."],
@@ -6827,7 +6836,7 @@ def test_the_spend_row_says_she_pays_from_her_fanfare():
         "Deal 7 damage. Spend 3: deal 13 instead."], "Furina"))
     assert "- **Spend** — " in page
     row = blindplay.ARM_KEYWORDS["Spend"]
-    assert row == ("Pay that much Fanfare. With less, you can't play the "
+    assert row == ("Pay that much Fanfare. With less, you cannot play the "
                    "card or its Spend mode. "
                    "Spend up to X pays X, or all you have if that is less.")
     assert row in page
@@ -6835,7 +6844,7 @@ def test_the_spend_row_says_she_pays_from_her_fanfare():
 
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
-    for phrase in ("Pay that much ", ". With less, you can't play ",
+    for phrase in ("Pay that much ", ". With less, you cannot play ",
                    "Spend up to X pays X, or all you have if that is less."):
         assert phrase in src, phrase
 
@@ -7489,7 +7498,7 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
     # row. The text pass of 2026-10-08 moved it off the mod's main preview
     # onto the boss preview, which the mod swaps in for any non-minion in a
     # boss room; the page has no swap, so its row keeps the sentence.
-    assert "a non-minion can't be Frozen" in src
+    assert "a non-minion cannot be Frozen" in src
     assert (blindplay.FROZEN_BOSS_CLAUSE.strip()
             in blindplay.REACTION_KEYWORDS["Frozen"])
     # The interpolated constants, read off the table the C# interpolates from.
@@ -7730,14 +7739,14 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
                                                 "Klee"))
     assert (f"- **Bomb** — Deals its size in Pyro damage when Set off. "
             f"Vulnerable raises it. "
-            f"Grows {blindplay.BOMB_GROWTH} at the start of your turn.") in page
+            f"Grows by {blindplay.BOMB_GROWTH} at the start of your turn.") in page
     # LIVE FIRST: where the screen's own tip carries the number, that number is
     # what the glossary prints -- the fallback is for a screen that prints the
     # WORD with no tip on it, which is an enemy's badge and a reward row.
     live_tip = blindplay.observe(elemental_hand_state(
-        bomb_tip="Deals its size in Pyro damage when Set off. Grows 9 at "
+        bomb_tip="Deals its size in Pyro damage when Set off. Grows by 9 at "
                  "the start of your turn.", character="Klee"))
-    assert "Grows 9 at the start of your turn" in live_tip
+    assert "Grows by 9 at the start of your turn" in live_tip
 
 
 def _shattering_pressure_reward_state() -> dict:
@@ -8984,7 +8993,7 @@ def test_a_base_keyword_a_face_names_is_defined_on_the_page():
     page = blindplay.observe(keyword_hand_state(
         ["Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies."]))
     glossary = page.split("## Words on this screen")[1]
-    assert ("- **Vulnerable** — An attack or card hit on it deals 50% more"
+    assert ("- **Vulnerable** — Takes 50% more damage from cards"
             in glossary)
     assert "Loses 1 stack at the end of its turn" in glossary
     # And the Plan tip is still there: two words, two definitions.
@@ -9041,14 +9050,14 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-497` did not read: "every card hit" is complete on an enemy and
         # silent on a player, whose Vulnerable is about a monster's swing.
         # The text pass of 2026-10-08 trimmed it, enemy hits still in scope.
-        "Vulnerable": ["An attack or card hit on it deals 50% more, a Skill's "
-                       "too. A ", "potion's does not. Loses 1 stack at the end "
+        "Vulnerable": ["Takes 50% more damage from cards, Skills included, "
+                       "but not from ", "potions. Loses 1 stack at the end "
                        "of its turn."],
         # `EB-469` put the Skill case in this sentence, in the C# and here in
         # one commit, so the anchor holds the clause that resolves the game's
         # own "Attacks".
         # The text pass of 2026-10-08 trimmed it, the Skill case kept.
-        "Weak": ["Every hit the wearer lands, a Skill's too, deals 25% less. ",
+        "Weak": ["Deals 25% less damage with every hit, Skills included. ",
                  "Loses ", "1 stack at the end of its turn."],
         # The two rows whose clause straddles a `[gold]` span are anchored
         # WITH the markup and folded out on the page side, the same way the
@@ -9057,8 +9066,8 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
                   "off at the end of each of its turns."],
         # The Furina full-run round (2026-10-10): and how long it lasts.
         "Strength": [" hit the wearer ",
-                     "lands. It does not decay; it lasts for the rest of "
-                     "this fight."],
+                     "lands. It lasts for the rest of "
+                     "this combat."],
         "Dexterity": [" the wearer gains. It ", "does not decay."],
         # The Repay floor (ruled 2026-10-09).
         "Vigor": ["Your next Attack deals additional damage."],

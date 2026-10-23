@@ -150,7 +150,7 @@ public class YaeReviewR3Tests : IDisposable
                      Face(new ProtoYmFoxfireSweep()));
         Assert.Contains("Weak[/gold] to ALL enemies. [gold]Tenko[/gold]", Face(new ProtoYmKitsuneGuile()));
         // Yae review r6, item 2.
-        Assert.Equal("Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: "
+        Assert.Equal("Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: "
                      + "[gold]Red Ink[/gold].",
                      Face(new ProtoYmManuscriptPile()));
         Assert.Contains(Il.CallSequence(Il.Method("ProtoYmShrineMaidensGuard", "OnPlay")),
@@ -355,7 +355,7 @@ public class YaeReviewR3Tests : IDisposable
         // The user's ruling, 2026-10-20 (turns-left targeting): was the oldest.
         var petals = new ProtoYmFallenPetals();
         Assert.Equal((0, CardType.Skill), (petals.EnergyCost.Canonical, petals.Type));
-        Assert.Equal("Your [gold]Sakura[/gold] with the fewest turns left withers (it acts once, its Last Bloom). "
+        Assert.Equal("Your [gold]Sakura[/gold] with the fewest turns left withers and acts once. "
                      + "If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}.",
                      Face(petals));
         var calls = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.FallenPetals))!).ToList();

@@ -161,13 +161,29 @@ public static class FurinaStageCues
     /// <summary>The hover's forecast line. The act's rule is the other half
     /// of the hover, the guest's own badge.</summary>
     public static string ForecastLine(StageForecastCue cue) =>
-        cue.Kind == StageCueKind.Repay
-            ? $"Repays {cue.Amount} of your drained HP."
-            : cue.Kind == StageCueKind.Block
-                ? $"Gives you {cue.Amount} Block."
-            : cue.Target == StageForecastCue.Aura
-                ? "Hits an enemy, aura first."
-                : "Acts at the end of your turn.";
+        CodeText.Format(
+            cue.Kind == StageCueKind.Repay ? ForecastRepayRow
+            : cue.Kind == StageCueKind.Block ? ForecastBlockRow
+            : cue.Target == StageForecastCue.Aura ? ForecastAuraRow
+            : ForecastActsRow,
+            CodeText.Vars(("Amount", cue.Amount)));
+
+    // ---- The forecast's rows (the localization census, 2026-10-23, step 2).
+    private static readonly string CueKey = "KLEEMOD-FURINA_STAGE_CUE";
+
+    internal static readonly CodeRow ForecastRepayRow =
+        new("card_keywords", CueKey + ".forecast_repay", "Repays {Amount} of your drained HP.");
+    internal static readonly CodeRow ForecastBlockRow =
+        new("card_keywords", CueKey + ".forecast_block", "Gives you {Amount} Block.");
+    internal static readonly CodeRow ForecastAuraRow =
+        new("card_keywords", CueKey + ".forecast_aura", "Hits an enemy, aura first.");
+    internal static readonly CodeRow ForecastActsRow =
+        new("card_keywords", CueKey + ".forecast_acts", "Acts at the end of your turn.");
+
+    public static IEnumerable<CodeRow> TextRows() => new[]
+    {
+        ForecastRepayRow, ForecastBlockRow, ForecastAuraRow, ForecastActsRow,
+    };
 
     /// <summary>
     /// REDRAW: every stage mutation funnels here (it was the strip's funnel,

@@ -42,7 +42,7 @@ public sealed class ProtoKoTreasureMap : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Treasure Map"),
-        ("description", "Put a [gold]Set off[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by {Grow:diff()}."),
+        ("description", "Put a [gold]Set off[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold] grows by {Grow:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

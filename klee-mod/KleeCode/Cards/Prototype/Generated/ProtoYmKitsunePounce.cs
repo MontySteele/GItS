@@ -51,7 +51,7 @@ public sealed class ProtoYmKitsunePounce : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitsune Pounce"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} more."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

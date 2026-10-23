@@ -1410,8 +1410,30 @@ def arm_keywords_printed(description: str) -> list[ArmKeyword]:
             if printed.intersection(keyword.tokens)]
 
 
+#: THE KLEE TEXT AUDIT (2026-10-23; [USER]: "On Klee - agree on the
+#: defaults"). Pick 2 took "triggered an [gold]Elemental Reaction[/gold]" off
+#: five Bomb faces for the plain verb ("If a Bomb reacted this turn"), and the
+#: verb is never golded, so the noun's tip would have left with the noun. A
+#: face that golds a Bomb and says one "reacts" owes the Elemental Reaction tip.
+REACT_VERB = re.compile(r"\breact(?:s|ed)?\b")
+#: Pick 5 says "Bomb" alone where the code counts Mines as Bombs. A row whose
+#: op grows Mines with Bombs still owes the Mine tip, off the op rather than
+#: the word: `grow_bombs` (`ProtoBombPower.GrowOn`, Chain Fuse and Quick Fuse)
+#: and Alice's Recipe's power (`AlicesRecipePower.GrowBeforePlacement`).
+MINE_COUNTING_POWERS = frozenset({"ko_alices_recipe"})
+
+
+def counts_mines_as_bombs(card: dict) -> bool:
+    """Does this row's own play grow Mines along with Bombs?"""
+    return any(e.get("op") == "grow_bombs"
+               or (e.get("op") == "apply_power"
+                   and e.get("power") in MINE_COUNTING_POWERS)
+               for e in card.get("effects") or [])
+
+
 def arm_keyword_tip_calls(description: str,
-                          spark_priced: bool = False) -> list[str]:
+                          spark_priced: bool = False,
+                          counts_mines: bool = False) -> list[str]:
     """The tip calls this face owes, in table order.
 
     The ONE EXCLUSION this used to carry, `includes_bomb_rules`, left with the
@@ -1431,10 +1453,23 @@ def arm_keyword_tip_calls(description: str,
     playability gate read.
     """
     printed = arm_keywords_printed(description)
-    if spark_priced and not any(k.word == "Spark" for k in printed):
-        printed = sorted(
-            printed + [k for k in ARM_KEYWORDS if k.word == "Spark"],
-            key=ARM_KEYWORDS.index)
+    owed = set()
+    if spark_priced:
+        owed.add("Spark")
+    # The Yae text audit (2026-10-23, pick 2 (a)): the Sakura Seal Annotation
+    # plants a Sakura, and its face no longer prints the word in parentheses,
+    # so the Annotation owes the Sakura tip the word used to carry.
+    if "Sakura Seal" in golded_tokens(description):
+        owed.add("Sakura")
+    if any(k.word == "Bomb" for k in printed):
+        if REACT_VERB.search(GOLD_SPAN.sub("", description)):
+            owed.add("Elemental Reaction")
+        if counts_mines:
+            owed.add("Mine")
+    words = {k.word for k in printed}
+    extra = [k for k in ARM_KEYWORDS if k.word in owed - words]
+    if extra:
+        printed = sorted(printed + extra, key=ARM_KEYWORDS.index)
     return [keyword.attach for keyword in printed]
 
 
@@ -2053,10 +2088,9 @@ PREDICATE_TEXT = {
     "no_block": "If you have no [gold]Block[/gold]",
     "bomb_went_off_this_turn": "If a [gold]Bomb[/gold] went off this turn",
     "bomb_reacted_this_turn":
-        "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
-        "this turn",
+        "If a [gold]Bomb[/gold] reacted this turn",
     "companion_played_this_turn":
-        "If you played a [gold]Companion[/gold] card this turn",
+        "If you played a [gold]Companion[/gold] this turn",
     "no_bomb_went_off_this_turn": "If no [gold]Bomb[/gold] went off this turn",
     "target_has_aura": "If the enemy holds an elemental aura",
     "target_has_debuff": "If the enemy has a debuff",
@@ -2077,7 +2111,7 @@ PREDICATE_TEXT = {
     "hp_lost_last_turn": "If you lost HP last turn",
     "first_turn_of_combat": "On your first turn",
     "shrine_full": "If your shrine is full",
-    "three_sakura": "If you have 3 [gold]Sakura[/gold]",
+    "three_sakura": "If you have 3 or more [gold]Sakura[/gold]",
     "any_enemy_weak": "If any enemy is [gold]Weak[/gold]",
     "crystallize_triggered_by_this":
         "If this triggers [gold]Crystallize[/gold]",
@@ -3154,6 +3188,9 @@ YAE_KINDS = {
     # Prayer's "It strikes now." (was `strike_newest`).
     "strike_most_turns_left_at": "StrikeMostTurnsLeftAt",
     "strike_most_turns_left": "StrikeMostTurnsLeft",
+    # Upgrade census (2026-10-23, [USER]): Saiguu's Lesson+ "Apply 1 Weak
+    # to ALL enemies", after its power is in (`yae_upgraded`).
+    "weak_all_if_upgraded": "WeakAllIfUpgraded",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3198,6 +3235,7 @@ YAE_KIND_FIELDS = {
     "strike_planted": (),
     "strike_most_turns_left_at": (),
     "strike_most_turns_left": (),
+    "weak_all_if_upgraded": (),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
 YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
@@ -3236,7 +3274,8 @@ YAE_PLANT_AS_KINDS = {"plant", "plant_level"}
 #: The kinds that read `IsUpgraded` at play time (`yae_upgraded`).
 #: Yae review r4, pick 1 (a): Inked Branches+ also Edits a card in your hand
 #: (`hand_if_upgraded: true` on its `edit_sakura`).
-YAE_UPGRADED_KINDS = {"fallen_petals", "second_printing", "edit_sakura"}
+YAE_UPGRADED_KINDS = {"fallen_petals", "second_printing", "edit_sakura",
+                      "weak_all_if_upgraded"}
 YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
 #: The user's ruling, 2026-10-20 (turns-left targeting): the ends count by
 #: turns left (`YaeShrineLedger.WitherOrder`), not planting order; were
@@ -3940,20 +3979,20 @@ APPLY_POWERS = {
     # are here for form; every slice row carries its own `description:`, which is
     # the surface's own face channel (EB-215).
     "ko_alices_recipe": ("AlicesRecipePower", None,
-        "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your "
-        "other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by {X}."),
+        "Whenever you place a [gold]Bomb[/gold], your other "
+        "[gold]Bombs[/gold] grow by {X}."),
     "ko_chained_reactions": ("ChainedReactionsPower", None,
         "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
     "ko_bomb_echo": ("BombEchoPower", None,
-        "At the start of your turn, your largest [gold]Bomb[/gold], on any "
-        "enemy, deals its size in [gold]Pyro[/gold] damage without going off."),
+        "At the start of your turn, your largest [gold]Bomb[/gold] deals its "
+        "size in [gold]Pyro[/gold] damage without going off."),
     # R244's coven reader. Chained Reactions' grammar one trigger over, and
     # DEAD ALONE by the ruling's own pick 2 -- a deck with no witch in it never
     # sets this off, which is what makes it the bridge card rather than a
     # fourth loop.
     "ko_witches_circle": ("WitchesCirclePower", None,
-        "Whenever you play a [gold]Companion[/gold] card, place a {X} "
+        "Whenever you play a [gold]Companion[/gold], place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
     # R276's Mine signpost (Explosive Frags). The stack IS the Vulnerable, so
     # the upgrade moves it; read at the one site a charge goes off
@@ -3988,9 +4027,8 @@ APPLY_POWERS = {
     "ko_boom_badge": ("BoomBadgePower", None,
         "Your next [gold]Set off[/gold] card this turn is played twice."),
     "ko_wait_for_it": ("WaitForItPower", None,
-        "This turn, the next time one of your [gold]Bombs[/gold] triggers an "
-        "[gold]Elemental Reaction[/gold], draw 2 cards and gain 1 "
-        "[gold]Energy[/gold]."),
+        "The next time a [gold]Bomb[/gold] reacts this turn, draw 2 cards "
+        "and gain 1 [gold]Energy[/gold]."),
     "ko_party_poppers": ("PartyPoppersPower", None,
         "Whenever you play a card that costs [gold]Sparks[/gold], place a "
         "[gold]Bomb[/gold] {X} on a random enemy."),
@@ -4011,9 +4049,8 @@ APPLY_POWERS = {
         "At the start of your turn, place a [gold]Mine[/gold] {X} on a "
         "random enemy."),
     "ko_aftershock": ("AftershockPower", None,
-        "The first time each turn a [gold]Bomb[/gold] of yours triggers an "
-        "[gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that "
-        "size on a random enemy."),
+        "The first time each turn one of your [gold]Bombs[/gold] reacts, "
+        "place a [gold]Bomb[/gold] that size on a random enemy."),
     "ko_spark_knight": ("SparkKnightPower", None,
         "Whenever you gain a [gold]Spark[/gold], deal {X} damage to a random "
         "enemy."),
@@ -4179,7 +4216,7 @@ APPLY_POWERS = {
         "This turn, [gold]Elemental Reactions[/gold] deal {X} additional "
         "damage."),
     "mc_ladder_of_ascent": ("LadderOfAscentPower", None,
-        "Whenever you play a [gold]Companion[/gold] card, deal {X} damage of "
+        "Whenever you play a [gold]Companion[/gold], deal {X} damage of "
         "that card's element to a random enemy."),
     # THE KOKOMI OVERHAUL, DRAFT 6 (R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out
@@ -4550,11 +4587,11 @@ APPLY_POWERS = {
     "vk_unwavering_banner": ("UnwaveringBannerPower", None,
         "Only [gold]Knights[/gold] change your [gold]current "
         "element[/gold]. Whenever another card would, gain 1 "
-        "[gold]Oath[/gold] of it instead."),
+        "[gold]Oath[/gold] of your [gold]current element[/gold] instead."),
     "vk_unwavering_banner_plus": ("UnwaveringBannerPower", None,
         "Only [gold]Knights[/gold] change your [gold]current "
         "element[/gold]. Whenever another card would, gain 2 "
-        "[gold]Oath[/gold] of it instead."),
+        "[gold]Oath[/gold] of your [gold]current element[/gold] instead."),
     "vk_cycle_of_seasons": ("CycleOfSeasonsPower", None,
         "Whenever your [gold]current element[/gold] changes, deal {X} damage "
         "to ALL enemies."),
@@ -4660,7 +4697,7 @@ APPLY_POWERS = {
         "it lives."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] also pay the element they "
-        "[gold]Swirl[/gold]. If it's your [gold]current element[/gold], it "
+        "[gold]Swirl[/gold]. If that is your [gold]current element[/gold], it "
         "pays twice."),
     "vk_eye_of_stormterror": ("EyeOfStormterrorPower", None,
         "The first 3 times you [gold]Swirl[/gold] each turn, draw {X} card."),
@@ -4699,7 +4736,7 @@ APPLY_POWERS = {
     "draw_cards_next_turn": ("DrawCardsNextTurnPower", None,
         "Next turn, draw {X} card{XS}."),
     "night_vigil": ("NightVigilPower", None,
-        "Your Attacks against enemies holding an aura deal {X} additional "
+        "Your Attacks against enemies with an aura deal {X} additional "
         "damage."),
     # Co-op notes pick 4 (2026-10-02): plus a Hydro aura each turn.
     "ancient_sea_authority": ("AncientSeaAuthorityPower", None,
@@ -11440,6 +11477,24 @@ def stage_guest_tip_calls(card: dict) -> list[str]:
     return calls
 
 
+def guest_face_interface(card: dict, face: str) -> str | None:
+    """The marker a Guest Star row's class carries for the half of its
+    guest's sentence its face already prints (`Cards.PlayerTips.Guest`): the
+    act ("Act: ...") -> `IPrintsGuestAct`, so the guest's tip shows the line;
+    the line (its `{GuestLine}` number) -> `IPrintsGuestLine`, so the tip
+    shows the act; neither -> no marker, and the tip shows both. Read off the
+    row's own face here, at generation, so the C# never reads English
+    (the localization census, 2026-10-23, group 3)."""
+    if not any(fx.get("op") == "stage_guest"
+               for fx in iter_effects(card.get("effects") or [])):
+        return None
+    if "Act:" in face:
+        return "IPrintsGuestAct"
+    if "{GuestLine" in face:
+        return "IPrintsGuestLine"
+    return None
+
+
 #: The ops whose one printed number is a CEILING, and the var that prints it:
 #: R252's Careful Now (and the co-op set's Hide Here!). One `cap` delta key,
 #: bound to the first top-level op here.
@@ -18066,6 +18121,12 @@ def emit(
     # row (localization route b, 2026-10-19).
     if sets_off_first(desc):
         interfaces += ", ISetsOffFirstCard"
+    # The localization census (2026-10-23, group 3): which half of its
+    # guest's sentence a Guest Star face prints, so `PlayerTips.Guest` reads
+    # a flag instead of searching the English face.
+    guest_face = guest_face_interface(card, desc)
+    if guest_face is not None:
+        interfaces += ", " + guest_face
     # YAE MIKO, RED INK ON A PLANTING CARD (ruled 2026-10-14): a row whose own
     # play plants a Sakura (`yae` plant / plant_level) says so on the class,
     # a MARKER read by `YaeAnnotationReach.Plants` (the Edit filter, and Red
@@ -18927,7 +18988,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 f"{ELEMENT_CS[switch_element]})")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
-        for attach in arm_keyword_tip_calls(desc, spark_priced):
+        for attach in arm_keyword_tip_calls(
+                desc, spark_priced, counts_mines_as_bombs(card)):
             # The text pass of 2026-10-08: a PLAN-ONLY row has no line above
             # its Plan and nothing to flip, so it carries the Plan tip that
             # says so (`_plan_only_line`'s test, the one its target follows).

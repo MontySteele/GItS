@@ -42,7 +42,7 @@ public sealed class ProtoKoAftershock : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Aftershock"),
-        ("description", "The first time each turn a [gold]Bomb[/gold] of yours triggers an [gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that size on a random enemy."),
+        ("description", "The first time each turn one of your [gold]Bombs[/gold] reacts, place a [gold]Bomb[/gold] that size on a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

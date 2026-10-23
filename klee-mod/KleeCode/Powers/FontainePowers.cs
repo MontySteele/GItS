@@ -85,7 +85,7 @@ public sealed class NightVigilPower : PowerModel, ILocalizationProvider
     {
         ("title", "Night Vigil"),
         ("description",
-            "Your Attacks against enemies holding an aura deal "
+            "Your Attacks against enemies with an aura deal "
           + "[blue]{Amount}[/blue] additional damage."),
     };
 

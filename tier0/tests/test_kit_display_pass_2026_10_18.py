@@ -18,13 +18,15 @@ def _row(card_id: str) -> str:
     return row[:row.index("\n\n")]
 
 
-def test_chain_fuse_names_mines_and_hovers_the_mine_tip():
+def test_chain_fuse_says_bomb_and_the_code_grows_mines():
     # Klee suite 6 lane 2: Chain Fuse grows Mines too (a Mine is a Bomb,
-    # `ProtoBombPower.GrowOn`), and the face did not say so.
-    assert ("Each [gold]Bomb[/gold] and [gold]Mine[/gold] on the enemy"
+    # `ProtoBombPower.GrowOn`). The Klee text audit (2026-10-23, pick 5;
+    # [USER]: "On Klee - agree on the defaults"): the code counts Mines as
+    # Bombs, so the face says "Each Bomb", as Quick Fuse's does.
+    assert ("Each [gold]Bomb[/gold] on the enemy grows by"
             in _row("proto_ko_chain_fuse"))
     face = (GENERATED / "ProtoKoChainFuse.cs").read_text(encoding="utf-8")
-    assert "ArmKeywordTips.ForMine(" in face
+    assert "ProtoBombPower.GrowOn(" in face
 
 
 def test_mikas_discount_is_printed_as_energy():
@@ -61,3 +63,43 @@ def test_the_reaction_preview_says_an_artifact_blocks_the_debuff():
         encoding="utf-8")
     note = effects.index("ReactionLog.Note(reaction, target, dealer, cardSource);")
     assert "DebuffBlockedByArtifact(debuff)" in effects[note - 800:note]
+
+
+# ---- the Klee text audit (2026-10-23): the tips kept on reworded faces ----
+# [USER]: "On Klee - agree on the defaults". The faces dropped the golded
+# "Elemental Reaction" noun for the plain verb and "Bomb and Mine" for
+# "Bomb"; the tips stay, off the verb and off the op (`gen.REACT_VERB`,
+# `gen.counts_mines_as_bombs`).
+
+import pytest  # noqa: E402
+
+from tools import gen_klee_cards as gen  # noqa: E402
+
+
+@pytest.mark.parametrize("cls,tip", [
+    ("ProtoKoMineToss", "ArmKeywordTips.ForMine("),
+    ("ProtoKoChainFuse", "ArmKeywordTips.ForMine("),
+    ("ProtoKoAlicesRecipe", "ArmKeywordTips.ForMine("),
+    ("ProtoKoFlashPoint", "ArmKeywordTips.ForElementalReaction("),
+    ("ProtoKoSizzle", "ArmKeywordTips.ForElementalReaction("),
+    ("ProtoKoPerfectTiming", "ArmKeywordTips.ForElementalReaction("),
+    ("ProtoKoAftershock", "ArmKeywordTips.ForElementalReaction("),
+    ("ProtoKoWaitForIt", "ArmKeywordTips.ForElementalReaction("),
+])
+def test_a_reworded_klee_face_keeps_its_tip(cls, tip):
+    assert tip in (GENERATED / f"{cls}.cs").read_text(encoding="utf-8")
+
+
+def test_the_react_verb_attaches_the_reaction_tip_only_beside_a_bomb():
+    assert "ArmKeywordTips.ForElementalReaction" in gen.arm_keyword_tip_calls(
+        "If a [gold]Bomb[/gold] reacted this turn, draw 1 card.")
+    assert "ArmKeywordTips.ForElementalReaction" not in gen.arm_keyword_tip_calls(
+        "If a [gold]Bomb[/gold] went off this turn, draw 1 card.")
+    assert gen.arm_keyword_tip_calls("The crowd reacts. Draw 1 card.") == []
+
+
+def test_the_introduction_magic_badge_matches_its_face():
+    src = (CODE / "Powers" / "Prototype" / "CompanionHexerei.cs").read_text(
+        encoding="utf-8").replace('"\n          + "', "")
+    assert ("count as [gold]Companions[/gold] this turn." in src)
+    assert "[gold]Companion[/gold] cards this turn" not in src

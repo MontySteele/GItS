@@ -81,7 +81,7 @@ public static class SlyGrant
     /// deploy; the rendered look is still an eyes-on item.
     /// </summary>
     public const string PromptText =
-        "Choose a Skill in your hand. It gains [gold]Sly[/gold] this turn.";
+        "Choose a Skill in your [gold]Hand[/gold]. It gains [gold]Sly[/gold] this turn.";
 
     /// <summary>The selection prompt. One member, so the ruled copy lives in
     /// one place for both carriers.</summary>

@@ -51,7 +51,7 @@ public sealed class ProtoYmMarginNote : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Margin Note"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Red Ink[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

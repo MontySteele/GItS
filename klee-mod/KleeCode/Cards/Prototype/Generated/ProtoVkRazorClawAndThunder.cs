@@ -56,7 +56,7 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor: Awakening"),
-        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line

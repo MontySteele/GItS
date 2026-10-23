@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards;
 using MegaCrit.Sts2.Core.Models;
@@ -46,12 +47,30 @@ public static class FurinaStageBowPreview
                                            stage.Capacity, who);
         return room.Kind switch
         {
-            StageSummonResult.Repeat => $"\n({who} moves to the newest seat and acts)",
-            StageSummonResult.Evict =>
-                $"\n({stage.Seats[room.Index].Who} acts, then leaves)",
+            StageSummonResult.Repeat => CodeText.Format(RepeatRow, CodeText.Vars(
+                ("Guest", PerformerWords.Name(who)))),
+            StageSummonResult.Evict => CodeText.Format(EvictRow, CodeText.Vars(
+                ("Guest", PerformerWords.Name(stage.Seats[room.Index].Who)))),
             _ => "",
         };
     }
+
+    // ---- The lines' rows (the localization census, 2026-10-23, step 2):
+    // each in-combat Stage line a card face carries is a row in
+    // `card_keywords`, its line break the row's, its numbers vars and a
+    // guest's name its own row (`PerformerWords`).
+    internal const string Table = "card_keywords";
+
+    internal static readonly CodeRow RepeatRow =
+        new(Table, "KLEEMOD-FACE_STAGE_BOW.repeat", "\n({Guest} moves to the newest seat and acts)");
+    internal static readonly CodeRow EvictRow =
+        new(Table, "KLEEMOD-FACE_STAGE_BOW.evict", "\n({Guest} acts, then leaves)");
+
+    /// <summary>Every Stage line's row (<see cref="CodeText.Sources"/>).</summary>
+    public static IEnumerable<CodeRow> TextRows() =>
+        new[] { RepeatRow, EvictRow }
+            .Concat(FurinaStageFacePreview.TextRows())
+            .Concat(PerformerWords.Rows());
 }
 
 /// <summary>
@@ -123,17 +142,67 @@ public static class FurinaStageFacePreview
         return SplitTag(returns, past);
     }
 
+    // ---- The rows (the localization census, 2026-10-23, step 2), each line
+    // break the row's, each number a var.
+    private const string Table = FurinaStageBowPreview.Table;
+    private static readonly string DrainKey = "KLEEMOD-FACE_STAGE_DRAIN_LINE";
+
+    internal static readonly CodeRow ReturnsRow =
+        new(Table, DrainKey + ".returns", "\n(Returns after combat)");
+    internal static readonly CodeRow PastLineLostRow =
+        new(Table, DrainKey + ".past_lost", "\n(Past your line: lost unless you Repay)");
+    internal static readonly CodeRow PastLineReturnsRow =
+        new(Table, DrainKey + ".past_returns", "\n(Past your Drain buffer: returns after combat)");
+    internal static readonly CodeRow SplitRow =
+        new(Table, DrainKey + ".split", "\n({Returns} returns, {Past} past your line)");
+    internal static readonly CodeRow NotEnoughHpRow =
+        new(Table, DrainKey + ".not_enough_hp", "\n(Not enough HP)");
+    /// <summary>"(+3 Block: Freminet)": the source is a name's own row.</summary>
+    internal static readonly CodeRow BlockFromRow =
+        new(Table, DrainKey + ".block_from", "\n(+{Block} Block: {Source})");
+    /// <summary>The Masquerade's name, as the Block line names it.</summary>
+    internal static readonly CodeRow MasqueradeNameRow =
+        new(Table, DrainKey + ".source_masquerade", StageDirector.MasqueradeTitle);
+    internal static readonly CodeRow LostRow =
+        new(Table, "KLEEMOD-FACE_STAGE_LOST.description", "\n(Lost this combat: {Lost})");
+    internal static readonly CodeRow NotEnoughFanfareRow =
+        new(Table, "KLEEMOD-FACE_STAGE_SPEND_SHORT.description", "\n(Not enough Fanfare)");
+    internal static readonly CodeRow SpendsNoHitRow =
+        new(Table, "KLEEMOD-FACE_STAGE_SPEND_HITS.none", "\n(Spends {Spend}: no extra hit)");
+    internal static readonly CodeRow SpendsHitsRow =
+        new(Table, "KLEEMOD-FACE_STAGE_SPEND_HITS.more",
+            "\n(Spends {Spend}: {Hits} more hit{Hits:plural:|s})");
+    internal static readonly CodeRow SpendsAllNoHitRow =
+        new(Table, "KLEEMOD-FACE_STAGE_SPEND_HITS.all_none", "\n(Spends all {Spend}: no extra hit)");
+    internal static readonly CodeRow SpendsAllHitsRow =
+        new(Table, "KLEEMOD-FACE_STAGE_SPEND_HITS.all_more",
+            "\n(Spends all {Spend}: {Hits} more hit{Hits:plural:|s})");
+    internal static readonly CodeRow RepaysRow =
+        new(Table, "KLEEMOD-FACE_STAGE_REPAY.repays", "\n(Repays {Repays})");
+    internal static readonly CodeRow RepayBlockRow =
+        new(Table, "KLEEMOD-FACE_STAGE_REPAY.floor_block", "\n(Repay {Repays}: gain {Pays} Block)");
+    internal static readonly CodeRow RepayVigorRow =
+        new(Table, "KLEEMOD-FACE_STAGE_REPAY.floor_vigor", "\n(Repay {Repays}: gain {Pays} Vigor)");
+    internal static readonly CodeRow RepayDamageRow =
+        new(Table, "KLEEMOD-FACE_STAGE_REPAY.floor_damage", "\n(Repay {Repays}: +{Pays} damage)");
+
+    internal static IEnumerable<CodeRow> TextRows() => new[]
+    {
+        ReturnsRow, PastLineLostRow, PastLineReturnsRow, SplitRow, NotEnoughHpRow, BlockFromRow,
+        MasqueradeNameRow, LostRow, NotEnoughFanfareRow, SpendsNoHitRow, SpendsHitsRow,
+        SpendsAllNoHitRow, SpendsAllHitsRow, RepaysRow, RepayBlockRow, RepayVigorRow, RepayDamageRow,
+    };
+
     /// <summary>The tag for a Drain wholly inside the buffer.</summary>
-    public const string ReturnsTag = "\n(Returns after combat)";
+    public static string ReturnsTag => CodeText.Format(ReturnsRow);
 
     /// <summary>The tag for a Drain wholly past the line.</summary>
-    public const string PastLineLost =
-        "\n(Past your line: lost unless you Repay)";
+    public static string PastLineLost => CodeText.Format(PastLineLostRow);
 
     /// <summary>The tag for a Drain that splits: "(4 returns, 2 past your
     /// line)".</summary>
     public static string SplitTag(int returns, int past) =>
-        $"\n({returns} returns, {past} past your line)";
+        CodeText.Format(SplitRow, CodeText.Vars(("Returns", returns), ("Past", past)));
 
     /// <summary>
     /// THE BLOCK A DRAIN PAYS, AND WHO PAYS IT (the Spend rounds review,
@@ -155,23 +224,22 @@ public static class FurinaStageFacePreview
         {
             words += BlockFrom(
                 StageDirector.MasqueradeBlock(amount, masquerade, upgraded),
-                StageDirector.MasqueradeTitle);
+                CodeText.Format(MasqueradeNameRow));
         }
         if (freminet)
         {
-            words += BlockFrom(amount, StagePerformer.Freminet.ToString());
+            words += BlockFrom(amount, PerformerWords.Name(StagePerformer.Freminet));
         }
         return words;
     }
 
     /// <summary>One source's line: "(+3 Block: Freminet)".</summary>
     public static string BlockFrom(int block, string source) =>
-        $"\n(+{block} Block: {source})";
+        CodeText.Format(BlockFromRow, CodeText.Vars(("Block", block), ("Source", source)));
 
     /// <summary>The tag under A Five-Century Act: the HP drained past the
     /// line returns after combat.</summary>
-    public const string PastLineReturns =
-        "\n(Past your Drain buffer: returns after combat)";
+    public static string PastLineReturns => CodeText.Format(PastLineReturnsRow);
 
     /// <summary>FACADE'S COUNT (her HP legibility pass, 2026-10-19, change
     /// 4: a seat saw 3 Block, then 12, and could not say why): "(Lost this
@@ -185,11 +253,11 @@ public static class FurinaStageFacePreview
 
     /// <summary>The words, for the pins.</summary>
     public static string LostThisCombatWords(int lost) =>
-        $"\n(Lost this combat: {System.Math.Max(0, lost)})";
+        CodeText.Format(LostRow, CodeText.Vars(("Lost", System.Math.Max(0, lost))));
 
     /// <summary>The refusal's words: a Drain cannot take her to 0 HP.
     /// </summary>
-    public const string NotEnoughHp = "\n(Not enough HP)";
+    public static string NotEnoughHp => CodeText.Format(NotEnoughHpRow);
 
     /// <summary>BACKLOG (Furina: a Spend card silently plays its plain
     /// side): "(Not enough Fanfare)" while a Spend mode's price of
@@ -203,7 +271,7 @@ public static class FurinaStageFacePreview
             : "";
 
     /// <summary><see cref="SpendShort"/>'s words.</summary>
-    public const string NotEnoughFanfare = "\n(Not enough Fanfare)";
+    public static string NotEnoughFanfare => CodeText.Format(NotEnoughFanfareRow);
 
     /// <summary>THE FURINA WAVE (2026-10-13, "To change now" 3): what a
     /// "Spend up to <paramref name="cap"/>: hit once more for every 4" buys
@@ -239,23 +307,19 @@ public static class FurinaStageFacePreview
     {
         if (spend <= 0) return "";
         var more = spend / FurinaStageLaw.SpendUpToEvery;
-        var buys = more switch
-        {
-            0 => "no extra hit",
-            1 => "1 more hit",
-            _ => more.ToString(System.Globalization.CultureInfo.InvariantCulture)
-                 + " more hits",
-        };
-        return "\n(Spends " + (all ? "all " : "")
-             + spend.ToString(System.Globalization.CultureInfo.InvariantCulture)
-             + ": " + buys + ")";
+        var row = more == 0
+            ? (all ? SpendsAllNoHitRow : SpendsNoHitRow)
+            : (all ? SpendsAllHitsRow : SpendsHitsRow);
+        return CodeText.Format(row, CodeText.Vars(("Spend", spend), ("Hits", more)));
     }
 
     /// <summary>The Drain tip's in-combat sentence (the pool-75 round,
     /// 2026-10-09: every record missed where the line sat): "Your Drain line
     /// is 30: your HP minus your Drain buffer: ..." (the buffer's words since
     /// 2026-10-11). Off the Drain tip since 2026-10-11.
-    /// Empty off a combat or a Furina board.</summary>
+    /// Empty off a combat or a Furina board. NOT KEYED (the localization
+    /// census, 2026-10-23, step 2): no player surface prints it any more,
+    /// and its <see cref="FurinaStageLaw.LineWhy"/> is the seat page's.</summary>
     public static string LineNow(CardModel card)
     {
         if (Owner(card) is not { } owner) return "";
@@ -315,7 +379,8 @@ public static class FurinaStageFacePreview
             : "";
 
     /// <summary>The line's words, for the pins.</summary>
-    public static string Line(int repays) => $"\n(Repays {repays})";
+    public static string Line(int repays) =>
+        CodeText.Format(RepaysRow, CodeText.Vars(("Repays", repays)));
 
     /// <summary>The line with the Repay floor's payout, the floor first:
     /// "(Repay 1: gain 2 Block)" when a Repay of <paramref name="amount"/>
@@ -331,10 +396,13 @@ public static class FurinaStageFacePreview
             return Line(repays);
         }
         var pays = (amount - repays) * perHp;
-        var what = payout == PayDamage
-            ? $"+{pays} damage"
-            : $"gain {pays} {payout}";
-        return $"\n(Repay {repays}: {what})";
+        var row = payout switch
+        {
+            PayDamage => RepayDamageRow,
+            PayVigor => RepayVigorRow,
+            _ => RepayBlockRow,
+        };
+        return CodeText.Format(row, CodeText.Vars(("Repays", repays), ("Pays", pays)));
     }
 
     /// <summary>"(Repays N)" for a card that Drains

@@ -167,8 +167,9 @@ def test_the_sample_contract_is_well_formed():
     # the energy counters of Klee, Kokomi, Varka and Yae, Furina's shape, and
     # the five orb layers each draws. Then +3: Kokomi's art polish
     # (2026-10-21) -- her Nereid's Ascension sheet and its tide layer, and
-    # the Bake-Kurage's frame sheet.
-    assert len(parsed.resources) == 554
+    # the Bake-Kurage's frame sheet. Then +5: each kit's own card trail
+    # (tools/gen_card_trails.py, 2026-10-23).
+    assert len(parsed.resources) == 559
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -288,6 +289,7 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # her two generated scenes), +9 for the generated select scenes of Klee,
     # Varka and Furina and the two textures each draws, +22 for Furina's
     # guest effects (eleven sheets and their eleven scenes), +24 for the four
-    # new kit energy counters and their orb layers (card frames stage 2).
-    assert report.checked["contract_resources"] == 554
+    # new kit energy counters and their orb layers (card frames stage 2),
+    # +5 for the five kit card trails (2026-10-23).
+    assert report.checked["contract_resources"] == 559
     assert report.checked["package_files"] == 3

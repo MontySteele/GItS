@@ -45,7 +45,7 @@ public sealed class ProtoYmFallenPetals : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fallen Petals"),
-        ("description", "Your [gold]Sakura[/gold] with the fewest turns left withers (it acts once, its Last Bloom). If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}."),
+        ("description", "Your [gold]Sakura[/gold] with the fewest turns left withers and acts once. If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

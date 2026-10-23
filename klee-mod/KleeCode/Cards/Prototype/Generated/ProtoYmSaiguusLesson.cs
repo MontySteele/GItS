@@ -45,7 +45,7 @@ public sealed class ProtoYmSaiguusLesson : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Saiguu's Lesson"),
-        ("description", "Whenever you apply [gold]Weak[/gold] to an enemy, a striking [gold]Sakura[/gold] strikes it."),
+        ("description", "Whenever you apply [gold]Weak[/gold] to an enemy, a striking [gold]Sakura[/gold] strikes it.{IfUpgraded:show: Apply 1 [gold]Weak[/gold] to ALL enemies.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,10 +64,11 @@ public sealed class ProtoYmSaiguusLesson : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<SaiguusLessonPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await YaeCards.WeakAllIfUpgraded(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        // yae_upgraded: the yae op reads IsUpgraded when the card is played.
     }
 }

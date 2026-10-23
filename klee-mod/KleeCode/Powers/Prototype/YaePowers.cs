@@ -107,8 +107,9 @@ public sealed class SakuraThirdPower : SakuraBadgePower
     public override int Slot => 2;
 }
 
-// Sakura Channeling (2026-10-14): "You can have 2 more Sakura", per copy,
-// so the shrine can hold 5, 7, 9 ... One badge per slot up to nine (three
+// Sakura Channeling (2026-10-14; Uncommon, 2 [3], upgrade census 2026-10-23):
+// "You can have 2 [3] more Sakura", per copy, so the shrine can hold 5 or 6,
+// then 7 to 9 with two copies. One badge per slot up to nine (two upgraded
 // copies); a tenth Sakura still stands and strikes, it shows no badge.
 
 public sealed class SakuraFourthPower : SakuraBadgePower
@@ -150,7 +151,7 @@ public static class SakuraBadge
         Slots.Take(System.Math.Max(0, System.Math.Min(Slots.Length, count)))
             .ToList();
 
-    /// <summary>Every badge, oldest Sakura first (nine: three Sakura
+    /// <summary>Every badge, oldest Sakura first (nine: two upgraded Sakura
     /// Channelings' worth).</summary>
     public static readonly System.Type[] Slots =
     {
@@ -261,7 +262,7 @@ public sealed class SakuraGrovePower : PowerModel, ILocalizationProvider
         ("title", "Sakura Grove"),
         ("description",
             "At the start of your turn, each [gold]Sakura[/gold] gains "
-          + "[blue]{Amount}[/blue] Level."),
+          + "[blue]{Amount}[/blue] Level{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -280,7 +281,7 @@ public sealed class EdictOfCleansingPower : PowerModel, ILocalizationProvider
     {
         ("title", "Edict of Cleansing"),
         ("description",
-            "Your [gold]Sakura[/gold] strikes deal [blue]{Amount}[/blue] "
+            "Your [gold]Sakura[/gold]'s strikes deal [blue]{Amount}[/blue] "
           + "additional damage to an enemy that is [gold]Weak[/gold] or has a "
           + "[gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura."),
     };
@@ -332,8 +333,8 @@ public sealed class FoxsMooncallPower : PowerModel, ILocalizationProvider
     {
         ("title", "Fox's Mooncall"),
         ("description",
-            "Your [gold]Sakura[/gold] are planted [blue]{Amount}[/blue] Level "
-          + "higher."),
+            "Your [gold]Sakura[/gold] are planted [blue]{Amount}[/blue] "
+          + "Level{Amount:plural:|s} higher."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -360,9 +361,10 @@ public sealed class YakanOfferingPower : PowerModel, ILocalizationProvider
     internal void Pulse() => Flash();
 }
 
-/// <summary>Sakura Channeling, the Rare that bends the 3-Sakura limit
+/// <summary>Sakura Channeling, the card that bends the 3-Sakura limit
 /// (designed by the main session 2026-10-14: [USER] judged Yae "generally
-/// underpowered right now"): "You can have 2 more Sakura". Its amount, 2 per
+/// underpowered right now"; Uncommon, 1, since the upgrade census,
+/// 2026-10-23): "You can have 2 [3] more Sakura". Its amount, 2 [3] per
 /// copy, is read by <see cref="YaeShrine.MaxSakura"/> for this combat; the
 /// full-shrine plant fires at that cap.</summary>
 public sealed class SakuraChannelingPower : PowerModel, ILocalizationProvider
@@ -390,7 +392,7 @@ public sealed class SerialNovelPower : PowerModel, ILocalizationProvider
         ("title", "Serial Novel"),
         ("description",
             "At the start of your turn, put [blue]{Amount}[/blue] random "
-          + "[gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] "
+          + "[gold]Annotated[/gold] card{Amount:plural:|s} from your [gold]Discard Pile[/gold] "
           + "into your [gold]Hand[/gold]."),
     };
 

@@ -103,12 +103,13 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
     public override string? CustomEnergyCounterPath =>
         KleePck.Path("varka/ui/energy_counter.tscn")
         ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
-    // The flying-card trail (a Power card flies into him on it). Ironclad's is
-    // orange fire, which read as "an orange streak" on Absolute Zero (in-game
-    // check, 2026-10-16); the Defect's cyan is the base trail nearest his
-    // Anemo teal.
+    // The flying-card trail: his own scene since 2026-10-23 ([USER]: "Card
+    // trail - can we make our own trails?"), the base trail recoloured to his
+    // card Anemo teal (#1FB585) by tools/gen_card_trails.py. The base defect
+    // trail, which he wore before, is the fallback for a pck without it.
     public override string? CustomTrailPath =>
-        "res://scenes/vfx/card_trail_defect.tscn";
+        KleePck.Path("varka/vfx/card_trail.tscn")
+        ?? "res://scenes/vfx/card_trail_defect.tscn";
     public override string? CustomMapMarkerPath =>
         KleePck.Path("varka/ui/map_marker.png");
     public override string? CustomCharacterSelectBg =>

@@ -59,7 +59,7 @@ public sealed class ProtoMiRaidenMusouNoHitotachi : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Raiden Shogun — Musou no Hitotachi"),
-        ("description", "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each card in your [gold]Hand[/gold]. ALL enemies and you lose {StrengthLoss:diff()} [gold]Strength[/gold] this turn.{InCombat: (Deals {CalculatedDamage:diff()} damage)|}{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each card in your [gold]Hand[/gold]. You and ALL enemies lose {StrengthLoss:diff()} [gold]Strength[/gold] this turn.{InCombat: (Deals {CalculatedDamage:diff()} damage)|}{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line

@@ -120,7 +120,7 @@ def test_a_publish_and_an_annotated_play_pay_nothing():
 def test_manuscript_pile_row():
     row = _row("proto_ym_manuscript_pile")
     assert row["description"] == (
-        "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: "
+        "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: "
         "[gold]Red Ink[/gold].")
     assert row["effects"] == [
         {"op": "draw", "amount": 2},

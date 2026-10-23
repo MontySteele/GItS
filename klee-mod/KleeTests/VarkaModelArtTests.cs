@@ -128,24 +128,23 @@ public class VarkaModelArtTests
         Assert.Equal(expected, got);
     }
 
+    /// <summary>Every kit's trail is its own recoloured scene (the user,
+    /// 2026-10-23: "Card trail - can we make our own trails?"), written by
+    /// tools/gen_card_trails.py, with the base trail it wore before as the
+    /// fallback for a pck without it.</summary>
     [Theory]
-    [InlineData("Varka")]
-    [InlineData("Furina")]
-    [InlineData("Kokomi")]
-    public void His_card_trail_is_not_the_ironclads_orange(string character)
+    [InlineData("Klee", "klee", "ironclad")]
+    [InlineData("Furina", "furina", "defect")]
+    [InlineData("Kokomi", "kokomi", "defect")]
+    [InlineData("Varka", "varka", "defect")]
+    [InlineData("Yae", "yae", "necrobinder")]
+    public void Each_kit_flies_its_cards_on_its_own_trail(string character, string kit, string fallback)
     {
         var src = RepoFile($"klee-mod/KleeCode/{character}.cs");
-        Assert.Contains("\"res://scenes/vfx/card_trail_defect.tscn\"", src);
-    }
-
-    /// <summary>Yae's trail matches her kit (the user, 2026-10-23): the
-    /// Necrobinder's pink, not the Ironclad's orange.</summary>
-    [Fact]
-    public void Yaes_card_trail_is_the_necrobinders_pink()
-    {
-        var src = RepoFile("klee-mod/KleeCode/Yae.cs");
-        Assert.Contains("\"res://scenes/vfx/card_trail_necrobinder.tscn\"", src);
-        Assert.DoesNotContain("card_trail_ironclad", src);
+        Assert.Contains($"KleePck.Path(\"{kit}/vfx/card_trail.tscn\")", src);
+        Assert.Contains($"?? \"res://scenes/vfx/card_trail_{fallback}.tscn\"", src);
+        Assert.Contains("res://src/Core/Nodes/Vfx/NCardTrailVfx.cs",
+            RepoFile($"klee-mod/pck-src/{kit}/vfx/card_trail.tscn"));
     }
 
     [Fact]

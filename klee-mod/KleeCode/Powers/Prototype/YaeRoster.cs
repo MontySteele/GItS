@@ -88,7 +88,7 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmHideBehindTheShrine>(),
         ModelDb.Card<ProtoYmRewrite>(),
         ModelDb.Card<ProtoYmDawnPrayer>(),
-        // Uncommon (38)
+        // Uncommon (39)
         ModelDb.Card<ProtoYmKitsuneRite>(),
         ModelDb.Card<ProtoYmThunderboltTithe>(),
         ModelDb.Card<ProtoYmEdictOfCleansing>(),
@@ -127,11 +127,11 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmHuntingGaze>(),
         ModelDb.Card<ProtoYmInscribedThunder>(),
         ModelDb.Card<ProtoYmKitsunesBlessing>(),
-        // Rare (20)
+        ModelDb.Card<ProtoYmSakuraChanneling>(),
+        // Rare (19)
         ModelDb.Card<ProtoYmTenkoKenshin>(),
         ModelDb.Card<ProtoYmYakanOffering>(),
         ModelDb.Card<ProtoYmTheSevenGlamours>(),
-        ModelDb.Card<ProtoYmSakuraChanneling>(),
         ModelDb.Card<ProtoYmEditorialPriority>(),
         ModelDb.Card<ProtoYmRebornAsGuujiYae>(),
         ModelDb.Card<ProtoYmEditorInChief>(),

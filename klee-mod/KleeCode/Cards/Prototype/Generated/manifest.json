@@ -2699,7 +2699,7 @@
       "innate": true
     },
     "proto_ym_enlightened_blessing": {
-      "innate": true
+      "power_amount": 1
     },
     "proto_ym_eternity": {
       "cost": -1
@@ -2780,7 +2780,7 @@
       "damage": 3
     },
     "proto_ym_kitsune_rite": {
-      "cost": -1
+      "draw": 1
     },
     "proto_ym_kitsune_veil": {
       "block": 3
@@ -2840,23 +2840,22 @@
       "draw": 1
     },
     "proto_ym_royalties": {
-      "cost": -1
+      "yae_amount": 1
     },
     "proto_ym_sacred_thunderbolt": {
-      "damage": 4,
-      "conditional_then_damage": 4
+      "damage": 3
     },
     "proto_ym_saiguus_lesson": {
-      "innate": true
+      "yae_upgraded": true
     },
     "proto_ym_sakura_canopy": {
       "block": 3
     },
     "proto_ym_sakura_channeling": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_ym_sakura_grove": {
-      "innate": true
+      "cost": -1
     },
     "proto_ym_sakura_seal": {
       "yae_amount": 1

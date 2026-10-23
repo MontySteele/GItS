@@ -45,7 +45,7 @@ public sealed class ProtoVkFrostWard : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Frost Ward"),
-        ("description", "Gain {VkBase:diff()} [gold]Block[/gold]. For each enemy with an aura, apply 1 [gold]Weak[/gold] and gain {VkPer:diff()} additional [gold]Block[/gold]."),
+        ("description", "Gain {VkBase:diff()} [gold]Block[/gold]. Apply 1 [gold]Weak[/gold] to each enemy with an aura and gain {VkPer:diff()} additional [gold]Block[/gold] for each."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

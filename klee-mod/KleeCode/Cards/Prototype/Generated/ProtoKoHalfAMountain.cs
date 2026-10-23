@@ -45,7 +45,7 @@ public sealed class ProtoKoHalfAMountain : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Half a Mountain"),
-        ("description", "Your largest [gold]Bomb[/gold], on any enemy, doubles in size."),
+        ("description", "Your largest [gold]Bomb[/gold] doubles in size."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

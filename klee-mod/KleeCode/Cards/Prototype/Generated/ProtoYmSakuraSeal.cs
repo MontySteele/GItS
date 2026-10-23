@@ -48,7 +48,7 @@ public sealed class ProtoYmSakuraSeal : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Seal"),
-        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Sakura Seal[/gold] (when played, plant a [gold]Sakura[/gold])."),
+        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your [gold]Hand[/gold]: [gold]Sakura Seal[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

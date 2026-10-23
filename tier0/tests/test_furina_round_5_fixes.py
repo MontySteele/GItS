@@ -107,11 +107,12 @@ def test_lyneys_face_names_the_acts_drain():
 
 
 def test_lyneys_badge_speaks_of_the_buffer():
-    cs = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-          / "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    assert '"Your [gold]Drain[/gold] buffer is "' in cs
-    assert '" HP larger. Act: "' in cs
-    assert "HP lower" not in cs
+    # The badge's keyed rows since the localization census (2026-10-23).
+    from tools import lint_text_conventions as ltc
+    line, act = ltc._guest_halves()["Lyney"]
+    assert line == "Your [gold]Drain[/gold] buffer is {LineDrop} HP larger."
+    assert act.startswith("Act: ")
+    assert "HP lower" not in line + act
 
 
 # ---- 4. telemetry ----------------------------------------------------------------
