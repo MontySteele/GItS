@@ -3154,6 +3154,9 @@ YAE_KINDS = {
     # Prayer's "It strikes now." (was `strike_newest`).
     "strike_most_turns_left_at": "StrikeMostTurnsLeftAt",
     "strike_most_turns_left": "StrikeMostTurnsLeft",
+    # Upgrade census (2026-10-23, [USER]): Saiguu's Lesson+ "Apply 1 Weak
+    # to ALL enemies", after its power is in (`yae_upgraded`).
+    "weak_all_if_upgraded": "WeakAllIfUpgraded",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3198,6 +3201,7 @@ YAE_KIND_FIELDS = {
     "strike_planted": (),
     "strike_most_turns_left_at": (),
     "strike_most_turns_left": (),
+    "weak_all_if_upgraded": (),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
 YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
@@ -3236,7 +3240,8 @@ YAE_PLANT_AS_KINDS = {"plant", "plant_level"}
 #: The kinds that read `IsUpgraded` at play time (`yae_upgraded`).
 #: Yae review r4, pick 1 (a): Inked Branches+ also Edits a card in your hand
 #: (`hand_if_upgraded: true` on its `edit_sakura`).
-YAE_UPGRADED_KINDS = {"fallen_petals", "second_printing", "edit_sakura"}
+YAE_UPGRADED_KINDS = {"fallen_petals", "second_printing", "edit_sakura",
+                      "weak_all_if_upgraded"}
 YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
 #: The user's ruling, 2026-10-20 (turns-left targeting): the ends count by
 #: turns left (`YaeShrineLedger.WitherOrder`), not planting order; were

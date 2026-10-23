@@ -45,13 +45,13 @@ public sealed class ProtoYmEnlightenedBlessing : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Scattered Blossoms"),
-        ("description", "Whenever a [gold]Sakura[/gold] withers, draw 2 cards."),
+        ("description", "Whenever a [gold]Sakura[/gold] withers, draw {PowerAmount:diff()} cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoYmEnlightenedBlessing : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<EnlightenedBlessingPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<EnlightenedBlessingPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

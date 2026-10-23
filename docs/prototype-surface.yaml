@@ -5181,10 +5181,11 @@
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
    # Claude, 2026-10-14 (Yae review r1, no pick): "Tenko. Draw 1 card." With
    # no Sakura standing it still draws, and its face says "Tenko (no Sakura)".
-   description: "[gold]Tenko[/gold]. Draw 1 card.",
+   # Upgrade census (2026-10-23, [USER]): draw 1 [2] (was cost -1).
+   description: "[gold]Tenko[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: yae, kind: tenko},
              {op: draw, amount: 1}],
-   upgrade: {cost: -1}}
+   upgrade: {draw: 1}}
 
 - {id: proto_ym_thunderbolt_tithe, name: "Thunderbolt Tithe", character: yae,
    authored_by: [claude],
@@ -5487,19 +5488,21 @@
    authored_by: [claude],
    # Pool sweep 2026-10-18 (review/active/pool-sweep-2026-10-18.md): draw 1 -> 2 per wither.
    cost: 1, type: power, rarity: uncommon,
+   # Upgrade census (2026-10-23, [USER]): draw 2 [3] (was Innate).
    description: "Whenever a [gold]Sakura[/gold] withers, draw 2 cards.",
    effects: [{op: apply_power, power: ym_enlightened_blessing, amount: 2, target: self}],
-   upgrade: {innate: true}}
+   upgrade: {power_amount: 1}}
 
 - {id: proto_ym_saiguus_lesson, name: "Saiguu's Lesson", character: yae,
    authored_by: [claude],
-   # Ruled 2026-10-15: the upgrade gains Innate (not a cost cut).
-   # Yae round 8 (2026-10-17, lane 3): "a striking Sakura", Narukami
-   # Judgment's words; the code never asks a Kitsune Sakura (hygiene).
+   # Yae round 8 (2026-10-17): "a striking Sakura". Upgrade census
+   # (2026-10-23, [USER]): the upgrade applies 1 Weak to ALL enemies after
+   # the power is in, so it triggers itself (was Innate).
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you apply [gold]Weak[/gold] to an enemy, a striking [gold]Sakura[/gold] strikes it.",
-   effects: [{op: apply_power, power: ym_saiguus_lesson, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   description: "Whenever you apply [gold]Weak[/gold] to an enemy, a striking [gold]Sakura[/gold] strikes it.{IfUpgraded:show: Apply 1 [gold]Weak[/gold] to ALL enemies.|}",
+   effects: [{op: apply_power, power: ym_saiguus_lesson, amount: 1, target: self},
+             {op: yae, kind: weak_all_if_upgraded}],
+   upgrade: {yae_upgraded: true}}
 
 - {id: proto_ym_shrines_sacred_shade, name: "The Shrine's Sacred Shade", character: yae,
    authored_by: [claude],
@@ -5618,8 +5621,9 @@
    cost: 1, type: skill, rarity: rare, exhaust: true,
    # Yae review r4, pick 1 (a) (ruled 2026-10-15): up to 2 cards (was 1).
    description: "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Royalties[/gold] (when played, gain {energyPrefix:energyIcons(1)}).",
+   # Upgrade census (2026-10-23, [USER]): up to 2 [3] cards (was cost -1).
    effects: [{op: yae, kind: edit, annotation: royalties, amount: 2}],
-   upgrade: {cost: -1}}
+   upgrade: {yae_amount: 1}}
 
 # Review r3, sec.3 (ruled 2026-10-14): the signature Rare.
 

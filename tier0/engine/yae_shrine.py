@@ -303,6 +303,10 @@ KIND_FIELDS = {
     # `YaeCards.StrikeMostTurnsLeftAt`, `YaeCards.StrikeMostTurnsLeft`.
     "strike_most_turns_left_at": (),
     "strike_most_turns_left": (),
+    # Upgrade census (2026-10-23, [USER]): Saiguu's Lesson+ "Apply 1 Weak to
+    # ALL enemies", after its power is in. C# twin:
+    # `YaeCards.WeakAllIfUpgraded`.
+    "weak_all_if_upgraded": (),
 }
 KINDS = frozenset(KIND_FIELDS)
 KIND_TARGETS = {
@@ -330,7 +334,7 @@ PLANT_AS_KINDS = frozenset({"plant", "plant_level"})
 #: Yae review r4, pick 1 (a): Inked Branches+ also Edits a card in your
 #: hand (`hand_if_upgraded: true` on its `edit_sakura`).
 UPGRADED_KINDS = frozenset({"fallen_petals", "second_printing",
-                            "edit_sakura"})
+                            "edit_sakura", "weak_all_if_upgraded"})
 OP_FIELDS = frozenset({"op", "kind", "amount", "base", "per", "target",
                        "annotation", "as", "which", "upgraded", "seal",
                        "hand_if_upgraded", "lasts"})
@@ -1792,6 +1796,12 @@ def op_yae(state, fx: dict, card) -> None:
             state.draw(2 if fx.get("upgraded") else 1)
     elif kind == "second_printing":
         second_printing(state, card, bool(fx.get("upgraded")))
+    elif kind == "weak_all_if_upgraded":
+        # Upgrade census (2026-10-23): Saiguu's Lesson+, after its power.
+        if fx.get("upgraded"):
+            effects._op_apply_power(state, {"op": "apply_power",
+                                            "power": "weak", "amount": 1,
+                                            "target": "all_enemies"}, card)
     elif kind == "authors_copy":
         authors_copy(state, card)
     # --- the pool to 78 (ruled 2026-10-15) ---

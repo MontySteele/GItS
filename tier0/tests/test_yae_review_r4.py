@@ -243,8 +243,9 @@ def test_pick1_rows():
                             if fx.get("op") == "yae")
     assert (amount(seal), amount(_card("sakura_seal+"))) == (2, 3)
     assert (amount(foot), amount(_card("footnote+"))) == (2, 3)
-    assert (amount(royal), amount(_card("royalties+"))) == (2, 2)
-    assert _card("royalties+").cost == 0
+    # Upgrade census (2026-10-23, [USER]): up to 2 [3] (was cost -1).
+    assert (amount(royal), amount(_card("royalties+"))) == (2, 3)
+    assert _card("royalties+").cost == 1
     assert _card("inked_branches+").cost == 0
     # Yae review r5, pick 1 (a): plus 2 [3] per card Edited this combat.
     for name, base, per in (("bestseller", (8, 10), (2, 3)),):
