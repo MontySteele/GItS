@@ -48,13 +48,13 @@ public sealed class ProtoFsRainfallOverture : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rainfall Overture"),
-        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Your next Attack this turn hits ALL enemies."),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Your next Attack this turn hits ALL enemies.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,10 +71,14 @@ public sealed class ProtoFsRainfallOverture : CustomCardModel, ICharacterCard
             await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Hydro, Owner.Creature);
         }
         await PowerCmd.Apply<RainfallOverturePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
     }
 }

@@ -94,6 +94,9 @@ ESCOFFIER_LINE_BONUS = T.ESCOFFIER_LINE_BONUS
 ESCOFFIER_LINE_BONUS_UPGRADED = T.ESCOFFIER_LINE_BONUS_UPGRADED
 ENSEMBLE_SEATS = T.ENSEMBLE_SEATS
 SHOWSTOPPER_SPEND = T.SHOWSTOPPER_SPEND
+SHOWSTOPPER_PLUS_PRICE = T.SHOWSTOPPER_PLUS_PRICE
+MASQUERADE_PLUS_BLOCK = T.MASQUERADE_PLUS_BLOCK
+CRITICS_DARLING_RAISE = T.CRITICS_DARLING_RAISE
 HIGH_STAKES_EVERY = T.HIGH_STAKES_EVERY
 HIGH_STAKES_EVERY_UPGRADED = T.HIGH_STAKES_EVERY_UPGRADED
 HYMN_THRESHOLD = T.HYMN_THRESHOLD
@@ -120,6 +123,12 @@ UNIVERSAL_REVELRY = "fs_universal_revelry"
 OUSIA_SURGE = "fs_ousia_surge"
 A_FIVE_CENTURY_ACT = "fs_a_five_century_act"
 CRITICS_DARLING = "fs_critics_darling"
+# The upgrade census (2026-10-23): the upgraded card's powers. Critics'
+# Darling+ deals 1 more, Showstopper+ Spends 3, The Masquerade+ gains 2 more
+# (the C# counts them on one class, `UpgradeTwinPower`).
+CRITICS_DARLING_PLUS = "fs_critics_darling_plus"
+SHOWSTOPPER_PLUS = "fs_showstopper_plus"
+THE_MASQUERADE_PLUS = "fs_the_masquerade_plus"
 # furina-next paper 2 (2026-10-16): Extended Run, Bis!'s slot, applies
 # its printed number (8, 12 upgraded).
 EXTENDED_RUN = "fs_extended_run"
@@ -153,10 +162,12 @@ ARM_POWER_IDS = {
     "ousia_surge": OUSIA_SURGE,
     "five_century": A_FIVE_CENTURY_ACT,
     "critics_darling": CRITICS_DARLING,
+    "critics_darling_plus": CRITICS_DARLING_PLUS,
     "extended_run": EXTENDED_RUN,
     # The pool to 75.
     "grand_entrance": GRAND_ENTRANCE,
     "showstopper": SHOWSTOPPER,
+    "showstopper_plus": SHOWSTOPPER_PLUS,
     "ensemble_cast": ENSEMBLE_CAST,
     "crescendo": CRESCENDO,
     "prima_donna": PRIMA_DONNA,
@@ -168,6 +179,7 @@ ARM_POWER_IDS = {
     "hymn_of_renewal": HYMN_OF_RENEWAL,
     # The block gap.
     "masquerade": THE_MASQUERADE,
+    "masquerade_plus": THE_MASQUERADE_PLUS,
     # The diversity pass.
     "leading_lady": LEADING_LADY,
     "full_house": FULL_HOUSE,
@@ -596,7 +608,10 @@ KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest",
          "verdict")
 #: Casting Call's `tutor_guest` carries its floor's draw ("If you can't,
 #: draw 2 cards"; the diversity pass, 2026-10-11). Facade carries its cap.
-KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest", "facade")
+KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest", "facade",
+               # The upgrade census (2026-10-23): Ensemble Cast summons
+               # 1 [2].
+               "summon_random")
 #: The one kind that aims (`target: enemy`): Verdict of the Oratrice.
 AIMED_KINDS = ("verdict",)
 #: The sweep's kinds need no stage, except Verdict, which reads her Fanfare
@@ -648,7 +663,8 @@ def kind(state, fx: dict, card) -> None:
         if not T.tutor_guest(state) and not state.over:
             state.draw(int(fx["amount"]))
     elif k == "summon_random":
-        T.summon_random(state)
+        for _ in range(int(fx["amount"])):
+            T.summon_random(state)
     elif k == "gain_fanfare":
         # The ledger's gain, the path Universal Revelry's gain takes.
         T.gain(state, int(fx["amount"]), "card")

@@ -80,7 +80,7 @@ public static class FurinaStageFacePreview
     /// <summary>"(Not enough HP)" while a Drain of <paramref name="amount"/>
     /// would take her to 0 HP; else where the Drain lands
     /// (<see cref="DrainTag"/>); then the Block the Drain pays and who pays
-    /// it (<see cref="DrainBlock(int, int, bool)"/>). Empty off a combat or
+    /// it (<see cref="DrainBlock(int, int, bool, int)"/>). Empty off a combat or
     /// a Furina board.</summary>
     public static string DrainLine(CardModel card, int amount)
     {
@@ -88,7 +88,8 @@ public static class FurinaStageFacePreview
         if (!FurinaStage.CanDrain(owner, amount)) return NotEnoughHp;
         var ledger = FurinaStageLedger.For(owner);
         var block = DrainBlock(amount, ledger.Mods.Masquerade,
-                               ledger.OnStage(StagePerformer.Freminet));
+                               ledger.OnStage(StagePerformer.Freminet),
+                               ledger.Mods.MasqueradeUpgraded);
         // The split the play will make (`FurinaStageLedger.NoteDrain`): the
         // part that fits in the buffer left returns, the rest is past the
         // line.
@@ -139,19 +140,22 @@ public static class FurinaStageFacePreview
     /// 2026-10-10, change 3: a seat could not tell The Masquerade's Block from
     /// Freminet's line and called The Masquerade "neutral"). "(+3 Block: The
     /// Masquerade)" for <paramref name="masquerade"/> copies of the power
-    /// (each pays the HP drained), "(+3 Block: Freminet)" while Freminet is
+    /// (each pays the HP drained, and each of <paramref name="upgraded"/>
+    /// 2 more: the upgrade census, 2026-10-23), "(+3 Block: Freminet)" while Freminet is
     /// on stage (his line pays the HP drained once), one line each, in the
     /// order <see cref="StageDirector.Drain"/> pays them. Empty when neither
     /// pays. The words, for the pins and the face.
     /// </summary>
-    public static string DrainBlock(int amount, int masquerade, bool freminet)
+    public static string DrainBlock(int amount, int masquerade, bool freminet,
+                                    int upgraded = 0)
     {
         if (amount <= 0) return "";
         var words = "";
         if (masquerade > 0)
         {
-            words += BlockFrom(amount * masquerade,
-                               StageDirector.MasqueradeTitle);
+            words += BlockFrom(
+                StageDirector.MasqueradeBlock(amount, masquerade, upgraded),
+                StageDirector.MasqueradeTitle);
         }
         if (freminet)
         {

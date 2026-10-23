@@ -45,7 +45,7 @@ public sealed class ProtoFsTheMasquerade : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Masquerade"),
-        ("description", "Whenever you [gold]Drain[/gold], gain that much [gold]Block[/gold]."),
+        ("description", "Whenever you [gold]Drain[/gold], gain that much [gold]Block[/gold]{IfUpgraded:show: plus 2|}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,11 @@ public sealed class ProtoFsTheMasquerade : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<TheMasqueradePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await UpgradeTwinPower.Install<TheMasqueradePower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        // upgraded_power: the upgraded card's copy of TheMasqueradePower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

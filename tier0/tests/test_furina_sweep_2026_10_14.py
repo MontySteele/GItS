@@ -268,7 +268,8 @@ def test_rainfall_overture_widens_the_next_attack_only():
     hp = [e.hp for e in st.enemies]
     _play(st, _card("strike"))
     assert sum(a != b for a, b in zip(hp, (e.hp for e in st.enemies))) == 1
-    assert _card("proto_fs_rainfall_overture+").cost == 0
+    # The upgrade census (2026-10-23): it draws 1, at the same cost.
+    assert _card("proto_fs_rainfall_overture+").cost == 1
 
 
 def test_crowd_favorite_pays_energy_below_half_only():

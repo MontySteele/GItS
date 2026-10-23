@@ -3451,7 +3451,10 @@ FURINA_KINDS = {
     "encore_performance": "EncorePerformance",
     "verdict": "Verdict",
 }
-FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest", "facade"}
+FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest", "facade",
+                      # Upgrade census (2026-10-23): Ensemble Cast summons
+                      # 1 [2].
+                      "summon_random"}
 #: The kinds that read `cardPlay.Target`, and the only ones that say
 #: `target: enemy` (Yae's `YAE_AIMED_KINDS` shape).
 FURINA_AIMED_KINDS = {"verdict"}
@@ -4038,6 +4041,11 @@ APPLY_POWERS = {
     "fs_critics_darling": ("CriticsDarlingPower", None,
         "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
         "much damage to a random enemy."),
+    # Upgrade census (2026-10-23): the upgraded card's copy deals 1 more
+    # (`upgraded_power`), counted on the same class (`UpgradeTwinPower`).
+    "fs_critics_darling_plus": ("CriticsDarlingPower", None,
+        "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
+        "much damage plus 1 to a random enemy."),
     # furina-next paper 2 (2026-10-16): Extended Run takes Bis!'s slot.
     "fs_extended_run": ("ExtendedRunPower", None,
         "Attacks and Skills that [gold]Spend[/gold] up to a number can "
@@ -4049,6 +4057,11 @@ APPLY_POWERS = {
         "Whenever you play a Guest Star, [gold]Repay[/gold] {X}."),
     "fs_showstopper": ("ShowstopperPower", None,
         "At the end of your turn, [gold]Spend[/gold] 5: your guests act "
+        "again."),
+    # Upgrade census (2026-10-23): the upgraded card's copy Spends 3
+    # (`upgraded_power`), counted on the same class (`UpgradeTwinPower`).
+    "fs_showstopper_plus": ("ShowstopperPower", None,
+        "At the end of your turn, [gold]Spend[/gold] 3: your guests act "
         "again."),
     "fs_ensemble_cast": ("EnsembleCastPower", None,
         "You have 4 guest seats."),
@@ -4075,6 +4088,11 @@ APPLY_POWERS = {
     "fs_the_masquerade": ("TheMasqueradePower", None,
         "Whenever you [gold]Drain[/gold], gain that much "
         "[gold]Block[/gold]."),
+    # Upgrade census (2026-10-23): the upgraded card's copy gains 2 more
+    # (`upgraded_power`), counted on the same class (`UpgradeTwinPower`).
+    "fs_the_masquerade_plus": ("TheMasqueradePower", None,
+        "Whenever you [gold]Drain[/gold], gain that much "
+        "[gold]Block[/gold] plus 2."),
     # THE DIVERSITY PASS (review/ruled/furina-diversity-pass-2026-10-11.md,
     # ruled 2026-10-11). The classes live in
     # klee-mod/KleeCode/Powers/Prototype/FurinaPool75Powers.cs.

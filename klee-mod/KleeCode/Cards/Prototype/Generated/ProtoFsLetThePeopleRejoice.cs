@@ -76,6 +76,6 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }

@@ -179,8 +179,12 @@ public class FurinaSweepTests
         Assert.Equal(3m, Upgraded(new ProtoFsArkheInBalance()).DynamicVars["PowerAmount"].BaseValue);
         Assert.Equal(8m, Upgraded(new ProtoFsUnderstudysDebut()).DynamicVars.Damage.BaseValue);
         Assert.Equal(8m, Upgraded(new ProtoFsUnderstudysDebut()).DynamicVars["BranchBlock"].BaseValue);
-        Assert.Equal(0, Upgraded(new ProtoFsRainfallOverture())
+        // The upgrade census (2026-10-23): Rainfall Overture keeps its cost
+        // and draws 1.
+        Assert.Equal(1, Upgraded(new ProtoFsRainfallOverture())
             .EnergyCost.GetWithModifiers(CostModifiers.None));
+        Assert.Equal(1, Upgraded(new ProtoFsRainfallOverture())
+            .DynamicVars.Cards.IntValue);
         Assert.Equal(0, Upgraded(new ProtoFsEncorePerformance())
             .EnergyCost.GetWithModifiers(CostModifiers.None));
         Assert.Equal(1, Upgraded(new ProtoFsVerdictOfTheOratrice())

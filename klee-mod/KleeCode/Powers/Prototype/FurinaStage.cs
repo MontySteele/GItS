@@ -245,6 +245,8 @@ public static class FurinaStage
     {
         int Sum<T>() where T : PowerModel =>
             (int)owner.Powers.OfType<T>().Sum(p => p.Amount);
+        int Upgraded<T>() where T : UpgradeTwinPower =>
+            owner.Powers.OfType<T>().Sum(p => p.UpgradedCopies);
         // Her relics (Furina's card pass, 2026-10-15), counted off the
         // player; none headless.
         // Relic effects are Furina's own (the off-character fix,
@@ -264,6 +266,10 @@ public static class FurinaStage
             BouquetOfRoses = Held<Relics.BouquetOfRoses>(),
             GrandEntrance = Sum<GrandEntrancePower>(),
             Showstopper = Sum<ShowstopperPower>(),
+            // The upgrade census (2026-10-23): one badge for both versions;
+            // an upgraded card's copy Spends 3, gains 2 more Block, deals 1
+            // more.
+            ShowstopperUpgraded = Upgraded<ShowstopperPower>(),
             Crescendo = Sum<CrescendoPower>(),
             // One badge for both versions (the icon declutter, 2026-10-19):
             // every copy is Energy, an upgraded card's copy is also a card.
@@ -275,8 +281,10 @@ public static class FurinaStage
             Thunderous = Sum<ThunderousApplausePower>(),
             FiveCenturyAct = owner.Powers.OfType<FiveCenturyActPower>().Count(),
             CriticsDarling = Sum<CriticsDarlingPower>(),
+            CriticsDarlingUpgraded = Upgraded<CriticsDarlingPower>(),
             ExtendedRun = Sum<ExtendedRunPower>(),
             Masquerade = Sum<TheMasqueradePower>(),
+            MasqueradeUpgraded = Upgraded<TheMasqueradePower>(),
             FullHouse = Sum<FullHousePower>(),
         };
     }

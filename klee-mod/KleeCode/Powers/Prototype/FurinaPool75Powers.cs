@@ -40,10 +40,14 @@ public sealed class GrandEntrancePower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>Showstopper</i>: "At the end of your turn, Spend 5: your
-/// guests act again." Each copy buys one more round, while the bank holds 5
-/// and a guest is on stage (<see cref="StageDirector.EndOfTurn"/>).</summary>
-public sealed class ShowstopperPower : PowerModel, ILocalizationProvider
+/// <summary><i>Showstopper</i>: "At the end of your turn, Spend 5 [3]: your
+/// guests act again." Each copy buys one more round, while the bank holds its
+/// price and a guest is on stage (<see cref="StageDirector.EndOfTurn"/>).
+/// A copy the upgraded card installed Spends 3 (the upgrade census,
+/// 2026-10-23; was cost -1) and pays first
+/// (<see cref="UpgradeTwinPower.UpgradedCopies"/>). One badge for both
+/// versions.</summary>
+public sealed class ShowstopperPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -51,11 +55,10 @@ public sealed class ShowstopperPower : PowerModel, ILocalizationProvider
         ("description",
             "At the end of your turn, [gold]Spend[/gold] 5: your guests act "
           + "again."),
+        ("smartDescription",
+            "At the end of your turn, [gold]Spend[/gold] "
+          + "{Upgraded:cond:>0?3|5}: your guests act again."),
     };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary><i>Ensemble Cast</i>: "You have 4 guest seats." A second copy
@@ -159,11 +162,13 @@ public sealed class ReginaOfAllWatersPower : PowerModel, ILocalizationProvider
 
 /// <summary><i>The Masquerade</i> (the block gap,
 /// review/records/furina-drain-line-round-2026-10-09.md pick 2, ruled
-/// 2026-10-09): "Whenever you Drain, gain that much Block." [Cost 0] "That
+/// 2026-10-09): "Whenever you Drain, gain that much Block." [plus 2] "That
 /// much" is the HP actually drained, past the line included; a guest act's
 /// Drain stops at the line, so it pays less. Copies add
-/// (<see cref="StageDirector.Drain"/>).</summary>
-public sealed class TheMasqueradePower : PowerModel, ILocalizationProvider
+/// (<see cref="StageDirector.Drain"/>); a copy the upgraded card installed
+/// adds 2 more a Drain (the upgrade census, 2026-10-23; was cost -1). One
+/// badge for both versions (<see cref="UpgradeTwinPower"/>).</summary>
+public sealed class TheMasqueradePower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -171,11 +176,10 @@ public sealed class TheMasqueradePower : PowerModel, ILocalizationProvider
         ("description",
             "Whenever you [gold]Drain[/gold], gain that much "
           + "[gold]Block[/gold]."),
+        ("smartDescription",
+            "Whenever you [gold]Drain[/gold], gain that much "
+          + "[gold]Block[/gold]{Upgraded:cond:>0? plus 2|}."),
     };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 // ======================================================================

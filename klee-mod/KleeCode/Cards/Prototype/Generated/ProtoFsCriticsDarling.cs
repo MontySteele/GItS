@@ -45,7 +45,7 @@ public sealed class ProtoFsCriticsDarling : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Critics' Darling"),
-        ("description", "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that much damage to a random enemy."),
+        ("description", "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that much damage{IfUpgraded:show: plus 1|} to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,11 @@ public sealed class ProtoFsCriticsDarling : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<CriticsDarlingPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await UpgradeTwinPower.Install<CriticsDarlingPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        // upgraded_power: the upgraded card's copy of CriticsDarlingPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

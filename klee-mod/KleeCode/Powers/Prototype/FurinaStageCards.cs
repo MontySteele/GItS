@@ -64,10 +64,17 @@ public static class FurinaCards
                              Amount(card));
 
     /// <summary>Ensemble Cast (the diversity pass, 2026-10-11): "Summon a
-    /// random guest."</summary>
-    public static Task SummonRandom(PlayerChoiceContext choiceContext,
-                                    CardModel card, CardPlay cardPlay) =>
-        FurinaStage.SummonRandom(choiceContext, card.Owner?.Creature);
+    /// random guest." [2 random guests] (the upgrade census, 2026-10-23: its
+    /// <c>FsAmount</c>, was cost -1). Each is one not on stage when it
+    /// comes.</summary>
+    public static async Task SummonRandom(PlayerChoiceContext choiceContext,
+                                          CardModel card, CardPlay cardPlay)
+    {
+        for (var i = 0; i < Amount(card); i++)
+        {
+            await FurinaStage.SummonRandom(choiceContext, card.Owner?.Creature);
+        }
+    }
 
     /// <summary>The ledger source a card's own Fanfare gain is filed
     /// under.</summary>

@@ -127,3 +127,35 @@ clear and concise."
 **Build condition.** Every card, relic and tooltip the change touches is
 read back for length and clarity in the build: base-game templates, one
 keyword tip for the rule, no card gaining a clause it does not need.
+
+## Upgrade census (2026-10-23)
+
+**The count.** Seventeen of Furina's 78 pool cards upgraded by cost alone
+(cost -1), against 6 for the base Ironclad and 9 for the Silent (`BACKLOG.md`:
+"You do have a habit of making too many powers just decrease their cost by 1
+on upgrade"). After this pass she has 8, inside the base range.
+
+**The ruling.** [USER], 2026-10-23: "Otherwise I agreed on all the cards!"
+Every cost stays; the upgrade is now the bracketed part.
+
+| Card | Base [upgraded] | Expected effect, graded by the next suite |
+|---|---|---|
+| Let the People Rejoice (Rare Attack, 2) | Spend all your Fanfare. Deal 2 [3] damage to ALL enemies per point. | A bank of 10 hits ALL for 30, not 20; upgraded copies end act 2 and 3 fights a turn sooner. |
+| The Show Must Go On (Rare Skill, 2) | Gain Block equal to your Fanfare. [Retain.] | Held for the big enemy turn; Block from it per play rises, its play count does not fall. |
+| Tutti! (Common Skill, 1) | Each guest acts. Draw 1 [2] card(s). | One more card a play; no change to how often guests act. |
+| Rainfall Overture (Uncommon Skill, 1) | Apply Hydro to ALL enemies. Your next Attack this turn hits ALL enemies. [Draw 1 card.] | Finds the Attack it widens more often; fewer turns it is played with no Attack after it. |
+| The Masquerade (Uncommon Power, 1) | Whenever you Drain, gain that much Block [plus 2]. | About 2 Block more a Drain, 4 to 6 a turn in a Drain deck; act 1 HP lost per fight down slightly. |
+| Critics' Darling (Rare Power, 2) | Whenever you Drain or Repay, deal that much damage [plus 1] to a random enemy. | About 1 damage more a Drain or Repay, 3 to 5 a turn in a loop deck; small. |
+| Showstopper (Rare Power, 2) | At the end of your turn, Spend 5 [3]: your guests act again. | The second round fires on banks of 3 and 4; more rounds a fight, a smaller bank held. |
+| Ensemble Cast (Rare Power, 2) | You have 4 guest seats. Summon a random guest [2 random guests]. | A full extra guest on the turn it is played; more guest acts in fights where it is drawn early. |
+
+Kept as cost cuts: Singer of Many Waters, Universal Revelry, A Five-Century
+Act, Regina of All Waters, Grand Absolution, Encore Performance, Verdict of
+the Oratrice, Plot Twist.
+
+**How it is built.** The three Powers keep one badge for both versions, as
+Prima Donna does (`UpgradeTwinPower`): the copy an upgraded card installs
+adds its 2 Block, its 1 damage or its cheaper Spend, and Showstopper pays its
+cheaper rounds first. Text: "plus 2" and "plus 1" follow Endless Waltz's
+"plus Y" wording; Tutti! uses the base game's "Draw N card(s)" template. No
+lint asked for another wording.

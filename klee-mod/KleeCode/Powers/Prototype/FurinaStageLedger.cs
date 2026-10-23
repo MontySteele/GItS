@@ -93,6 +93,11 @@ public sealed record StageMods
     /// copy to a random enemy.</summary>
     public int CriticsDarling { get; init; }
 
+    /// <summary>The copies of <see cref="CriticsDarling"/> an upgraded card
+    /// installed (the upgrade census, 2026-10-23): each deals 1 more.
+    /// </summary>
+    public int CriticsDarlingUpgraded { get; init; }
+
     /// <summary>Extended Run (furina-next paper 2, 2026-10-16): the applied
     /// total (8 a copy, 12 upgraded) an Attack's or Skill's "Spend up to"
     /// cap rises by, once a play.</summary>
@@ -113,6 +118,11 @@ public sealed record StageMods
     /// <summary>Showstopper copies: each buys one more round of acts at the
     /// end of her turn for Spend 5.</summary>
     public int Showstopper { get; init; }
+
+    /// <summary>The copies of <see cref="Showstopper"/> an upgraded card
+    /// installed (the upgrade census, 2026-10-23): each Spends 3, and they
+    /// pay first.</summary>
+    public int ShowstopperUpgraded { get; init; }
 
     /// <summary>Crescendo (furina-next, 2026-10-16): the applied total of its
     /// steps (2 a copy, 3 upgraded). What each copy has paid is the ledger's
@@ -138,6 +148,11 @@ public sealed record StageMods
     /// <summary>The Masquerade copies (the block gap, 2026-10-09): each Drain
     /// gains the HP it actually drained as Block, per copy.</summary>
     public int Masquerade { get; init; }
+
+    /// <summary>The copies of <see cref="Masquerade"/> an upgraded card
+    /// installed (the upgrade census, 2026-10-23): each gains 2 more a
+    /// Drain.</summary>
+    public int MasqueradeUpgraded { get; init; }
 
     /// <summary>Full House (the diversity pass, 2026-10-11): the "Spend up
     /// to" cap an act that deals damage takes, copies' caps added (4, 6

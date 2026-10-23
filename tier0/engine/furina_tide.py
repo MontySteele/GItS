@@ -174,6 +174,10 @@ ESCOFFIER_LINE_BONUS = 2           # line: your guests' acts deal 2 [3] more dam
 ESCOFFIER_LINE_BONUS_UPGRADED = 3
 ENSEMBLE_SEATS = 4                 # Ensemble Cast: 4 guest seats
 SHOWSTOPPER_SPEND = 5              # Showstopper: end of turn, Spend 5
+# The upgrade census (2026-10-23): what an upgraded card's copy changes.
+SHOWSTOPPER_PLUS_PRICE = 3     # Showstopper+: Spend 3
+MASQUERADE_PLUS_BLOCK = 2      # The Masquerade+: that much Block plus 2
+CRITICS_DARLING_RAISE = 1  # Critics' Darling+: that much plus 1
 # High Stakes (the Spend round 2, 2026-10-10): "Your Attacks deal 1
 # additional damage for every 5 HP you have Drained this combat." [every 4].
 # The Spend rounds review (2026-10-10) made it every 4 [3], round 2's
@@ -937,10 +941,12 @@ def _loop_readers(state, n: int) -> None:
     copies = revelry_copies(state)
     if copies and n > 0:
         gain(state, n * copies, "revelry")
-    critics = _player_power(state.player, "critics_darling")
-    if critics and state.living_enemies:
-        _hit(state, state.rng.choice(state.living_enemies), n * critics,
-             None)
+    plus = _player_power(state.player, "critics_darling_plus")
+    critics = _player_power(state.player, "critics_darling") + plus
+    if critics and n > 0 and state.living_enemies:
+        # The upgrade census (2026-10-23): an upgraded copy deals 1 more.
+        _hit(state, state.rng.choice(state.living_enemies),
+             n * critics + CRITICS_DARLING_RAISE * plus, None)
 
 
 def spend(state, amount: int) -> bool:
@@ -1114,9 +1120,12 @@ def drain(state, n: int) -> bool:
     # The Masquerade (the block gap, 2026-10-09): the HP actually drained as
     # Block, per copy; a Power's Block, unpowered (the C# `StageDirector`).
     # A guest act's Drain arrives here already stopped at the line.
-    masquerade = _player_power(p, "masquerade")
+    masquerade_plus = _player_power(p, "masquerade_plus")
+    masquerade = _player_power(p, "masquerade") + masquerade_plus
     if masquerade and not state.over:
-        p.block += n * masquerade
+        # The upgrade census (2026-10-23): an upgraded copy gains 2 more.
+        p.block += (n * masquerade
+                    + MASQUERADE_PLUS_BLOCK * masquerade_plus)
     encore = (SALON_ENCORE_DAMAGE * f.powers["salon_encore"]
               + _arm_power(state, "salon_encore"))
     if encore:
@@ -1686,11 +1695,17 @@ def end_of_turn(state) -> None:
         return
     f = _f(state)
     act_all(state)
-    for _ in range(_player_power(state.player, "showstopper")):
+    # The upgrade census (2026-10-23): an upgraded copy Spends 3, and the
+    # cheaper rounds are paid first (the C# `StageDirector.ShowstopperPrices`).
+    plus = _player_power(state.player, "showstopper_plus")
+    prices = ([SHOWSTOPPER_PLUS_PRICE] * plus
+              + [SHOWSTOPPER_SPEND]
+              * _player_power(state.player, "showstopper"))
+    for price in prices:
         if (state.over or not state.player.alive or not f.stage
-                or f.fanfare < price_of(f, SHOWSTOPPER_SPEND)):
+                or f.fanfare < price_of(f, price)):
             break
-        if not spend(state, SHOWSTOPPER_SPEND):
+        if not spend(state, price):
             break
         f.ledger["showstopper_rounds"] = (
             f.ledger.get("showstopper_rounds", 0) + 1)
