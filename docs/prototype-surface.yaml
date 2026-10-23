@@ -5640,11 +5640,12 @@
 - {id: proto_ym_sakura_grove, name: "Sakura Grove", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   # Shrine r2: each Sakura. The pool to 78, sec.3: a Rare (was Uncommon),
-   # swapped with Fox's Mooncall. Provenance note, "Yae: the pool to 78".
+   # Shrine r2. Pool to 78 sec.3 (provenance note): Rare (was Uncommon), swapped with Fox's Mooncall.
+   # Yae deck read 2026-10-23 (review/records/yae-suite-2026-10-23.md,
+   # "Deck commonalities"): upgrade cost 0, was Innate.
    description: "At the start of your turn, each [gold]Sakura[/gold] gains a Level.",
    effects: [{op: apply_power, power: ym_sakura_grove, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   upgrade: {cost: -1}}
 
 - {id: proto_ym_forbidden_art_daisesshou, name: "Forbidden Art: Daisesshou", character: yae,
    authored_by: [claude],

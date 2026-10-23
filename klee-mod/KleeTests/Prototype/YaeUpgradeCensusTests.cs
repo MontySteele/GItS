@@ -96,4 +96,16 @@ public class YaeUpgradeCensusTests
         Assert.True(hit >= 0 && level > hit, string.Join(" | ", play));
         Assert.Contains(play, c => c.Contains("ReactionEffects.get_TotalResolved"));
     }
+
+    /// <summary>Yae deck read 2026-10-23 (review/records/yae-suite-2026-10-23.md,
+    /// "Deck commonalities"), pick 1 (a): "Sounds good - agreed on both
+    /// defaults!" Sakura Grove's upgrade is cost 0, not Innate.</summary>
+    [Fact]
+    public void Sakura_grove_upgrade_costs_zero_not_innate()
+    {
+        var plus = Upgraded<ProtoYmSakuraGrove>();
+        Assert.Equal((1, 0), (new ProtoYmSakuraGrove().EnergyCost.Canonical,
+                              (int)plus.EnergyCost.GetWithModifiers(CostModifiers.None)));
+        Assert.DoesNotContain(CardKeyword.Innate, plus.Keywords);
+    }
 }

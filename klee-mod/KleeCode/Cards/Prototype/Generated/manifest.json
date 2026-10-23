@@ -2852,7 +2852,7 @@
       "power_amount": 1
     },
     "proto_ym_sakura_grove": {
-      "innate": true
+      "cost": -1
     },
     "proto_ym_sakura_seal": {
       "yae_amount": 1

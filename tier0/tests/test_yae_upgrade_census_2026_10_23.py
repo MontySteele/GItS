@@ -127,3 +127,13 @@ def test_sacred_thunderbolt_without_a_reaction_levels_nothing():
     _play(st, _card("sacred_thunderbolt"))
     assert _levels(st) == before
     assert st.enemies[0].hp == 100 - 9
+
+
+# Yae deck read 2026-10-23 (review/records/yae-suite-2026-10-23.md, "Deck
+# commonalities"), pick 1 (a): "Sounds good - agreed on both defaults!"
+# Sakura Grove's upgrade is cost 0, not Innate.
+
+def test_sakura_grove_upgrade_costs_zero_not_innate():
+    base, plus = _card("sakura_grove"), _card("sakura_grove+")
+    assert (base.cost, plus.cost) == (1, 0)
+    assert not base.innate and not plus.innate
