@@ -84,7 +84,10 @@ public class SpiralAbyssTests
             {
                 text = text.Replace($"up to {AbyssNumbers.RiptideCap(0)} times", "up to N times");
             }
-            Assert.Contains($"**{AbyssText.Name(s)}, new text:** \"{text}\"", scaling);
+            // The shared text audit (pick 3) renamed Riptide "Blood in the
+            // Water"; the paper keeps the old name.
+            var name = s == AbyssShadow.Riptide ? "Riptide" : AbyssText.Name(s);
+            Assert.Contains($"**{name}, new text:** \"{text}\"", scaling);
         }
         Assert.Equal(14, AbyssDraft.AllBlessings.Count);
         Assert.Equal(12, AbyssDraft.AllShadows.Count);

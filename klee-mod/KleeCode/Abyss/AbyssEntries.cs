@@ -276,7 +276,7 @@ public static class AbyssText
         AbyssShadow.ElementalMark => "Elemental Mark",
         AbyssShadow.Herald => "Abyss Herald",
         AbyssShadow.Rally => "Rally",
-        AbyssShadow.Riptide => "Riptide",
+        AbyssShadow.Riptide => "Blood in the Water",
         AbyssShadow.FatuiSkirmishers => "Fatui Skirmishers",
         AbyssShadow.ThornyGround => "Thorny Ground",
         AbyssShadow.Bulwark => "Bulwark",

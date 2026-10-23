@@ -4250,7 +4250,7 @@
              {op: apply_power, power: weak, amount: 2, target: enemy}],
    upgrade: {power_amount: 1}}
 
-- {id: proto_vk_jean_dandelion_breeze, name: "Dandelion Breeze", character: varka,
+- {id: proto_vk_jean_dandelion_breeze, name: "Gale Guard", character: varka,
    authored_by: [claude],
    # A Skill, not a Knight: a plain name, no colon (the Knight's tell).
    # Was "Jean — Wind Companion" until the Varka text audit, 2026-10-23.

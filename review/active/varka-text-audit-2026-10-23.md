@@ -107,5 +107,8 @@ sense to me!"
    "to add into your Hand" too.
 2. (a) Built: All Four Winds "Your cards read your total Oath." and Elixir
    of the Four Winds "This turn, your cards read your total Oath."
-3. (a) Built: `proto_vk_jean_dandelion_breeze` is titled "Dandelion
-   Breeze", id unchanged, still a non-Knight Skill; its art is keyed by id.
+3. (a) Built: `proto_vk_jean_dandelion_breeze` is titled "Gale Guard", id
+   unchanged, still a non-Knight Skill; its art is keyed by id. "Dandelion
+   Breeze" was the first build and clashed with the Mondstadt Companion
+   "Jean — Dandelion Breeze" and Klee's power of that name. [USER]: "Ok,
+   I'm good on both those name defaults".
