@@ -13,6 +13,12 @@ line leaves this file. Closed picks are in git
 Moved here from the backlog, yours by nature: the writing review before the
 public launch; listen for the modded death sound (`set_hp player 1`).
 
+## Open packets: writing review
+
+- **Story text audit, character chains** (`review/active/story-text-audit-2026-10-23.md`):
+  (1) "Add [X] to your deck." everywhere; (2) vary three "reads it twice"
+  lines; (3) Yae's chain waits for her Balance. All defaults.
+
 ## Eyes-on looks (materials ready; no build waits on them)
 
 - **Models and screens in motion** (from the backlog, 2026-10-19): Klee,
