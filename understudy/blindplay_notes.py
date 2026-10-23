@@ -1344,7 +1344,9 @@ PLAN_WRITTEN_NUMBER_NOTE = ("- Your Strength when you write it counts, a loss "
                             "you never does. A Plan that reads an intent "
                             "(Tide Wall, Flank, Undercurrent Snare) reads it "
                             "when it lands. A planned Block is yours, so "
-                            "Frail cuts it.")
+                            "Frail cuts it. A Plan meets the enemy as it is "
+                            "when it lands: an Intangible enemy takes 1 per "
+                            "hit.")
 #: Kokomi review r5 (2026-10-14, A2): so Spearhead before Masterstroke is
 #: visible.
 PLAN_ORDER_NOTE = "- Plans carry out in the order written."
@@ -1366,8 +1368,14 @@ PLAN_AFTER_DRAW_NOTE = "- Plans carry out after your draw."
 #: no living enemy intends one.
 PLAN_NO_ATTACK_WARNING = ("     - {enemies} {verb} not intend to attack: "
                           "{plan}'s Plan {what}.")
-PLAN_NO_ATTACK_WHAT = {"attackers": "hits no one", "blocked": "deals 0",
+#: Kokomi seat triage (2026-10-23): "blocked" takes the Plan's flat bonus
+#: (Kelp Wall+ deals 4 with nothing blocked), `counter_deals` on the wire.
+PLAN_NO_ATTACK_WHAT = {"attackers": "hits no one", "blocked": "deals {n}",
                        "energy": "gives no Energy"}
+#: Kokomi seat triage (2026-10-23): Following Current's hit after each
+#: carried-out Plan, which no waiting Plan's number includes.
+FOLLOWING_CURRENT_LINE = ("- Following Current adds {n} Hydro after each "
+                          "Plan ({k} {plans}: {m} more).")
 #: Item 9: an ALL-enemies hit that a body's Vulnerable will raise.
 PLAN_LANDS_VULNERABLE = " ({parts}, after Vulnerable)"
 #: Kokomi round 7 (2026-10-14): Vulnerable an earlier Plan applies in the same

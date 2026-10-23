@@ -137,6 +137,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, _aura_on_board,
                                         PLAN_AFTER_DRAW_NOTE,
                                         PLAN_NO_ATTACK_WARNING,
                                         PLAN_NO_ATTACK_WHAT,
+                                        FOLLOWING_CURRENT_LINE,
                                         PLAN_LANDS_VULNERABLE,
                                         PLAN_LANDS_VULNERABLE_FROM,
                                         PLAN_LANDS_VULNERABLE_FRONT,
@@ -889,9 +890,31 @@ def _plan_no_attack_lines(entry: dict[str, Any],
                          for b in bodies for i in b.get("intents") or []):
         return []
     names = [str(b.get("name") or "The enemy") for b in bodies]
+    # Kokomi seat triage (2026-10-23): Kelp Wall+'s flat bonus lands with no
+    # attack, so the number is the wire's `counter_deals`, not a bare 0.
+    if entry.get("needs_attack") == "blocked":
+        what = what.format(n=int(entry.get("counter_deals") or 0))
     return [PLAN_NO_ATTACK_WARNING.format(
         enemies=_and_list(names), verb="does" if len(names) == 1 else "do",
         plan=entry["name"], what=what)]
+
+
+def following_current_lines(you: dict[str, Any], queue: list[Any],
+                            twice: bool) -> list[str]:
+    """Kokomi seat triage (2026-10-23): Following Current's hit after each
+    Plan is in no waiting Plan's number. One line under the Plan list, off
+    the power's amount on her: "Following Current adds 4 Hydro after each
+    Plan (3 Plans: 12 more)." Nereid's Ascension's second carry-out counts.
+    Nothing without the power or with nothing planned."""
+    n = sum(p["stacks"] for p in you.get("powers") or []
+            if _fold(p.get("name")) == "following current"
+            and isinstance(p.get("stacks"), int))
+    plans = len(queue) + (1 if twice and queue else 0)
+    if n <= 0 or plans <= 0:
+        return []
+    return [FOLLOWING_CURRENT_LINE.format(
+        n=n, k=plans, plans="Plan" if plans == 1 else "Plans",
+        m=n * plans)]
 
 
 #: Kokomi review r9 (2026-10-15, item 6): an end-of-turn summon's row names
@@ -3405,6 +3428,12 @@ EDIT_PROMPT_HEAD = "Choose a card to Edit"
 EDIT_UP_TO_PROMPT = re.compile(r"^Choose up to (\d+) cards to Edit")
 EDIT_UP_TO_NOTE = ("*Pick up to {n} different cards on this one screen, then "
                    "confirm. Fewer, or none, is allowed.*")
+#: Kokomi seat triage (2026-10-23): Grand Design's hand chooser lists only
+#: the cards it can plan, and a seat chose a card in hand it did not list.
+GRAND_DESIGN_PROMPT = re.compile(r"^Choose up to \d+ cards? to plan\b")
+GRAND_DESIGN_CHOOSER_NOTE = ("*Grand Design lists only cards with a Plan "
+                             "line, plus Basic Strike and Defend; other cards "
+                             "in your hand are not offered.*")
 #: Yae round 10 (2026-10-17, lane 4): a picked hand card leaves the hand's
 #: list and waits in the selected row until `confirm`
 #: (`NPlayerHand.SelectCardInSimpleMode`; the bridge's `selected_cards`).
@@ -5051,6 +5080,8 @@ def render(obs: dict[str, Any]) -> str:
                     # Kokomi review r6 (2026-10-14, item 7): a Counter Plan
                     # no enemy intends to attack into.
                     out += _plan_no_attack_lines(e, c.get("enemies") or [])
+                out += following_current_lines(you, pl["queue"],
+                                               bool(pl.get("twice")))
                 if pl["twice"]:
                     # The Rare doubles the first entry of the morning's drain
                     # (`KokomiPlan.Drain`). (Its Dusk half left with Dusk,
@@ -5418,6 +5449,8 @@ def render(obs: dict[str, Any]) -> str:
         up_to = EDIT_UP_TO_PROMPT.match(str(obs.get("prompt") or ""))
         if up_to:
             out += [EDIT_UP_TO_NOTE.format(n=up_to.group(1)), ""]
+        if GRAND_DESIGN_PROMPT.match(str(obs.get("prompt") or "")):
+            out += [GRAND_DESIGN_CHOOSER_NOTE, ""]
         for card in obs["offers"]:
             out += _render_card(card)
         if obs["screen"] == "card_select":

@@ -30,12 +30,7 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Upgrades that only cut cost or add Innate: at Furina's and Yae's next card passes, count their cost-only and Innate-only upgrades against the base five and replace the excess with a real upgrade, as Kokomi's finish pass (`review/active/kokomi-cards-2026-10-18.md` sec. 7, upgrade census) and Varka's powers pass (`varka-fang-next`) did ([USER], 2026-10-19: "You do have a habit of making too many powers just decrease their cost by 1 on upgrade").
 - Durin's start-of-turn tick skipped one fight (Fogmog, trace); `RandomEnemy` may pick the Eye With Teeth illusion (`CompanionOverhaulPowers.cs:51`). Live look. (Chained Reactions is QUEUE, backlog wrap-up pick 3.)
 
-- Kokomi: Grand Design's chooser closed after one pick on some turns (`review/records/kokomi-balance-suite-2026-10-21.md`, lane 5); reproduce in a scenario.
-- Kokomi: lane 1 of the same suite read Tidal Surge as Ethereal and saw Bubble Ward twice in a few turns with one copy; check the lane's transcript before calling it a bug.
-- Kokomi (`review/records/kokomi-balance-suite-3-2026-10-21.md`): a Plan carried out into Intangible hit for 1 while the Plan page said 13 (lane 1); the page could warn.
-- Kokomi (`review/records/kokomi-balance-suite-5-2026-10-22.md`): Kelp Wall+'s Plan preview said "deals 0" against an enemy not attacking, then dealt 4 (lane 5); check the preview's intent read.
-- Kokomi (same record): Plan previews leave out Following Current once Resolve of Watatsumi+ stacks with it (lane 1); Grand Design+'s picker seemed to list too few cards (lane 2).
-- Mend (same record): "(0 will land)" with no reason given while HP is at or below combat-start HP; two seats were lost. The tip could say the cap.
+- Kokomi: a Strike planned by Grand Design carried out with no HP loss against a sleeping Bygone Effigy (suite 1 lane 5, fight 5); replay in a scenario to tell a sleep/Slow interaction from a dropped hit.
 
 ## Harness, bridge, tools and sim
 

@@ -3674,6 +3674,12 @@ public static class KokomiPlan
                 // attack. Null for every other entry and a flipped one.
                 ["needs_attack"] = entry.Now && entry.TwoLine
                     ? null : NeedsAttack(entry),
+                // Kokomi seat triage (2026-10-23): what a Counter Plan
+                // (Kelp Wall, Turnabout) deals as things stand, its flat
+                // bonus and Resolve of Watatsumi's included, so the page's
+                // no-attack warning says "deals 4", not "deals 0". Null for
+                // every other entry and a flipped one.
+                ["counter_deals"] = CounterDeals(entry, kokomi),
                 // Item 11: the card written is an Attack, which the base
                 // game counts as an Attack played this turn (Ripple Basin).
                 // A Basic Grand Design planned was moved, not played, so
@@ -3846,14 +3852,20 @@ public static class KokomiPlan
                     // KOKOMI REVIEW R5 (2026-10-14, A3): a Counter's running
                     // count in its own words ("7 blocked so far"); the hit
                     // is that count.
+                    // Kokomi seat triage (2026-10-23): the caption adds
+                    // the upgrade's flat bonus and Resolve of Watatsumi's,
+                    // as the carry-out does (`AskedFor`, `Hit`). Kelp
+                    // Wall+ said "No enemy intends to attack" and dealt 4.
                     case Kind.DamageBlockedSince:
                         var blocked = ledger.BlockedSince(entry.Window);
+                        var blockedDeals = CounterDeals(entry, kokomi) ?? 0;
                         // KOKOMI REVIEW R6 (2026-10-14, item 7).
                         if (blocked == 0 && !AnyEnemyIntendsAttack(kokomi))
-                            return NoAttackIntended;
-                        return LiveBlocked(blocked);
+                            return NoAttackDeals(blockedDeals);
+                        return LiveBlocked(blocked, blockedDeals);
                     case Kind.DamageTakenSince:
-                        return LiveTaken(ledger.TakenSince(entry.Window));
+                        return LiveTaken(ledger.TakenSince(entry.Window),
+                                         CounterDeals(entry, kokomi) ?? 0);
                     case Kind.EnergyIfAttackedSince:
                         if (ledger.AttackedSince(entry.Window))
                             return $"Energy {clause.Amount}";
@@ -3953,8 +3965,71 @@ public static class KokomiPlan
     /// review r5, 2026-10-14, A3).</summary>
     public static string LiveBlocked(int amount) => $"{amount} blocked so far";
 
+    /// <summary>Kelp Wall's caption with what it deals (Kokomi seat triage,
+    /// 2026-10-23): "7 blocked, deals 11" where an upgrade's flat bonus or
+    /// Resolve of Watatsumi adds to the count; the bare count otherwise.
+    /// </summary>
+    public static string LiveBlocked(int amount, int deals) =>
+        deals == amount ? LiveBlocked(amount) : $"{amount} blocked, deals {deals}";
+
     /// <summary>Turnabout's running count, "N taken so far".</summary>
     public static string LiveTaken(int amount) => $"{amount} taken so far";
+
+    /// <summary>Turnabout's caption with what it deals, as
+    /// <see cref="LiveBlocked(int, int)"/>.</summary>
+    public static string LiveTaken(int amount, int deals) =>
+        deals == amount ? LiveTaken(amount) : $"{amount} taken, deals {deals}";
+
+    /// <summary>Kelp Wall on a board with no attack intended (Kokomi seat
+    /// triage, 2026-10-23): <see cref="NoAttackIntended"/>, and what the
+    /// upgrade's flat bonus still deals where it deals something.</summary>
+    public static string NoAttackDeals(int deals) =>
+        deals > 0 ? $"{NoAttackIntended}: deals {deals}" : NoAttackIntended;
+
+    /// <summary>
+    /// KOKOMI SEAT TRIAGE (2026-10-23): what a waiting Counter Plan (Kelp
+    /// Wall, Turnabout) deals if it were carried out on the board as it
+    /// stands: its window's count plus the flat bonus the upgrade writes
+    /// (<see cref="AskedFor"/>), plus Resolve of Watatsumi's bonus on a hit
+    /// above 0 (<see cref="Hit"/>). Null for any other entry, a flipped one,
+    /// or no combat. Display only.
+    /// </summary>
+    public static int? CounterDeals(Entry entry, Creature? kokomi)
+    {
+        if (kokomi?.CombatState == null) return null;
+        if (entry.Now && entry.TwoLine) return null;
+        try
+        {
+            var ledger = KokomiOverhaulLedger.For(kokomi);
+            foreach (var clause in entry.Clauses)
+            {
+                switch (clause.Kind)
+                {
+                    case Kind.DamageBlockedSince:
+                        return CounterDealsOf(
+                            ledger.BlockedSince(entry.Window), clause.Amount,
+                            ResolveOfWatatsumiPower.Bonus(kokomi));
+                    case Kind.DamageTakenSince:
+                        return CounterDealsOf(
+                            ledger.TakenSince(entry.Window), clause.Amount,
+                            ResolveOfWatatsumiPower.Bonus(kokomi));
+                }
+            }
+            return null;
+        }
+        catch (System.Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>The arithmetic of <see cref="CounterDeals"/>: count plus
+    /// flat bonus, plus Resolve's bonus when that is above 0. PURE.</summary>
+    public static int CounterDealsOf(int count, int flat, int resolve)
+    {
+        var asked = count + flat;
+        return asked > 0 ? asked + System.Math.Max(0, resolve) : 0;
+    }
 
     /// <summary>A Counter Plan no enemy has attacked into yet.</summary>
     public const string NoAttackYet = "No attack yet";

@@ -674,9 +674,20 @@ _FIRST_QUOTED = re.compile(r'"([^"]+)"')
 _COPY_NUMBER = re.compile(r"\s*\(\d+\)\s*$")
 
 
-def choice_opened_since_look(state: dict[str, Any]) -> str:
+_CHOOSE_VERB = re.compile(r"^\s*choose\b", re.IGNORECASE)
+
+
+def choice_opened_since_look(state: dict[str, Any],
+                             command: str = "") -> str:
     """The skip sentence for a command refused on a chooser that opened
-    since the seat's last look; `""` otherwise."""
+    since the seat's last look; `""` otherwise.
+
+    Kokomi seat triage (2026-10-23): not for a `choose`. A `choose` chained
+    after the play that opens its chooser is aimed at that chooser, so its
+    refusal ("'X' is not offered on this chooser") is the real answer and is
+    printed and counted; the skip had hidden it."""
+    if _CHOOSE_VERB.match(command or ""):
+        return ""
     now = _screen(state)
     if now not in FIGHT_OVERLAYS:
         return ""
@@ -797,7 +808,8 @@ def cmd_act(args) -> int:
         # was played (or left the hand) since -- a skip, not counted, and
         # never re-aimed at another copy (`copy_left_since_look`). The board
         # mark above still holds a chained `end turn` once.
-        skipped = (choice_opened_since_look(state) if live else "")             or copy_left_since_look(shown_why)
+        skipped = (choice_opened_since_look(state, args.command)
+                   if live else "") or copy_left_since_look(shown_why)
         if skipped:
             print(skipped)
             return 1
@@ -833,7 +845,7 @@ def cmd_act(args) -> int:
         # Furina seat (2026-10-14): a chooser opened since the last look
         # (`choice_opened_since_look`) -- a skip, not counted.
         if live and not skipped:
-            skipped = choice_opened_since_look(state)
+            skipped = choice_opened_since_look(state, args.command)
         if skipped:
             print(skipped)
             if show_page:
