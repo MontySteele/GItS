@@ -96,9 +96,13 @@ public class FurinaBlockGapTests
             Assert.Equal((rarity, cost, kind),
                          (card.Rarity, card.EnergyCost.Canonical, card.Type));
         }
-        Assert.Contains("EnergyCost.UpgradeBy(-1)",
+        // The upgrade census (2026-10-23): plus 2 Block and Retain, was
+        // cost -1 for both.
+        Assert.DoesNotContain("EnergyCost.UpgradeBy(-1)",
+                              Generated("ProtoFsTheMasquerade"));
+        Assert.Contains("UpgradeTwinPower.Install<TheMasqueradePower>",
                         Generated("ProtoFsTheMasquerade"));
-        Assert.Contains("EnergyCost.UpgradeBy(-1)",
+        Assert.Contains("AddKeyword(CardKeyword.Retain)",
                         Generated("ProtoFsTheShowMustGoOn"));
     }
 
@@ -195,8 +199,9 @@ public class FurinaBlockGapTests
         var none = StageKit.Of();
         Assert.True(StageKit.Run(none.Director.Drain(3)));
         Assert.DoesNotContain(none.Board.Log, l => l.StartsWith("block "));
-        // The power the card applies is the one the rules read.
-        Assert.Contains("PowerCmd.Apply<TheMasqueradePower>",
+        // The power the card applies is the one the rules read (one class
+        // for both versions since the upgrade census, 2026-10-23).
+        Assert.Contains("UpgradeTwinPower.Install<TheMasqueradePower>",
                         Generated("ProtoFsTheMasquerade"));
     }
 

@@ -183,12 +183,14 @@ public class FurinaDiversityPassTests : IDisposable
     [Fact]
     public void The_floors_print_and_call_what_the_paper_says()
     {
-        Assert.Equal("Each guest acts. Draw 1 card.", Face(new ProtoFsTutti()));
+        Assert.Equal("Each guest acts. Draw {Cards:diff()} card{Cards:plural:|s}.",
+                     Face(new ProtoFsTutti()));
         Assert.Contains("CardPileCmd.Draw", Generated("ProtoFsTutti"));
-        // The paper's upgrade, kept under [USER]'s loop ruling (2026-10-11):
-        // cost 0, the same draw of 1.
-        Assert.Contains("EnergyCost.UpgradeBy(-1)", Generated("ProtoFsTutti"));
-        Assert.Equal(1, Upgraded(new ProtoFsTutti()).DynamicVars.Cards.IntValue);
+        // The upgrade census (2026-10-23): draws 2 at the same cost (was cost
+        // 0, the same draw of 1).
+        Assert.DoesNotContain("EnergyCost.UpgradeBy(-1)", Generated("ProtoFsTutti"));
+        Assert.Equal(1, new ProtoFsTutti().DynamicVars.Cards.IntValue);
+        Assert.Equal(2, Upgraded(new ProtoFsTutti()).DynamicVars.Cards.IntValue);
         Assert.StartsWith("Draw 1 card. Choose a guest.", Face(new ProtoFsFinalBow()));
         var bow = Generated("ProtoFsFinalBow");
         Assert.True(bow.IndexOf("CardPileCmd.Draw", StringComparison.Ordinal)
@@ -198,8 +200,12 @@ public class FurinaDiversityPassTests : IDisposable
         Assert.Equal(2, new ProtoFsCastingCall().DynamicVars["FsAmount"].IntValue);
         Assert.Contains("CardPileCmd.Draw",
             Il.Calls(typeof(FurinaCards).GetMethod("TutorGuest")!));
-        Assert.Equal("You have 4 guest seats. [gold]Summon[/gold] a random guest.",
+        // The upgrade census (2026-10-23): 2 random guests upgraded.
+        Assert.Equal("You have 4 guest seats. [gold]Summon[/gold] "
+                     + "{IfUpgraded:show:2 random guests|a random guest}.",
                      Face(new ProtoFsEnsembleCast()));
+        Assert.Equal(1, new ProtoFsEnsembleCast().DynamicVars["FsAmount"].IntValue);
+        Assert.Equal(2, Upgraded(new ProtoFsEnsembleCast()).DynamicVars["FsAmount"].IntValue);
         var cast = Generated("ProtoFsEnsembleCast");
         Assert.True(cast.IndexOf("PowerCmd.Apply<EnsembleCastPower>", StringComparison.Ordinal)
                     < cast.IndexOf("FurinaCards.SummonRandom", StringComparison.Ordinal));

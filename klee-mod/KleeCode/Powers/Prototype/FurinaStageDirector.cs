@@ -191,6 +191,46 @@ public sealed class StageDirector
     public const string MasqueradeTitle = "The Masquerade";
     public const string FullHouseTitle = "Full House";
 
+    // ---- the upgrade census (2026-10-23): what an upgraded copy adds ------
+
+    /// <summary>The Masquerade's Block for a Drain of
+    /// <paramref name="lost"/>: that much per copy, plus 2 per copy an
+    /// upgraded card installed. Nothing for no Drain. PURE.</summary>
+    public static int MasqueradeBlock(int lost, int copies, int upgraded) =>
+        lost <= 0 || copies <= 0 ? 0
+            : lost * copies
+              + FurinaStageLaw.MasqueradePlusBlock
+                * System.Math.Clamp(upgraded, 0, copies);
+
+    /// <summary>Critics' Darling's hit for a Drain or Repay of
+    /// <paramref name="amount"/>: that much per copy, plus 1 per copy an
+    /// upgraded card installed. Nothing for nothing moved. PURE.</summary>
+    public static int CriticsDarlingHit(int amount, int copies, int upgraded) =>
+        amount <= 0 || copies <= 0 ? 0
+            : amount * copies
+              + FurinaStageLaw.CriticsDarlingRaise
+                * System.Math.Clamp(upgraded, 0, copies);
+
+    /// <summary>Showstopper's rounds, one price per copy, cheapest first: 3
+    /// for each copy an upgraded card installed, then 5 for the rest. PURE.
+    /// </summary>
+    public static IReadOnlyList<int> ShowstopperPrices(int copies,
+                                                       int upgraded)
+    {
+        var prices = new List<int>();
+        if (copies <= 0) return prices;
+        var plus = System.Math.Clamp(upgraded, 0, copies);
+        for (var i = 0; i < plus; i++)
+        {
+            prices.Add(FurinaStageLaw.ShowstopperPlusPrice);
+        }
+        for (var i = plus; i < copies; i++)
+        {
+            prices.Add(FurinaStageLaw.ShowstopperSpend);
+        }
+        return prices;
+    }
+
     private readonly FurinaStageLedger _stage;
     private readonly IStageBoard _board;
 
@@ -343,10 +383,13 @@ public sealed class StageDirector
         var revelry = _stage.Mods.Revelry;
         if (revelry > 0) _stage.Gain(amount * revelry, RevelryTitle);
         var critics = _stage.Mods.CriticsDarling;
-        if (critics > 0 && !_board.Over)
+        if (critics > 0 && amount > 0 && !_board.Over)
         {
+            // The upgrade census (2026-10-23): an upgraded card's copy deals
+            // 1 more.
             await PowerHit(CriticsDarlingTitle, StageTarget.Random,
-                           amount * critics);
+                           CriticsDarlingHit(amount, critics,
+                                             _stage.Mods.CriticsDarlingUpgraded));
         }
     }
 
@@ -471,7 +514,10 @@ public sealed class StageDirector
         var masquerade = _stage.Mods.Masquerade;
         if (masquerade > 0 && !_board.Over)
         {
-            await _board.Block(lost * masquerade);
+            // The upgrade census (2026-10-23): an upgraded card's copy gains
+            // 2 more.
+            await _board.Block(MasqueradeBlock(lost, masquerade,
+                                               _stage.Mods.MasqueradeUpgraded));
         }
         var encore = _stage.Mods.SalonsEncore;
         if (encore > 0 && !_board.Over)
@@ -1074,16 +1120,18 @@ public sealed class StageDirector
     public async Task EndOfTurn(int singer)
     {
         await ActAll();
-        for (var i = 0; i < _stage.Mods.Showstopper; i++)
+        // The upgrade census (2026-10-23): an upgraded card's copy Spends 3,
+        // and the cheaper rounds are paid first.
+        foreach (var price in ShowstopperPrices(_stage.Mods.Showstopper,
+                                                _stage.Mods.ShowstopperUpgraded))
         {
-            if (_board.Over || _stage.IsEmpty
-                || !_stage.CanSpend(FurinaStageLaw.ShowstopperSpend))
+            if (_board.Over || _stage.IsEmpty || !_stage.CanSpend(price))
             {
                 break;
             }
             using (_stage.CausedBy(ShowstopperTitle))
             {
-                if (await Spend(FurinaStageLaw.ShowstopperSpend) <= 0) break;
+                if (await Spend(price) <= 0) break;
                 await ActAll();
             }
         }

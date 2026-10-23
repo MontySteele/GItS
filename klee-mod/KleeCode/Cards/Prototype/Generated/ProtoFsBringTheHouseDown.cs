@@ -45,15 +45,13 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bring the House Down"),
-        ("description", "[gold]Spend[/gold] up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {Damage:diff()} damage. [gold]Spend[/gold] 5 for each guest on stage: each guest acts twice."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(0m),
-            new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 10 * FurinaStage.Of(card.Owner?.Creature).Count))
+            new DamageVar(8m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,18 +63,17 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard, 
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 10 * FurinaStage.Of(Owner.Creature).Count);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await FurinaCards.ActAll(choiceContext, this, cardPlay);
+        await FurinaCards.HouseDown(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

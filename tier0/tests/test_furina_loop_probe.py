@@ -65,9 +65,10 @@ def test_the_tab_costs_energy_so_a_guest_and_two_tabs_stop():
 #: Repay floor as first built gave it Vigor on an empty Repay, which made it
 #: grow without end; the main session's ruling (2026-10-09) took its floor
 #: off, and it is inert again.
-#: Tutti!+ (0: each guest acts, draw 1) alone cycles inert too. The sweep
-#: (2026-10-14) cut Interval Bell and Soothing Waters.
-KNOWN_INERT = {("proto_fs_tutti+",)}
+#: Tutti!+ (0: each guest acts, draw 1) alone cycled inert too, until the
+#: upgrade census (2026-10-23) kept its cost of 1 (it draws 2 instead). The
+#: sweep (2026-10-14) cut Interval Bell and Soothing Waters.
+KNOWN_INERT: set = set()
 
 #: ACCEPTED LOOPS: productive cycles the sweep finds and [USER] has accepted,
 #: by base card set, each with its reason. A productive cycle not listed here
@@ -130,8 +131,8 @@ def test_no_named_combination_is_a_productive_loop(name):
     assert not row["single_turn"]["productive"], name
 
 
-#: Named combinations whose best run is an accepted loop. Since the diversity
+#: Named combinations whose best run is an accepted loop. From the diversity
 #: pass (2026-10-11), two Tutti!+ (0: each guest acts, draw 1) with
-#: Charlotte's draw on stage cycle in a deck thinned to them; the same
-#: thin-deck loop as ACCEPTED_LOOPS, under the same ruling.
-ACCEPTED_NAMED = {"tutti_showstopper_house": _TUTTI_THIN_DECK}
+#: Charlotte's draw on stage cycled in a deck thinned to them; the upgrade
+#: census (2026-10-23) kept Tutti!+ at 1 Energy, and the loop is gone.
+ACCEPTED_NAMED: dict = {}

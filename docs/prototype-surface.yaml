@@ -3285,7 +3285,8 @@
               target: self}]}
 
 - {id: proto_fs_let_the_people_rejoice, name: "Let the People Rejoice",
-   upgrade: {cost: -1},
+   # Upgrade census (2026-10-23): 2 [3] a point, was cost -1.
+   upgrade: {formula_per: 1},
    character: furina, authored_by: [claude],
    art_of: let_the_people_rejoice,
    register: salon, cost: 2, type: attack, rarity: rare,
@@ -3345,10 +3346,12 @@
               target: self}]}
 
 - {id: proto_fs_critics_darling, name: "Critics' Darling", character: furina,
-   upgrade: {cost: -1},
+   # Upgrade census (2026-10-23): plus 1 damage a hit, was cost -1. One
+   # badge for both (`UpgradeTwinPower`).
+   upgrade: {upgraded_power: fs_critics_darling_plus},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that much damage to a random enemy.",
+   description: "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that much damage{IfUpgraded:show: plus 1|} to a random enemy.",
    effects: [{op: apply_power, power: fs_critics_darling, amount: 1,
               target: self}]}
 
@@ -3407,10 +3410,11 @@
 
 # Tutti!: Common, and it draws 1 (the diversity pass, sec.2: the floor).
 - {id: proto_fs_tutti, name: "Tutti!", character: furina,
-   upgrade: {cost: -1},
+   # Upgrade census (2026-10-23): draws 1 [2], was cost -1.
+   upgrade: {draw: 1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common, retain: true,
-   description: "Each guest acts. Draw 1 card.",
+   description: "Each guest acts. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: furina, kind: act_all},
              {op: draw, amount: 1}]}
 
@@ -3441,23 +3445,26 @@
    effects: [{op: stage_guest, member: freminet}]}
 
 - {id: proto_fs_showstopper, name: "Showstopper", character: furina,
-   upgrade: {cost: -1},
+   # Upgrade census (2026-10-23): Spend 5 [3], was cost -1. One badge for
+   # both (`UpgradeTwinPower`); an upgraded copy's round is paid first.
+   upgrade: {upgraded_power: fs_showstopper_plus},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "At the end of your turn, [gold]Spend[/gold] 5: your guests act again.",
+   description: "At the end of your turn, [gold]Spend[/gold] {IfUpgraded:show:3|5}: your guests act again.",
    effects: [{op: apply_power, power: fs_showstopper, amount: 1,
               target: self}]}
 
 # Ensemble Cast summons a random guest not on stage (the diversity pass,
 # sec.2: the floor).
 - {id: proto_fs_ensemble_cast, name: "Ensemble Cast", character: furina,
-   upgrade: {cost: -1},
+   # Upgrade census (2026-10-23): summons 2 random guests, was cost -1.
+   upgrade: {furina_amount: 1},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "You have 4 guest seats. [gold]Summon[/gold] a random guest.",
+   description: "You have 4 guest seats. [gold]Summon[/gold] {IfUpgraded:show:2 random guests|a random guest}.",
    effects: [{op: apply_power, power: fs_ensemble_cast, amount: 1,
               target: self},
-             {op: furina, kind: summon_random}]}
+             {op: furina, kind: summon_random, amount: 1}]}
 
 - {id: proto_fs_guest_star_navia, name: "Guest Star: Navia", character: furina,
    upgrade: {guest_upgraded: true},
@@ -3561,19 +3568,16 @@
    effects: [{op: apply_power, power: fs_standing_room_only, amount: 1,
               target: self}]}
 
-# Bring the House Down: Spend up to 10 for each guest on stage, in one Spend
-# (furina-next paper 2, review/active/furina-next-2-2026-10-16.md sec.2,
-# ruled 2026-10-16; was Spend all).
+# Bring the House Down, reflavoured by the upgrade census (2026-10-23): a hit,
+# then Showstopper's conditional Spend (`furina` kind `house_down`). Provenance
+# note, "Furina's upgrade census, 2026-10-23".
 - {id: proto_fs_bring_the_house_down, name: "Bring the House Down", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {damage: 3},
    authored_by: [claude],
    register: salon, cost: 2, type: attack, rarity: rare,
-   description: "[gold]Spend[/gold] up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_up_to, amount: 10, per: stage_guests},
-             {op: damage,
-              amount_formula: {base: 0, per: 1, count: stage_spent},
-              target: enemy},
-             {op: furina, kind: act_all}]}
+   description: "Deal {Damage:diff()} damage. [gold]Spend[/gold] 5 for each guest on stage: each guest acts twice.",
+   effects: [{op: damage, amount: 8, target: enemy},
+             {op: furina, kind: house_down}]}
 
 # Ousia, Drain (10): 3 Common, 4 Uncommon, 3 Rare. The Review section caps
 # the "Drain down to your line" cards: The Deluge, All In and Pay the Tab
@@ -3716,16 +3720,19 @@
 # The Masquerade: "that much" is the HP actually drained, past the line
 # included; a guest act's Drain stops at the line, so it pays less.
 - {id: proto_fs_the_masquerade, name: "The Masquerade", character: furina,
-   upgrade: {cost: -1},
+   # Upgrade census (2026-10-23): plus 2 Block a Drain, was cost -1. One
+   # badge for both (`UpgradeTwinPower`).
+   upgrade: {upgraded_power: fs_the_masquerade_plus},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you [gold]Drain[/gold], gain that much [gold]Block[/gold].",
+   description: "Whenever you [gold]Drain[/gold], gain that much [gold]Block[/gold]{IfUpgraded:show: plus 2|}.",
    effects: [{op: apply_power, power: fs_the_masquerade, amount: 1,
               target: self}]}
 
 # The Show Must Go On reads the bank and spends none of it.
 - {id: proto_fs_the_show_must_go_on, name: "The Show Must Go On", character: furina,
-   upgrade: {cost: -1},
+   # Upgrade census (2026-10-23): gains Retain, was cost -1.
+   upgrade: {retain: true},
    authored_by: [claude],
    register: salon, cost: 2, type: skill, rarity: rare,
    description: "Gain [gold]Block[/gold] equal to your [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
@@ -3851,7 +3858,8 @@
 # Rainfall Overture: the next Attack this turn hits ALL enemies
 # (`RainfallOverturePower`: a single-target hit is aimed at every enemy).
 - {id: proto_fs_rainfall_overture, name: "Rainfall Overture", character: furina,
-   upgrade: {cost: -1},
+   # Upgrade census (2026-10-23): also draws 1, was cost -1.
+   upgrade: {add: {op: draw, amount: 1}},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
    description: "Apply [gold]Hydro[/gold] to ALL enemies. Your next Attack this turn hits ALL enemies.",

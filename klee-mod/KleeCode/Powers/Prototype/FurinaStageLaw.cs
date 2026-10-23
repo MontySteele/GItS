@@ -180,6 +180,22 @@ public static class FurinaStageLaw
     /// act again."</summary>
     public const int ShowstopperSpend = 5;
 
+    /// <summary>Bring the House Down (the upgrade census, 2026-10-23):
+    /// "Spend 5 for each guest on stage: each guest acts twice."</summary>
+    public const int HouseDownSpendPerGuest = 5;
+
+    /// <summary>Showstopper upgraded (the upgrade census, 2026-10-23):
+    /// "Spend 3".</summary>
+    public const int ShowstopperPlusPrice = 3;
+
+    /// <summary>The Masquerade upgraded (the upgrade census, 2026-10-23):
+    /// "gain that much Block plus 2".</summary>
+    public const int MasqueradePlusBlock = 2;
+
+    /// <summary>Critics' Darling upgraded (the upgrade census, 2026-10-23):
+    /// "deal that much damage plus 1".</summary>
+    public const int CriticsDarlingRaise = 1;
+
     /// <summary>High Stakes (the Spend round 2, 2026-10-10,
     /// <c>review/records/furina-spend-round-2-2026-10-10.md</c>): "Your
     /// Attacks deal 1 additional damage for every 5 HP you have Drained this

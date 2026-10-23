@@ -60,8 +60,10 @@ def test_the_four_rows_are_as_ruled():
         row = rows[cid]
         assert (row.cost, row.type, row.rarity) == (cost, kind, rarity), cid
         assert cid in FS.POOL_IDS, cid
-    assert loader.get_card("proto_fs_the_masquerade+").cost == 0
-    assert loader.get_card("proto_fs_the_show_must_go_on+").cost == 1
+    # The upgrade census (2026-10-23): plus 2 Block and Retain, costs kept.
+    assert loader.get_card("proto_fs_the_masquerade+").cost == 1
+    assert loader.get_card("proto_fs_the_show_must_go_on+").cost == 2
+    assert loader.get_card("proto_fs_the_show_must_go_on+").retain
 
 
 # ---- Velvet Curtain -----------------------------------------------------------

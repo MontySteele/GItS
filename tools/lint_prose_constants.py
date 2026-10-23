@@ -212,9 +212,6 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
      "BattleFormationPower.Draw", "1"):
         "the card's own base-game draw, not Battle Formation's",
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
-     "BattleFormationPower.Draw", "1"):
-        "the card's own base-game draw, not Battle Formation's",
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
      "BattleFormationPower.Draw", "1"):
         "the card's own draw, not Battle Formation's",
@@ -387,9 +384,6 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
      "AbyssNumbers.ResonanceDraw", "1"):
         "the card's own draw, not the Abyss Blessing's",
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
-     "AbyssNumbers.ResonanceDraw", "1"):
-        "the card's own draw, not the Abyss Blessing's",
     ("klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs",
      "AbyssNumbers.ResonanceDraw", "1"):
         "the power's own draw, not the Abyss Blessing's",
@@ -400,9 +394,6 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     # card as their floor, the base game's "Draw 1 card." -- a card's own
     # draw, not Charlotte's line. "draw" fell under the common-word cap when
     # the pass cut two draw cards.
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
-     "FurinaStageLaw.CharlotteLineDraw", "1"):
-        "the card's own base-game draw, not Charlotte's line",
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
      "FurinaStageLaw.CharlotteLineDraw", "1"):
         "the card's own base-game draw, not Charlotte's line",
