@@ -4,4 +4,4 @@
 
 jumpy_dumpty_mk_omega: {damage: +4, bomb_damage: +4}   # hits 12->16; bomb 12->16
 princess_of_watatsumi: {block: +3}                     # 9->12 Block; its Plan line is game-side
-all_the_worlds_a_stage: {block: +3}                    # 8->11 Block
+all_the_worlds_a_stage: {block: +3, retain: true}      # 8->11 Block; Retain, as Rising Applause+

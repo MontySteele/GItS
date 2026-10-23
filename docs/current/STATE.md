@@ -207,6 +207,9 @@ for Balance." That run sent no data (0.3.12 shipped without the uploader).
   `review/active/furina-card-pass-2026-10-15.md`. Ancients: Center of
   Attention (Tome), All the World's a Stage (Tooth on Rising Applause). Sim
   twin `tier0/engine/furina_tide.py`. Parked: Wriothesley's rarity.
+- **All the World's a Stage+ gains Retain**, as Rising Applause+ does
+  (2026-10-19: "the Ancient card should keep Retain as long as the starter
+  does"; 2026-10-23: "Yes to Archaic Tooth; let's send it.").
 - **Process:** frozen on `main`; changes go on `furina-next` with a suite
   record.
 - **Latest record:** `review/records/furina-suite-4-2026-10-16.md` (mean
@@ -215,8 +218,8 @@ for Balance." That run sent no data (0.3.12 shipped without the uploader).
   7.7 / 12.8 / 14.9% of max HP a normal fight against base 8.8 / 14.9 / 10.0,
   so only act 3 is high.
 - **Story built** (`review/active/furina-story-2026-10-15.md`,
-  `Story/FurinaStory.cs`): events, lines and the Stage Fright curse. Unseen
-  in game.
+  `Story/FurinaStory.cs`): events, lines and the Stage Fright curse. Seen
+  in play (2026-10-23).
 - **Next:** make her HP legible (which HP comes back after the fight, which
   Drain stays a cost, why Repay gives Block below full HP), not a buff; the
   co-op check owed at a finish line.

@@ -575,7 +575,8 @@ ANCIENT_WITNESS: dict[str, dict] = {
     # Gale's pattern; the sim twins in tier0/content/cards/ancients.yaml.
     "AllTheWorldsAStage": {
         "why": "Furina's Archaic Tooth Ancient, Rising Applause's "
-               "replacement: a Skill, 1 Energy, 8 Block, +3 upgraded; Spend "
+               "replacement: a Skill, 1 Energy, 8 Block, +3 and Retain "
+               "upgraded (as Rising Applause+); Spend "
                "all her Fanfare and deal that much Hydro to ALL enemies "
                "twice (CalculationBase 0, ExtraDamage 1 per Fanfare spent, "
                "two hits).",

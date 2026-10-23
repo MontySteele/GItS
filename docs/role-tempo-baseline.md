@@ -69,27 +69,27 @@ play-graded only (D4 clause, written in at birth).
 
 | cell | Ironclad | Silent | Defect | Necrobinder | Regent |
 |---|---|---|---|---|---|
-| `block\|early` | 10.0 | 9.9 | 12.1 | 13.2 | 11.0 |
+| `block\|early` | 10.0 | 9.9 | 13.2 | 13.2 | 11.0 |
 | `block\|late` | 14.4 | 11.0 | 15.4 | 18.7 | 9.9 |
-| `block\|mid` | 7.8 | 6.6 | 11.0 | 12.1 | 5.5 |
-| `frontload\|early` | 25.6 | 20.9 | 20.9 | 24.2 | 26.4 |
+| `block\|mid` | 7.8 | 6.6 | 12.1 | 12.1 | 5.5 |
+| `frontload\|early` | 27.8 | 20.9 | 20.9 | 26.4 | 26.4 |
 | `frontload\|late` | 26.7 | 19.8 | 35.2 | 31.9 | 23.1 |
-| `frontload\|mid` | 18.9 | 15.4 | 25.3 | 26.4 | 19.8 |
-| `scaling\|early` | 1.1 | 1.1 | 5.5 | 0.0 | 3.3 |
+| `frontload\|mid` | 16.7 | 15.4 | 25.3 | 24.2 | 19.8 |
+| `scaling\|early` | 1.1 | 2.2 | 6.6 | 0.0 | 5.5 |
 | `scaling\|late` | 27.8 | 27.5 | 46.2 | 24.2 | 29.7 |
-| `scaling\|mid` | 10.0 | 9.9 | 15.4 | 6.6 | 9.9 |
-| `support\|early` | 1.1 | 0.0 | 0.0 | 0.0 | 1.1 |
+| `scaling\|mid` | 10.0 | 11.0 | 16.5 | 6.6 | 12.1 |
+| `support\|early` | 1.1 | 0.0 | 1.1 | 1.1 | 2.2 |
 | `support\|late` | 4.4 | 4.4 | 4.4 | 4.4 | 2.2 |
-| `support\|mid` | 1.1 | 3.3 | 2.2 | 4.4 | 3.3 |
+| `support\|mid` | 1.1 | 3.3 | 1.1 | 3.3 | 4.4 |
 | `sustain\|early` | 1.1 | 0.0 | 0.0 | 1.1 | 0.0 |
 | `sustain\|late` | 0.0 | 0.0 | 0.0 | 1.1 | 0.0 |
 | `sustain\|mid` | 1.1 | 0.0 | 0.0 | 1.1 | 0.0 |
-| `utility\|early` | 4.4 | 6.6 | 2.2 | 6.6 | 4.4 |
+| `utility\|early` | 5.6 | 6.6 | 2.2 | 8.8 | 4.4 |
 | `utility\|late` | 11.1 | 28.6 | 11.0 | 23.1 | 12.1 |
-| `utility\|mid` | 10.0 | 15.4 | 5.5 | 11.0 | 7.7 |
-| `velocity\|early` | 4.4 | 5.5 | 5.5 | 6.6 | 6.6 |
+| `utility\|mid` | 11.1 | 15.4 | 5.5 | 13.2 | 7.7 |
+| `velocity\|early` | 11.1 | 15.4 | 15.4 | 17.6 | 19.8 |
 | `velocity\|late` | 11.1 | 7.7 | 14.3 | 16.5 | 15.4 |
-| `velocity\|mid` | 12.2 | 13.2 | 14.3 | 14.3 | 11.0 |
+| `velocity\|mid` | 7.8 | 7.7 | 8.8 | 7.7 | 13.2 |
 
 ## 3. The (solve × run-band) matrix (% of pool)
 
@@ -145,7 +145,7 @@ play-graded only (D4 clause, written in at birth).
 
 **This section is the repair.** §§2–4 above are whole-pool numbers, and
 the first lint run applied them to an archetype's sub-pool: a 90–91-card
-canon character spread across everything it does, versus 14–34
+canon character spread across everything it does, versus none
 GItS cards all pointed at one plan. An archetype's per-cell density is
 structurally higher, the bar was generous by construction, and Furina
 cleared some floors by 40–60 points. R90 rules the comparison
@@ -177,8 +177,8 @@ is percentages-only exactly as before.
 | `ironclad_strength` | Ironclad | 10 | an UNBOUNDED per-attack additive that every attack in the deck inherits. |
 | `regent_stars` | Regent | 36 | a per-combat bank that cards gain, spend as a second printed price, and read. |
 
-**The sizes are the point**: 10–42 cards against the 12 declared
-GItS archetypes at 14–34. The two sides are finally the same
+**The sizes are the point**: 10–42 cards against the 0 declared
+GItS archetypes at none. The two sides are finally the same
 kind of object. Both spans are derived here, from the packages in the
 table above and from the three sheets, so neither can go stale.
 
@@ -186,15 +186,15 @@ table above and from the three sheets, so neither can go stale.
 
 | cell | silent_poison | defect_orbs | necro_summons | ironclad_strength | regent_stars |
 |---|---|---|---|---|---|
-| `block\|early` | 0.0 | 7.1 | 27.3 | 0.0 | 13.9 |
+| `block\|early` | 0.0 | 9.5 | 27.3 | 0.0 | 13.9 |
 | `block\|late` | 7.7 | 28.6 | 45.5 | 10.0 | 11.1 |
-| `block\|mid` | 0.0 | 19.0 | 36.4 | 0.0 | 5.6 |
-| `frontload\|early` | 7.7 | 21.4 | 27.3 | 10.0 | 36.1 |
+| `block\|mid` | 0.0 | 21.4 | 36.4 | 0.0 | 5.6 |
+| `frontload\|early` | 7.7 | 21.4 | 36.4 | 10.0 | 36.1 |
 | `frontload\|late` | 7.7 | 59.5 | 68.2 | 40.0 | 36.1 |
-| `frontload\|mid` | 7.7 | 33.3 | 63.6 | 20.0 | 30.6 |
-| `scaling\|early` | 0.0 | 11.9 | 0.0 | 0.0 | 5.6 |
+| `frontload\|mid` | 7.7 | 33.3 | 54.5 | 20.0 | 30.6 |
+| `scaling\|early` | 0.0 | 14.3 | 0.0 | 0.0 | 8.3 |
 | `scaling\|late` | 38.5 | 71.4 | 4.5 | 70.0 | 25.0 |
-| `scaling\|mid` | 7.7 | 28.6 | 4.5 | 20.0 | 8.3 |
+| `scaling\|mid` | 7.7 | 31.0 | 4.5 | 20.0 | 11.1 |
 | `support\|early` | 0.0 | 0.0 | 0.0 | 0.0 | 2.8 |
 | `support\|late` | 7.7 | 4.8 | 4.5 | 10.0 | 0.0 |
 | `support\|mid` | 0.0 | 2.4 | 4.5 | 10.0 | 0.0 |
@@ -204,9 +204,9 @@ table above and from the three sheets, so neither can go stale.
 | `utility\|early` | 7.7 | 0.0 | 0.0 | 0.0 | 11.1 |
 | `utility\|late` | 84.6 | 16.7 | 9.1 | 10.0 | 22.2 |
 | `utility\|mid` | 38.5 | 4.8 | 4.5 | 0.0 | 13.9 |
-| `velocity\|early` | 0.0 | 2.4 | 0.0 | 0.0 | 5.6 |
+| `velocity\|early` | 0.0 | 7.1 | 9.1 | 0.0 | 19.4 |
 | `velocity\|late` | 0.0 | 11.9 | 0.0 | 0.0 | 11.1 |
-| `velocity\|mid` | 0.0 | 4.8 | 9.1 | 0.0 | 8.3 |
+| `velocity\|mid` | 0.0 | 4.8 | 0.0 | 0.0 | 11.1 |
 
 Read the `necro_summons` column beside `silent_poison` and the
 charter's §2 diagnosis stops being a claim. The summon package covers
@@ -262,9 +262,9 @@ canon packages the only universally-covered jobs are *deal damage at every band*
 | `block\|early` | ironclad_strength, silent_poison |
 | `block\|mid` | ironclad_strength, silent_poison |
 | `scaling\|early` | ironclad_strength, necro_summons, silent_poison |
-| `velocity\|early` | ironclad_strength, necro_summons, silent_poison |
+| `velocity\|early` | ironclad_strength, silent_poison |
 | `velocity\|late` | ironclad_strength, necro_summons, silent_poison |
-| `velocity\|mid` | ironclad_strength, silent_poison |
+| `velocity\|mid` | ironclad_strength, necro_summons, silent_poison |
 
 **ANCHORED floors** apply to an archetype that names a canon package
 in `tools/canon_role_tempo.py::ARCHETYPE_ANCHORS`. The floor is **the
@@ -285,13 +285,13 @@ none either.
 | archetype | anchor package | n | mandatory cells | not linted for it |
 |---|---|---|---|---|
 | `furina/fanfare` | `silent_poison` | 13 | `block\|late` 7.7, `frontload\|early` 7.7, `frontload\|late` 7.7, `frontload\|mid` 7.7, `scaling\|late` 38.5, `scaling\|mid` 7.7 | `block\|early`, `block\|mid`, `scaling\|early`, `velocity\|early`, `velocity\|late`, `velocity\|mid` |
-| `furina/salon` | `necro_summons` | 22 | `block\|early` 27.3, `block\|late` 45.5, `block\|mid` 36.4, `frontload\|early` 27.3, `frontload\|late` 68.2, `frontload\|mid` 63.6, `scaling\|late` 4.5, `scaling\|mid` 4.5, `velocity\|mid` 9.1 | `scaling\|early`, `velocity\|early`, `velocity\|late` |
+| `furina/salon` | `necro_summons` | 22 | `block\|early` 27.3, `block\|late` 45.5, `block\|mid` 36.4, `frontload\|early` 36.4, `frontload\|late` 68.2, `frontload\|mid` 54.5, `scaling\|late` 4.5, `scaling\|mid` 4.5, `velocity\|early` 9.1 | `scaling\|early`, `velocity\|late`, `velocity\|mid` |
 | `furina/spotlight` | `ironclad_strength` | 10 | `block\|late` 10.0, `frontload\|early` 10.0, `frontload\|late` 40.0, `frontload\|mid` 20.0, `scaling\|late` 70.0, `scaling\|mid` 20.0 | `block\|early`, `block\|mid`, `scaling\|early`, `velocity\|early`, `velocity\|late`, `velocity\|mid` |
-| `klee/demolition` | `necro_summons` | 22 | `block\|early` 27.3, `block\|late` 45.5, `block\|mid` 36.4, `frontload\|early` 27.3, `frontload\|late` 68.2, `frontload\|mid` 63.6, `scaling\|late` 4.5, `scaling\|mid` 4.5, `velocity\|mid` 9.1 | `scaling\|early`, `velocity\|early`, `velocity\|late` |
+| `klee/demolition` | `necro_summons` | 22 | `block\|early` 27.3, `block\|late` 45.5, `block\|mid` 36.4, `frontload\|early` 36.4, `frontload\|late` 68.2, `frontload\|mid` 54.5, `scaling\|late` 4.5, `scaling\|mid` 4.5, `velocity\|early` 9.1 | `scaling\|early`, `velocity\|late`, `velocity\|mid` |
 | `klee/reaction` | `silent_poison` | 13 | `block\|late` 7.7, `frontload\|early` 7.7, `frontload\|late` 7.7, `frontload\|mid` 7.7, `scaling\|late` 38.5, `scaling\|mid` 7.7 | `block\|early`, `block\|mid`, `scaling\|early`, `velocity\|early`, `velocity\|late`, `velocity\|mid` |
-| `klee/spark` | `regent_stars` | 36 | `block\|early` 13.9, `block\|late` 11.1, `block\|mid` 5.6, `frontload\|early` 36.1, `frontload\|late` 36.1, `frontload\|mid` 30.6, `scaling\|early` 5.6, `scaling\|late` 25.0, `scaling\|mid` 8.3, `velocity\|early` 5.6, `velocity\|late` 11.1, `velocity\|mid` 8.3 | — |
-| `kokomi/commander` | `regent_stars` | 36 | `block\|early` 13.9, `block\|late` 11.1, `block\|mid` 5.6, `frontload\|early` 36.1, `frontload\|late` 36.1, `frontload\|mid` 30.6, `scaling\|early` 5.6, `scaling\|late` 25.0, `scaling\|mid` 8.3, `velocity\|early` 5.6, `velocity\|late` 11.1, `velocity\|mid` 8.3 | — |
-| `kokomi/priest` | `defect_orbs` | 42 | `block\|early` 7.1, `block\|late` 28.6, `block\|mid` 19.0, `frontload\|early` 21.4, `frontload\|late` 59.5, `frontload\|mid` 33.3, `scaling\|early` 11.9, `scaling\|late` 71.4, `scaling\|mid` 28.6, `velocity\|early` 2.4, `velocity\|late` 11.9, `velocity\|mid` 4.8 | — |
+| `klee/spark` | `regent_stars` | 36 | `block\|early` 13.9, `block\|late` 11.1, `block\|mid` 5.6, `frontload\|early` 36.1, `frontload\|late` 36.1, `frontload\|mid` 30.6, `scaling\|early` 8.3, `scaling\|late` 25.0, `scaling\|mid` 11.1, `velocity\|early` 19.4, `velocity\|late` 11.1, `velocity\|mid` 11.1 | — |
+| `kokomi/commander` | `regent_stars` | 36 | `block\|early` 13.9, `block\|late` 11.1, `block\|mid` 5.6, `frontload\|early` 36.1, `frontload\|late` 36.1, `frontload\|mid` 30.6, `scaling\|early` 8.3, `scaling\|late` 25.0, `scaling\|mid` 11.1, `velocity\|early` 19.4, `velocity\|late` 11.1, `velocity\|mid` 11.1 | — |
+| `kokomi/priest` | `defect_orbs` | 42 | `block\|early` 9.5, `block\|late` 28.6, `block\|mid` 21.4, `frontload\|early` 21.4, `frontload\|late` 59.5, `frontload\|mid` 33.3, `scaling\|early` 14.3, `scaling\|late` 71.4, `scaling\|mid` 31.0, `velocity\|early` 7.1, `velocity\|late` 11.9, `velocity\|mid` 4.8 | — |
 
 The anchor claims themselves — one line of provenance each — live in
 `ARCHETYPE_ANCHORS` and are design facts, reviewed the same way

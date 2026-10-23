@@ -112,8 +112,11 @@ public sealed class AllTheWorldsAStage
             .Execute(choiceContext);
     }
 
+    // Retain on upgrade, as Rising Applause+ has (2026-10-19: "the Ancient
+    // card should keep Retain as long as the starter does").
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(3m);
+        AddKeyword(CardKeyword.Retain);
     }
 }
