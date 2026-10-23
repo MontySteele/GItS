@@ -85,7 +85,7 @@ public class KokomiRelicsPotionsTests : IDisposable
             ("Kurage Lantern", "Your Stings and Wards are not Ethereal."),
             ("Resistance Muster Roll",
              "At the start of each combat, choose 1 of 3 random Inazuma "
-           + "Companions to add to your Hand. It costs 0 this turn."),
+           + "Companions to add into your Hand. It costs 0 this turn."),
             ("Bottled Shoal", "Add 3 Stings to your Hand."),
             ("Bottled Tide",
              "The Bake-Kurage carries out every waiting Plan now."),

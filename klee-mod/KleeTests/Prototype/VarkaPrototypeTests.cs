@@ -383,13 +383,13 @@ public class VarkaPrototypeTests : IDisposable
         // relic untied to his actual relic"; "Starter - (a)").
         Assert.Equal(
             "At the start of each combat, your starting [gold]Knight[/gold]'s "
-          + "element becomes current. Your [gold]Swirls[/gold] also pay your "
-          + "[gold]current element[/gold].",
+          + "element becomes your [gold]current element[/gold]. Your "
+          + "[gold]Swirls[/gold] also pay it.",
             ((ILocalizationProvider)Bare<BoreasFang>()).Localization!
                 .Single(l => l.Item1 == "description").Item2);
         Assert.False(Bare<BoreasFang>().AddsAscension);
         Assert.True(Bare<WolfsGravestone>().AddsAscension);
-        Assert.Contains("[gold]Swirls[/gold] also pay your [gold]current element[/gold]",
+        Assert.Contains("[gold]Swirls[/gold] also pay it.",
             ((ILocalizationProvider)Bare<WolfsGravestone>()).Localization!
                 .Single(l => l.Item1 == "description").Item2);
         // The payout reads the Fang before it pays the current element.

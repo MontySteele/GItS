@@ -240,8 +240,8 @@ for Balance." That run sent no data (0.3.12 shipped without the uploader).
     for the seat page.
 - **Starter:** Four Winds' Ascension and one of four starter Knights, rolled
   per run; Windbound Execution is retired. Boreas's Fang: "At the start of
-  each combat, your starting Knight's element becomes current. Your Swirls
-  also pay your current element." Wolf's Gravestone (Orobas upgrade) adds an
+  each combat, your starting Knight's element becomes your current element.
+  Your Swirls also pay it." Wolf's Gravestone (Orobas upgrade) adds an
   upgraded Ascension, free that turn, on his first Oath gain each combat.
 - **Pool:** 78 (20 / 36 / 22), thirteen pool Knights. Ancients: All Four
   Winds (Tome); Dandelion Gale (Tooth, replacing Four Winds' Ascension): 10

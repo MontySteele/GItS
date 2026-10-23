@@ -101,10 +101,10 @@ sense to me!"
    section 5: Adventure Club and Tag Along say "to add into your Hand".
    Unwavering Banner's badges drop "can" and say "Whenever"; the numbered
    badge keeps "Oath of it instead", since the card's full words put it at
-   142 of 125. Fix 6 is built on Knight's Commission only: Boreas's Fang
-   reads 132 of the relic ceiling's 120 with "becomes your current
-   element", so the Fang and Wolf's Gravestone keep "becomes current"
-   until the main session words a shorter face.
+   142 of 125. Fix 6 on Boreas's Fang and Wolf's Gravestone: "...becomes
+   your current element. Your Swirls also pay it." (the full words were
+   132 of the relic ceiling's 120). Kokomi's Resistance Muster Roll says
+   "to add into your Hand" too.
 2. (a) Built: All Four Winds "Your cards read your total Oath." and Elixir
    of the Four Winds "This turn, your cards read your total Oath."
 3. (a) Built: `proto_vk_jean_dandelion_breeze` is titled "Dandelion
