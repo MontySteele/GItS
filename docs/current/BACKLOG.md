@@ -25,10 +25,12 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Upgrades that only cut cost or add Innate: Yae's half is built (2026-10-23, `review/active/yae-block-edit-pass-2026-10-19.md`, "Upgrade census (2026-10-23)"). At Furina's next card pass, count their cost-only and Innate-only upgrades against the base five and replace the excess with a real upgrade, as Kokomi's finish pass (`review/active/kokomi-cards-2026-10-18.md` sec. 7, upgrade census) and Varka's powers pass (`varka-fang-next`) did ([USER], 2026-10-19: "You do have a habit of making too many powers just decrease their cost by 1 on upgrade").
 - Durin's start-of-turn tick skipped one fight (Fogmog, trace); `RandomEnemy` may pick the Eye With Teeth illusion (`CompanionOverhaulPowers.cs:51`). Live look. (Chained Reactions is QUEUE, backlog wrap-up pick 3.)
 
+- Yae previews the 2026-10-23 suite misread: Superconduct's "Vulnerable, which applies before this hit" (does the card's printed number already include it?); "Tenko (Sakura: 15 damage)" is the total over every Sakura, not each; Pael's Legion shows doubled Block on every Block card in hand though only the first played doubles.
 - Kokomi: a Strike planned by Grand Design carried out with no HP loss against a sleeping Bygone Effigy (suite 1 lane 5, fight 5); replay in a scenario to tell a sleep/Slow interaction from a dropped hit.
 
 ## Harness, bridge, tools and sim
 
+- Seat page: "Nothing this page can count landed off it" printed under Dawn Prayer and Twin Sakura plays whose Sakura strike landed (Yae suite 2026-10-23, lanes 4 and 5).
 - Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
 - Legacy cleanup stage 6: the Spotlight print fold (`SpotlightSystem.PrintedDamage/PrintedBlock*`, `SpotlitBlockVar`, codegen `spotlight_calc_rider` / `spotlight_block_rider`) stays. The identity wraps could go alone, but the calc rider is how 40 companion cards get `FrontFoldedDamageVar` (and 24 a `CalculatedBlockVar`), with a 0 multiplier; dropping it moves those cards to plain Damage/Block vars and their `{CalculatedDamage}` face tokens, which changes previews. Drop it in one regen with a deploy check, riding Klee's next promotion PR.
 - `EB-84` enchant eligibility live smoke: three of four shapes watched; the `souls_power` to local Exhaust shape still needs a door (an Exhaust-enchant grantor with a Power in the deck).
