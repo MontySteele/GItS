@@ -177,9 +177,11 @@ def test_grove_levels_every_sakura_each_turn_start():
     assert Y.act_size(st, _led(st).sakura[0]) == 1 + 2 * 4
 
 
-def test_grove_upgrade_is_innate():
-    assert not loader.get_card(_ym("sakura_grove")).innate
-    assert loader.get_card(_ym("sakura_grove") + "+").innate
+def test_grove_upgrade_costs_zero():
+    # Yae deck read 2026-10-23: cost 0, was Innate.
+    base, plus = loader.get_card(_ym("sakura_grove")), loader.get_card(_ym("sakura_grove") + "+")
+    assert (base.cost, plus.cost) == (1, 0)
+    assert not base.innate and not plus.innate
 
 
 def test_mikage_levels_then_tenkos():

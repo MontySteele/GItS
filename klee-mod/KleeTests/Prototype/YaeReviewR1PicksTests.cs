@@ -149,13 +149,15 @@ public class YaeReviewR1PicksTests : IDisposable
     }
 
     [Fact]
-    public void Grove_upgrade_is_innate()
+    public void Grove_upgrade_costs_zero()
     {
+        // Yae deck read 2026-10-23: cost 0, was Innate.
         var card = new ProtoYmSakuraGrove();
         Assert.Equal("At the start of your turn, each [gold]Sakura[/gold] gains a Level.",
                      Face(card));
-        Assert.Contains(Il.Calls(Il.Method(nameof(ProtoYmSakuraGrove), "OnUpgrade")),
-                        c => c.Contains("AddKeyword"));
+        var upgrade = Il.Calls(Il.Method(nameof(ProtoYmSakuraGrove), "OnUpgrade")).ToList();
+        Assert.Contains(upgrade, c => c.Contains("UpgradeBy"));
+        Assert.DoesNotContain(upgrade, c => c.Contains("AddKeyword"));
     }
 
     [Fact]
