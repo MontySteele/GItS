@@ -254,6 +254,14 @@ public class CardFrameTests
     }
 
     [Fact]
+    public void The_pip_initial_is_set_in_the_games_slab_serif()
+    {
+        // [USER], 2026-10-22: "The 'I' on Inazuma cards looks kind of like an
+        // l." Kreon's capital I has slabs; the theme sans's is a bare stroke.
+        Assert.Equal("res://themes/kreon_bold_shared.tres", NationEmblem.FontPath);
+    }
+
+    [Fact]
     public void A_card_with_no_nation_draws_no_pip()
     {
         Assert.Null(NationEmblem.StyleFor(null));

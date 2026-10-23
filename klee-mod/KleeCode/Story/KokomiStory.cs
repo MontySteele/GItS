@@ -134,7 +134,7 @@ public static class KokomiStory
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic) },
                     },
-                    new StoryOption("SAY_THE_SEA_PRAYER", "Kneel at the water and say the sea prayer.",
+                    new StoryOption("SAY_THE_SEA_PRAYER", "Kneel at the water and pray.",
                         "Lose 6 HP. Upgrade 2 random cards.",
                         new StoryEffect(StoryEffectKind.LoseHp, 6),
                         "The water is cold to the knee. She says the old island words softly, as fishing "

@@ -78,7 +78,7 @@ swim out to coral like this and stay until someone came looking.*
 | Option | Effect | Result |
 |---|---|---|
 | Reach in for a piece. | Lose 10 HP. Gain a random relic. | The coral cuts, as coral does. She would have done it at ten as well. |
-| Kneel at the water and say the sea prayer. | Lose 6 HP. Upgrade 2 random cards. | The water is cold to the knee. She says the old island words softly, as fishing families say them before a voyage. |
+| Kneel at the water and pray. | Lose 6 HP. Upgrade 2 random cards. | The water is cold to the knee. She says the old island words softly, as fishing families say them before a voyage. |
 | Leave a pearl for it. | Lose 50 Gold. Remove a card. Locked under 50 Gold. | On Watatsumi you pay the sea back. She picks her best pearl. |
 | Leave the coral undisturbed. | Nothing. | She watches it glow for a while, then climbs on. |
 
