@@ -89,7 +89,7 @@ internal static class PlayerTips
         // Furina. One merged Guest Star box (pick 3 (a)): a Guest Star card
         // drops Summon and keeps this.
         [ArmKeywordTips.SpendKey] =
-            "Pay that much [gold]Fanfare[/gold]. With less, you can't play "
+            "Pay that much [gold]Fanfare[/gold]. With less, you cannot play "
           + "the card or its Spend mode.",
         [ArmKeywordTips.DrainKey] =
             "Lose N HP. After combat, up to 1/4 of your Max HP drained comes "

@@ -431,7 +431,7 @@ public static class KleeMod
                     // trusted it at a boss, which only gains Vulnerable.
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Vulnerable (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion can't be Frozen; it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion cannot be Frozen; it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
                     ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
                     // THE ELEMENT PORT (sec.4 A, 2026-09-28; spent removed
                     // 2026-10-03): Swirl removes the aura, deals a flat 2 to

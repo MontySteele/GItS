@@ -102,7 +102,7 @@ public sealed class BlastingPowder : ArmPotion
     {
         ("title", "Blasting Powder"),
         ("description",
-            "Every [gold]Bomb[/gold] on ALL enemies grows [blue]" + Growth
+            "Every [gold]Bomb[/gold] on ALL enemies grows by [blue]" + Growth
           + "[/blue]."),
     };
 

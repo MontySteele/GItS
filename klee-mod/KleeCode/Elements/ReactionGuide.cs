@@ -135,7 +135,7 @@ public static class ReactionGuide
     public static IReadOnlyList<string> Notes { get; } = new[]
     {
         "[gold]Anemo[/gold] and [gold]Geo[/gold] never stay on an enemy.",
-        $"In a boss fight a non-minion can't be Frozen; it gains {ReactionConstants.FrozenBossVuln} [gold]Vulnerable[/gold] instead.",
+        $"In a boss fight a non-minion cannot be Frozen; it gains {ReactionConstants.FrozenBossVuln} [gold]Vulnerable[/gold] instead.",
         $"Attacking a Frozen enemy ends the freeze and deals {ReactionConstants.ShatterDamage} unblockable damage.",
     };
 

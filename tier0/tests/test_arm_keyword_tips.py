@@ -545,7 +545,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # lost and repaid, Drain and Repay are the HP loan, and the four
             # guests are the only performers. The v2 Stage's clauses (Bow,
             # Cue, Rehearsal, the front seat) left with v2.
-            "Pay that much [gold]Fanfare[/gold]. With less, you can't play ",
+            "Pay that much [gold]Fanfare[/gold]. With less, you cannot play ",
             "the card or its Spend mode. ",
             # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain
             # are rather verbose (Drain moreso)".

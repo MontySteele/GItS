@@ -377,7 +377,7 @@ public sealed class CrowfeatherCoverPower
     {
         ("title", "Crowfeather Cover"),
         ("description",
-            "Your next Attack card this turn deals [blue]{Amount}[/blue] "
+            "Your next Attack this turn deals [blue]{Amount}[/blue] "
           + "additional damage and is [gold]Electro[/gold], not its own "
           + "element."),
     };

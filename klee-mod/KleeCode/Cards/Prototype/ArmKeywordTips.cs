@@ -1056,7 +1056,7 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForSpend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SpendKey,
-            "Pay that much [gold]Fanfare[/gold]. With less, you can't play "
+            "Pay that much [gold]Fanfare[/gold]. With less, you cannot play "
           + "the card or its Spend mode. " + SpendUpToSentence);
 
     /// <summary>The Spend tip's second sentence (the Spend paper,

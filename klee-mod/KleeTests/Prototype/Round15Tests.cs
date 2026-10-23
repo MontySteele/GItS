@@ -181,7 +181,7 @@ public class Round15Tests
         var body = Printed(typeof(BaseKeywordTips), "ForWeak");
 
         Assert.Equal(
-            "Every hit the wearer lands, a Skill's too, deals 25% less. Loses "
+            "Deals 25% less damage with every hit, Skills included. Loses "
           + "1 stack at the end of its turn.", body);
         // The tip a player hovers is inside the in-game box either way.
         Assert.True(body.Length <= 135, body.Length.ToString());
