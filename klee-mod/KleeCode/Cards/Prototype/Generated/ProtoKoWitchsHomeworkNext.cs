@@ -40,7 +40,7 @@ public sealed class ProtoKoWitchsHomeworkNext : CustomCardModel, IHomeworkCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_one_more_charge");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_witchs_homework_next");
 
     public override List<(string, string)>? Localization => new()
     {

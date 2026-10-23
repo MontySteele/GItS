@@ -522,7 +522,6 @@
 # (`C.STAGING_GRANT_IDS`). Provenance note, "Klee scaling pass, 2026-10-05".
 - {id: proto_ko_witchs_homework_next, name: "Witch's Homework II", character: klee,
    authored_by: [claude],
-   art_of: proto_ko_one_more_charge,
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
    description: "Place a [gold]Bomb[/gold] {BombSize:diff()}. When it goes off, this card's [gold]Bomb[/gold] is {IfUpgraded:show:3|2} larger for the rest of the run.",
    upgrade: {upgraded_grant: true},
