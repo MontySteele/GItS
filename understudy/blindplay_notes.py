@@ -1718,8 +1718,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # before its enemy attacks" as "on the enemy's turn"; the tip now says
     # it waits on a turn its enemy does not attack.
     # 2026-10-13 (text-only fix): an attack leaves the plain Bombs.
-    "Mine": ("A Bomb that also goes off when its enemy attacks you, without "
-             "the enemy's plain Bombs. Otherwise, it waits. Any Set off "
+    # 2026-10-23 ("On Klee - agreed on all."): it uses up the aura.
+    "Mine": ("A Bomb that also goes off when its enemy attacks you, and "
+             "uses up the enemy's aura. Its plain Bombs stay. Any Set off "
              "spends it too."),
     # THE 2026-09-25 TEXT PASS rewrote the word to two short sentences, in
     # step with `ArmKeywordTips.ForPlan` word for word: the old row carried

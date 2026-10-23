@@ -142,10 +142,12 @@
 # note, "Klee status package, 2026-10-01".
 
 # Reworked 2026-09-27 ([USER]: "very OP"): grows Bombs, places none.
+# 2026-10-23 ("On Klee - agreed on all."): a Set off takes its whole pile
+# first, so the face says "still waiting" (text only).
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever one of your [gold]Bombs[/gold] goes off, your other [gold]Bombs[/gold] grow 3.",
+   description: "Whenever one of your [gold]Bombs[/gold] goes off, your [gold]Bombs[/gold] still waiting grow 3.",
    effects: [{op: apply_power, power: ko_chained_reactions, amount: 3, target: self}]}
 
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash", character: klee,

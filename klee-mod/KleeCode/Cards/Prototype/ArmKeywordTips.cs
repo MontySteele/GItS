@@ -295,12 +295,15 @@ public static class ArmKeywordTips
     /// it, so the tip now says a Set off spends it too. 2026-10-13 (text-only
     /// fix on main): an enemy's attack pops its Mines and leaves its plain
     /// Bombs (<c>ProtoBombPower.TakeMines</c>), and the tip now says so.
+    /// 2026-10-23 ("On Klee - agreed on all."): the tip says a Mine uses up
+    /// the enemy's aura, which it never did; "Otherwise, it waits" left. The
+    /// ruled wording's parenthesis became its own sentence (rule 14).
     /// </summary>
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, without the enemy's plain Bombs. Otherwise, it waits. Any "
+          + "you, and uses up the enemy's aura. Its plain Bombs stay. Any "
           + "[gold]Set off[/gold] spends it too.");
 
     /// <summary>

@@ -91,8 +91,8 @@ public sealed class ChainedReactionsPower
     {
         ("title", "Chained Reactions"),
         ("description",
-            "Whenever one of your [gold]Bombs[/gold] goes off, your other "
-          + "[gold]Bombs[/gold] grow [blue]{Amount}[/blue]."),
+            "Whenever one of your [gold]Bombs[/gold] goes off, your "
+          + "[gold]Bombs[/gold] still waiting grow [blue]{Amount}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -6505,7 +6505,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # the Bomb row, and its last two sentences are the Bomb's word for
         # word, so the anchors above hold them for both.
         "Mine": [" that also goes off when its enemy attacks ",
-                 "you, without the enemy's plain Bombs. Otherwise, it waits. Any "],
+                 "you, and uses up the enemy's aura. Its plain Bombs stay. Any "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a

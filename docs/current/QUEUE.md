@@ -12,19 +12,7 @@ line leaves this file. Closed picks are in git
 
 Found while clearing `BACKLOG.md`; each is a rule or text call on a kit.
 
-1. **Klee, Stoke the Fuse** spends every Spark even on an empty field, as
-   its text says; Party Poppers' Bomb lands after the play, on a random enemy.
-   (a, default) leave it. (b) spend only if the target has a Bomb (`klee-next`).
-2. **Klee, Perfect Timing's** replay hits nothing when the first Set off
-   killed the target. (a, default) leave it. (b) the replay picks another
-   enemy with Bombs (`klee-next`).
-3. **Klee, Chained Reactions:** a Set off takes the whole pile first, so a
-   second Bomb in that pile never grows. (a, default) say so: "your Bombs
-   still waiting grow 3" (text only). (b) leave it.
-4. **Klee, the Mine tip** never says it uses up the aura. (a, default) "A Bomb
-   that also goes off when its enemy attacks you (its plain Bombs stay), and
-   uses up the enemy's aura. Any Set off spends it too." (b) leave it.
-5. **Role-tempo floors:** regenerating with the fixed card reader moves 25 of
+1. **Role-tempo floors:** regenerating with the fixed card reader moves 25 of
    110 package floors (Klee's spark `velocity|early` 5.6 to 19.4).
    (a, default) take the new floors. (b) keep the old ones.
 
