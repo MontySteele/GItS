@@ -43,7 +43,7 @@ water she can shape.
 |---|---|---|---|
 | The strategist | The Sand Table | The Other Commander | Endgame |
 | Watatsumi | Coral Light (a memory) | The Serpent's Bones | The Tide Comes In |
-| Her friends | A Room with No One In It | A Report from Gorou (home) | The Tide Comes In (home) |
+| Her friends | A Room with No One in It | A Report from Gorou (home) | The Tide Comes In (home) |
 | No act 1 event | | A Report from Gorou | The Tide Comes In |
 
 How the eight events are priced, against the base game:
@@ -82,7 +82,7 @@ swim out to coral like this and stay until someone came looking.*
 | Leave a pearl for it. | Lose 50 Gold. Remove a card. Locked under 50 Gold. | On Watatsumi you pay the sea back. She picks her best pearl. |
 | Leave the coral undisturbed. | Nothing. | She watches it glow for a while, then climbs on. |
 
-**Act 1. A Room with No One In It** (all free).
+**Act 1. A Room with No One in It** (all free).
 *Behind a door with nothing written on it is a small room: one cushion, one
 lamp, a stack of unread books. Kokomi closes the door behind her. For the
 first time since the Spire began, nobody needs her to decide anything.*
@@ -107,7 +107,7 @@ a patient line. It opens a hand: your move.*
 |---|---|---|
 | Play the full game. | Lose 12 HP. Gain a random relic. | It takes every piece she offers, even the bad ones. She wins by one piece, hours later. |
 | Offer a draw. | Transform a card. | It agrees only once she offers it a piece to keep. It cannot leave a piece on the table. |
-| Concede and study its opening. | Add **Doubt**. Choose 1 of 3 random Rare cards. | She plays its first ten moves against herself until she sees it: it takes every piece left in reach. |
+| Concede and study its opening. | Add **Doubt** to your deck. Choose 1 of 3 random Rare cards to add to your deck. | She plays its first ten moves against herself until she sees it: it takes every piece left in reach. |
 
 **Act 2. The Serpent's Bones** (follows Coral Light; every option priced).
 It opens with a line from her act 1 choice:
@@ -122,12 +122,12 @@ to the surface and later died fighting the Shogun. His remains have poisoned peo
 | Option | Effect | Result |
 |---|---|---|
 | Lay a hand on it, through her sleeve. | Lose 8 Max HP. Gain a random relic. | She wraps her hand first and keeps the touch short; she knows what his remains did to Inazuma. For a moment she can feel the island he gave her people. The cold stays in her fingers. |
-| Gather the offerings at its foot. | Gain 100 Gold. Add **Doubt**. | Someone has been leaving Mora here for a very long time. She takes it home for the shrine's poor box. The bone whispers to her all the way up. |
-| Promise him a rite at home. | Remove a card. Add **Public Address**. | A proper one, on Watatsumi, with the whole shrine there. She means every word, and she is already dreading the speech. |
+| Gather the offerings at its foot. | Gain 100 Gold. Add **Doubt** to your deck. | Someone has been leaving Mora here for a very long time. She takes it home for the shrine's poor box. The bone whispers to her all the way up. |
+| Promise him a rite at home. | Remove a card. Add **Public Address** to your deck. | A proper one, on Watatsumi, with the whole shrine there. She means every word, and she is already dreading the speech. |
 
 **Act 2. A Report from Gorou** (her home event; all free). It follows A Room
-with No One In It, or no act 1 event. When it follows the room, it opens:
-*"Rested, she reads it twice."*
+with No One in It, or no act 1 event. When it follows the room, it opens:
+*"Rested, she reads it properly this time."*
 
 *A Watatsumi scout is waiting on the stair, soaked to the knee, with a
 satchel and a wrapped box. "From the General, Your Excellency. He said to

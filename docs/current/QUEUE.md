@@ -15,6 +15,10 @@ public launch; listen for the modded death sound (`set_hp player 1`).
 
 ## Eyes-on looks (materials ready; no build waits on them)
 
+- **Read the character dialogue and story events before translation** (user,
+  2026-10-23: "the writing surfaces for character dialogue / new events still
+  needs a human inspection before translation"): the four chains, the run
+  lines and the Ancients' lines; the translation waits on it.
 - **Models and screens in motion** (from the backlog, 2026-10-19): Klee,
   Varka and Furina in motion (the facing flip with an enemy behind, multi-hit
   timing at Normal speed, Varka's two ground bursts, a pale bar behind a

@@ -110,7 +110,7 @@ public static class FurinaStory
                         "She has never actually sat out here. The seats are softer than she thought. She "
                       + "stays until her feet stop aching."),
                     new StoryOption("TAKE_A_COSTUME", "Take a costume from the rack.",
-                        "Gain a random relic. Add [gold]Doubt[/gold].",
+                        "Gain a random relic. Add [gold]Doubt[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.GainRandomRelic),
                         "It fits perfectly. She would very much like to know who took her measurements.")
                     {
@@ -138,7 +138,7 @@ public static class FurinaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.RemoveCard) },
                     },
                     new StoryOption("STAND_IN_IT", "Stand in it until it stops.",
-                        "Add [gold]Doubt[/gold]. Upgrade 3 random cards.",
+                        "Add [gold]Doubt[/gold] to your deck. Upgrade 3 random cards.",
                         new StoryEffect(StoryEffectKind.AddCard, 0, typeof(Doubt)),
                         "\"It's over. It's been over for ages,\" she tells the water. It stops at her knees. "
                       + "She waits a long time anyway, to be sure.")
@@ -146,7 +146,7 @@ public static class FurinaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.UpgradeRandomCards, 3) },
                     },
                     new StoryOption("HUM_THE_OVERTURE", "Hum the overture and wade on.",
-                        "Gain 75 Gold. Add [gold]Stage Fright[/gold].",
+                        "Gain 75 Gold. Add [gold]Stage Fright[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.GainGold, 75),
                         "She hums all the way across, loudly. There are coins in the water, like at the "
                       + "Fountain of Lucine, and she takes a handful for luck. Her hands shake for an hour.")
@@ -174,7 +174,7 @@ public static class FurinaStory
                         "She does all the voices, Charlotte's included. On the second reading she adds the "
                       + "exclamation marks Charlotte left out."),
                     new StoryOption("CAST_THE_SEQUEL", "Cast the sequel in the margin.",
-                        "Choose 1 of 3 random Guest Stars.",
+                        "Choose 1 of 3 random Guest Stars to add to your deck.",
                         new StoryEffect(StoryEffectKind.ChooseFromPoolToDeck, 3),
                         "Lead: Furina. Then a part for everyone she can think of. Charlotte gets a cameo, "
                       + "as a reporter, which serves her right."),
@@ -211,7 +211,7 @@ public static class FurinaStory
                         },
                     },
                     new StoryOption("TAKE_THE_ROLE_BACK", "Take the role back.",
-                        "Remove a card. Add [gold]Stage Fright[/gold].",
+                        "Remove a card. Add [gold]Stage Fright[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.RemoveCard),
                         "The girl hurries off, relieved. Furina takes her mark. She knows every line, and "
                       + "the first one still comes out a beat late.")
@@ -261,7 +261,7 @@ public static class FurinaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic) },
                     },
                     new StoryOption("PLEAD_INNOCENT", "Plead innocent.",
-                        "Heal 15 HP. Add [gold]Stage Fright[/gold].",
+                        "Heal 15 HP. Add [gold]Stage Fright[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.Heal, 15),
                         "\"I did what I had to, and it worked.\" The scale doesn't move. \"Well? Say "
                       + "something.\" It never could decide anything by itself.")
@@ -323,7 +323,7 @@ public static class FurinaStory
                     new StoryOption("KEEP_IT", "Keep it for a hard night.",
                         "Choose 1 of 3 random Common Skills to add to your deck.",
                         StoryEffect.Choose(CardRarity.Common, CardType.Skill),
-                        "\"Tell him I'll write.\" She reads it twice more on the way up."),
+                        "\"Tell him I'll write.\" She reads it again on every landing."),
                 },
                 Portrait: () => KleeArt.CardPortrait("event_furina_letter_from_the_court"),
                 FallbackPortraitPath: "res://images/events/potion_courier.png")
@@ -372,7 +372,7 @@ public static class FurinaStory
                         "One proper bow, and off while they're still clapping. Someone in the wings is "
                       + "grinning at her."),
                     new StoryOption("ASK_FOR_AN_ENCORE", "Ask them to stay for an encore.",
-                        "Upgrade 3 random cards. Add [gold]Stage Fright[/gold].",
+                        "Upgrade 3 random cards. Add [gold]Stage Fright[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.UpgradeRandomCards, 3),
                         "They stay. Her heart is pounding. She sends the orchestra back to the top twice, "
                       + "because the tempo is wrong.")

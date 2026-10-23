@@ -172,7 +172,7 @@ public class KokomiStoryTests
         Assert.Equal(StoryEffectKind.RemoveCard, o.Effects[0].Kind);
         Assert.Equal(StoryEffectKind.AddCard, o.Effects[1].Kind);
         Assert.Equal(typeof(PublicAddress), o.Effects[1].Card);
-        Assert.Equal("Remove a card. Add [gold]Public Address[/gold].", o.Description);
+        Assert.Equal("Remove a card. Add [gold]Public Address[/gold] to your deck.", o.Description);
     }
 
     [Fact]
@@ -330,7 +330,7 @@ public class KokomiStoryTests
         // The paper gives the free way out no opening.
         Assert.Null(Opening(typeof(KokomiSerpentsBones), R(0, coral, "LEAVE_IT")));
 
-        // "When it follows the room, it opens: Rested, she reads it twice."
+        // "When it follows the room, it opens: Rested, she reads it properly this time."
         foreach (var o in E(typeof(KokomiEmptyRoom)).Options)
         {
             Assert.Equal("RESTED", Opening(typeof(KokomiReportFromGorou), R(0, typeof(KokomiEmptyRoom), o.Key)));
