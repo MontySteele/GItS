@@ -1410,8 +1410,30 @@ def arm_keywords_printed(description: str) -> list[ArmKeyword]:
             if printed.intersection(keyword.tokens)]
 
 
+#: THE KLEE TEXT AUDIT (2026-10-23; [USER]: "On Klee - agree on the
+#: defaults"). Pick 2 took "triggered an [gold]Elemental Reaction[/gold]" off
+#: five Bomb faces for the plain verb ("If a Bomb reacted this turn"), and the
+#: verb is never golded, so the noun's tip would have left with the noun. A
+#: face that golds a Bomb and says one "reacts" owes the Elemental Reaction tip.
+REACT_VERB = re.compile(r"\breact(?:s|ed)?\b")
+#: Pick 5 says "Bomb" alone where the code counts Mines as Bombs. A row whose
+#: op grows Mines with Bombs still owes the Mine tip, off the op rather than
+#: the word: `grow_bombs` (`ProtoBombPower.GrowOn`, Chain Fuse and Quick Fuse)
+#: and Alice's Recipe's power (`AlicesRecipePower.GrowBeforePlacement`).
+MINE_COUNTING_POWERS = frozenset({"ko_alices_recipe"})
+
+
+def counts_mines_as_bombs(card: dict) -> bool:
+    """Does this row's own play grow Mines along with Bombs?"""
+    return any(e.get("op") == "grow_bombs"
+               or (e.get("op") == "apply_power"
+                   and e.get("power") in MINE_COUNTING_POWERS)
+               for e in card.get("effects") or [])
+
+
 def arm_keyword_tip_calls(description: str,
-                          spark_priced: bool = False) -> list[str]:
+                          spark_priced: bool = False,
+                          counts_mines: bool = False) -> list[str]:
     """The tip calls this face owes, in table order.
 
     The ONE EXCLUSION this used to carry, `includes_bomb_rules`, left with the
@@ -1431,10 +1453,18 @@ def arm_keyword_tip_calls(description: str,
     playability gate read.
     """
     printed = arm_keywords_printed(description)
-    if spark_priced and not any(k.word == "Spark" for k in printed):
-        printed = sorted(
-            printed + [k for k in ARM_KEYWORDS if k.word == "Spark"],
-            key=ARM_KEYWORDS.index)
+    owed = set()
+    if spark_priced:
+        owed.add("Spark")
+    if any(k.word == "Bomb" for k in printed):
+        if REACT_VERB.search(GOLD_SPAN.sub("", description)):
+            owed.add("Elemental Reaction")
+        if counts_mines:
+            owed.add("Mine")
+    words = {k.word for k in printed}
+    extra = [k for k in ARM_KEYWORDS if k.word in owed - words]
+    if extra:
+        printed = sorted(printed + extra, key=ARM_KEYWORDS.index)
     return [keyword.attach for keyword in printed]
 
 
@@ -2053,10 +2083,9 @@ PREDICATE_TEXT = {
     "no_block": "If you have no [gold]Block[/gold]",
     "bomb_went_off_this_turn": "If a [gold]Bomb[/gold] went off this turn",
     "bomb_reacted_this_turn":
-        "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
-        "this turn",
+        "If a [gold]Bomb[/gold] reacted this turn",
     "companion_played_this_turn":
-        "If you played a [gold]Companion[/gold] card this turn",
+        "If you played a [gold]Companion[/gold] this turn",
     "no_bomb_went_off_this_turn": "If no [gold]Bomb[/gold] went off this turn",
     "target_has_aura": "If the enemy holds an elemental aura",
     "target_has_debuff": "If the enemy has a debuff",
@@ -3935,20 +3964,20 @@ APPLY_POWERS = {
     # are here for form; every slice row carries its own `description:`, which is
     # the surface's own face channel (EB-215).
     "ko_alices_recipe": ("AlicesRecipePower", None,
-        "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your "
-        "other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by {X}."),
+        "Whenever you place a [gold]Bomb[/gold], your other "
+        "[gold]Bombs[/gold] grow by {X}."),
     "ko_chained_reactions": ("ChainedReactionsPower", None,
         "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
     "ko_bomb_echo": ("BombEchoPower", None,
-        "At the start of your turn, your largest [gold]Bomb[/gold], on any "
-        "enemy, deals its size in [gold]Pyro[/gold] damage without going off."),
+        "At the start of your turn, your largest [gold]Bomb[/gold] deals its "
+        "size in [gold]Pyro[/gold] damage without going off."),
     # R244's coven reader. Chained Reactions' grammar one trigger over, and
     # DEAD ALONE by the ruling's own pick 2 -- a deck with no witch in it never
     # sets this off, which is what makes it the bridge card rather than a
     # fourth loop.
     "ko_witches_circle": ("WitchesCirclePower", None,
-        "Whenever you play a [gold]Companion[/gold] card, place a {X} "
+        "Whenever you play a [gold]Companion[/gold], place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
     # R276's Mine signpost (Explosive Frags). The stack IS the Vulnerable, so
     # the upgrade moves it; read at the one site a charge goes off
@@ -3983,9 +4012,8 @@ APPLY_POWERS = {
     "ko_boom_badge": ("BoomBadgePower", None,
         "Your next [gold]Set off[/gold] card this turn is played twice."),
     "ko_wait_for_it": ("WaitForItPower", None,
-        "This turn, the next time one of your [gold]Bombs[/gold] triggers an "
-        "[gold]Elemental Reaction[/gold], draw 2 cards and gain 1 "
-        "[gold]Energy[/gold]."),
+        "The next time a [gold]Bomb[/gold] reacts this turn, draw 2 cards "
+        "and gain 1 [gold]Energy[/gold]."),
     "ko_party_poppers": ("PartyPoppersPower", None,
         "Whenever you play a card that costs [gold]Sparks[/gold], place a "
         "[gold]Bomb[/gold] {X} on a random enemy."),
@@ -4006,9 +4034,8 @@ APPLY_POWERS = {
         "At the start of your turn, place a [gold]Mine[/gold] {X} on a "
         "random enemy."),
     "ko_aftershock": ("AftershockPower", None,
-        "The first time each turn a [gold]Bomb[/gold] of yours triggers an "
-        "[gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that "
-        "size on a random enemy."),
+        "The first time each turn one of your [gold]Bombs[/gold] reacts, "
+        "place a [gold]Bomb[/gold] that size on a random enemy."),
     "ko_spark_knight": ("SparkKnightPower", None,
         "Whenever you gain a [gold]Spark[/gold], deal {X} damage to a random "
         "enemy."),
@@ -18904,7 +18931,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 f"{ELEMENT_CS[switch_element]})")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
-        for attach in arm_keyword_tip_calls(desc, spark_priced):
+        for attach in arm_keyword_tip_calls(
+                desc, spark_priced, counts_mines_as_bombs(card)):
             # The text pass of 2026-10-08: a PLAN-ONLY row has no line above
             # its Plan and nothing to flip, so it carries the Plan tip that
             # says so (`_plan_only_line`'s test, the one its target follows).

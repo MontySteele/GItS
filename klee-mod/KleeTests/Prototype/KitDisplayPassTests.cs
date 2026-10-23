@@ -94,14 +94,18 @@ public class KitDisplayPassTests
         Assert.Contains("costs {Amount:energyIcons()} less", badge);
     }
 
-    // ---- Chain Fuse: the face names Mines ---------------------------------
+    // ---- Chain Fuse: a Mine is a Bomb ------------------------------------
+    // The Klee text audit (2026-10-23, pick 5): `ProtoBombPower.GrowOn` grows
+    // every charge on the pile, Mines included, so the face says "Each Bomb",
+    // as Quick Fuse's does.
 
     [Fact]
-    public void Chain_fuse_says_it_grows_mines()
+    public void Chain_fuse_says_each_bomb()
     {
         var face = new ProtoKoChainFuse().Localization!
             .First(r => r.Item1 == "description").Item2;
-        Assert.Contains("[gold]Bomb[/gold] and [gold]Mine[/gold]", face);
+        Assert.StartsWith("Each [gold]Bomb[/gold] on the enemy grows by", face);
+        Assert.DoesNotContain("Mine", face);
     }
 
     // ---- Varka's screen: an Artifact eats a reaction's debuff -------------

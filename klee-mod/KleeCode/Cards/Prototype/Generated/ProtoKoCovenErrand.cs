@@ -42,7 +42,7 @@ public sealed class ProtoKoCovenErrand : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coven Errand"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on an enemy, {IfUpgraded:show:16|14} if you played a [gold]Companion[/gold] card this turn."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. If you played a [gold]Companion[/gold] this turn, it is 4 larger."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

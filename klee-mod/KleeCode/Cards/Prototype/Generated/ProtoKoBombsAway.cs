@@ -42,7 +42,7 @@ public sealed class ProtoKoBombsAway : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bombs Away!"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on an enemy. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold]."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

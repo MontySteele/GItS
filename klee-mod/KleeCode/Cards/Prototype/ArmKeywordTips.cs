@@ -219,7 +219,7 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "Deals its size in [gold]Pyro[/gold] damage when "
-          + "[gold]Set off[/gold]. [gold]Vulnerable[/gold] raises it. Grows "
+          + "[gold]Set off[/gold]. [gold]Vulnerable[/gold] raises it. Grows by "
           + KleeOverhaulLaw.BombGrowth
           + " at the start of your turn. If its enemy dies, it jumps.");
 
@@ -302,9 +302,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
-            "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, and uses up the enemy's aura. Its plain Bombs stay. Any "
-          + "[gold]Set off[/gold] spends it too.");
+            "A [gold]Bomb[/gold] that also goes off by itself when its enemy "
+          + "attacks you, using up the enemy's aura. The enemy's other Bombs "
+          + "stay.");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.

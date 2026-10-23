@@ -75,3 +75,13 @@ Live check, 2026-10-19 (lane 1 booted in Simplified Chinese): the game's own
 text is Chinese and ours shows in English, but plurals break: Countdown reads
 "Draw 2 card." because the English is formatted with Chinese plural rules.
 (b) fixes that, since fallback lines are formatted as English.
+
+**The writing review and the first translation, ruled 2026-10-23.**
+[USER]: "Agreed on all of it!" (1) English first, kit by kit, then
+translation on the settled English. (2) Each kit gets the Kokomi audit
+format (`kokomi-text-audit-2026-10-22.md`): Klee, Varka, Furina, Yae and the
+shared text, then the story and event prose as its own pass. (3) Claude
+translates Simplified Chinese with a glossary of Genshin's official Chinese
+names and Slay the Spire 2's own Chinese card wording; a reader who knows
+Chinese checks a sample before release. (4) Yae's English pass is now; her
+translation waits for her Balance. First audit: `klee-text-audit-2026-10-23.md`.

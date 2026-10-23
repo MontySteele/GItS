@@ -326,7 +326,7 @@ def test_define_falls_back_to_the_glossary_marked_off_screen():
     # The Bomb row's `{growth}` is filled with the rule's constant.
     bomb = blindplay_brief.define(page, "BOMB")
     assert "{" not in bomb and "}" not in bomb
-    assert f"Grows {blindplay_shape.BOMB_GROWTH} at the start" in bomb
+    assert f"Grows by {blindplay_shape.BOMB_GROWTH} at the start" in bomb
     assert "If its enemy dies, it jumps." in bomb
     assert "Vulnerable raises it." in bomb
     # Another table than the arms': the base game's words.

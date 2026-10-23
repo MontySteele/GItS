@@ -427,9 +427,9 @@ public class KleeR276ExpansionTests
                         Printed("Cards/Prototype/Generated/ProtoKoTagAlong.cs"));
         Assert.Contains("await KleeExpansion.ChooseCompanions(choiceContext, Owner, 2, 4);",
                         Printed("Cards/Prototype/Generated/ProtoKoAdventureClub.cs"));
-        Assert.Equal("Choose 1 of 3 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. "
+        Assert.Equal("Choose 1 of 3 [gold]Companions[/gold] to add to your [gold]Hand[/gold]. "
                      + "It costs 0 this turn.", Face(new ProtoKoTagAlong()));
-        Assert.Equal("Choose 2 of 4 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. "
+        Assert.Equal("Choose 2 of 4 [gold]Companions[/gold] to add to your [gold]Hand[/gold]. "
                      + "They cost 0 this turn.", Face(new ProtoKoAdventureClub()));
         // The grid's prompt is injected with the other selection prompts.
         Assert.Equal("Choose 2 Companion cards to add to your [gold]Hand[/gold].",
@@ -605,7 +605,7 @@ public class KleeR276ExpansionTests
         Assert.Equal(
             Play("ProtoKoMineToss").Where(c => c.Contains("ProtoBombPower")),
             play.Where(c => c.Contains("ProtoBombPower")));
-        Assert.Equal("Place a [gold]Mine[/gold] {BombSize:diff()} on an enemy.", Face(card));
+        Assert.Equal("Place a [gold]Mine[/gold] {BombSize:diff()}.", Face(card));
     }
 
     // ---- the explosion's charge-aware door ----------------------------------
