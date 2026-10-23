@@ -464,13 +464,15 @@ public class AbyssPoolsTwoTests
     [Fact]
     public void Every_new_entry_has_its_relic_badge_icon_and_strip_title()
     {
-        var rows = AbyssChoicePage.LocRows();
+        // The strip titles are the names' own rows (`AbyssText.Rows`).
+        var rows = CodeText.Sources().Where(r => r.Table == "events")
+            .ToDictionary(r => r.Key, r => r.English);
         foreach (var b in AbyssDraft.AllBlessings)
         {
             var relic = (AbyssBlessingRelic)RuntimeHelpers.GetUninitializedObject(AbyssDisplay.RelicTypeFor(b));
             Assert.Equal(b, relic.Blessing);
             Assert.StartsWith("abyss/relics/", AbyssOverlayContent.BlessingIconFile(b));
-            Assert.Equal(AbyssText.Name(b), rows[AbyssChoicePage.StripTitleKey(AbyssText.Name(b))]);
+            Assert.Equal(AbyssText.Name(b), rows[AbyssChoicePage.StripTitleKey(b)]);
         }
         foreach (var s in AbyssDraft.AllShadows)
         {

@@ -120,13 +120,12 @@ def test_the_clause_is_what_the_tenko_then_does():
 
 def test_the_words_are_one_table_in_both_engines():
     cs = SHRINE_CS.read_text(encoding="utf-8")
+    # Keyed rows since the localization census (2026-10-23): each kind's
+    # words are its row's English, the same `{n}` template.
+    rows = {Y.THUNDER: "live_damage", Y.FOXFIRE: "live_to_each", Y.KITSUNE: "live_block"}
     for kind in Y.SAKURA_KINDS:
         words = Y.TENKO_FACE[kind]
-        if kind == Y.THUNDER:
-            assert '_ => $"' + words + '"' in cs, words
-        else:
-            name = gen.YAE_SAKURA_KINDS[kind]
-            assert f'YaeSakuraKind.{name} => $"{words}"' in cs, words
+        assert f'Tenko + "{rows[kind]}", "{words}")' in cs, words
     assert f'NoSakura = "{Y.NO_SAKURA}"' in cs
     assert "YaeTenkoKind" not in cs
 

@@ -35,8 +35,8 @@ public abstract class AbyssShadowPower : PowerModel, ILocalizationProvider
 
     public List<(string, string)>? Localization => new()
     {
-        ("title", AbyssText.Name(Shadow)),
-        ("description", AbyssText.Text(Shadow, AbyssText.NoAct)),
+        ("title", AbyssText.NameEnglish(Shadow)),
+        ("description", AbyssText.English(Shadow, AbyssText.NoAct)),
         ("smartDescription", "{" + TextVar + "}"),
     };
 

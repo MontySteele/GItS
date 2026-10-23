@@ -684,7 +684,7 @@ public static class KleeMod
             foreach (var annotation in Powers.YaeAnnotationText.All)
             {
                 keywordFallback[Cards.ArmKeywordTips.KeyOf(annotation) + ".title"] =
-                    Powers.YaeAnnotationText.Name(annotation);
+                    Powers.YaeAnnotationText.NameEnglish(annotation);
             }
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

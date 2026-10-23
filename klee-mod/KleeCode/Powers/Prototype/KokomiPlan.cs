@@ -1764,26 +1764,51 @@ public static class KokomiPlan
     /// </summary>
     public static string? RequestFlip(Player? player, int index)
     {
+        var why = FlipRefused(player, index, out _);
+        if (why != null) return why;
+        MegaCrit.Sts2.Core.Runs.RunManager.Instance.ActionQueueSynchronizer
+            .RequestEnqueue(new FlipPlanGameAction(player!, (uint)index));
+        return null;
+    }
+
+    /// <summary>Why a flip of <paramref name="index"/> would be refused, as
+    /// the Plans view prints it to the player: a keyed sentence
+    /// (<see cref="Vfx.KokomiPlanText"/>; the localization census,
+    /// 2026-10-23), or null when it would be sent.</summary>
+    public static string? FlipRefusalShown(Player? player, int index)
+    {
+        FlipRefused(player, index, out var shown);
+        return shown;
+    }
+
+    /// <summary>The checks <see cref="RequestFlip"/> makes: the bridge's
+    /// lower-case reason, and the player's sentence in
+    /// <paramref name="shown"/>; null for both when the flip may go.</summary>
+    private static string? FlipRefused(Player? player, int index, out string? shown)
+    {
+        shown = null;
         var kokomi = player?.Creature;
         if (player == null || !KokomiOverhaul.LiveFor(kokomi))
         {
+            shown = Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.NoKurage);
             return "there is no Bake-Kurage here";
         }
         if (player.PlayerCombatState?.Phase != PlayerTurnPhase.Play)
         {
+            shown = Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.NotYourTurn);
             return "a Plan can be flipped only during your turn";
         }
         var queue = Pending(player);
         if (index < 0 || index >= queue.Count)
         {
+            shown = Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.NoPlanAt, ("N", index + 1));
             return "there is no waiting Plan " + (index + 1);
         }
         if (!queue[index].TwoLine)
         {
+            shown = Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.OneLine, ("Title", queue[index].Title));
             return queue[index].Title + " has only one line";
         }
-        MegaCrit.Sts2.Core.Runs.RunManager.Instance.ActionQueueSynchronizer
-            .RequestEnqueue(new FlipPlanGameAction(player, (uint)index));
         return null;
     }
 
@@ -3868,7 +3893,7 @@ public static class KokomiPlan
                                          CounterDeals(entry, kokomi) ?? 0);
                     case Kind.EnergyIfAttackedSince:
                         if (ledger.AttackedSince(entry.Window))
-                            return $"Energy {clause.Amount}";
+                            return LiveEnergy(clause.Amount);
                         return AnyEnemyIntendsAttack(kokomi)
                             ? NoAttackYet : NoAttackIntended;
                     case Kind.Damage when clause.Aim == Aim.EnemiesAttackedSince:
@@ -3876,7 +3901,7 @@ public static class KokomiPlan
                         if (n == 0)
                             return AnyEnemyIntendsAttack(kokomi)
                                 ? NoAttackYet : NoAttackIntended;
-                        return n == 1 ? "1 attacker" : $"{n} attackers";
+                        return LiveAttackers(n);
                 }
             }
             return null;
@@ -3896,22 +3921,28 @@ public static class KokomiPlan
     {
         // The Kokomi upgrade pass (2026-10-19): nothing caught plays a
         // random Common Companion.
-        if (string.IsNullOrWhiteSpace(title)) return "Random Companion";
+        if (string.IsNullOrWhiteSpace(title)) return Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.RandomCompanion);
         var name = title!;
         var dash = name.LastIndexOf('—');
         if (dash >= 0) name = name.Substring(dash + 1).Trim();
         var colon = name.IndexOf(':');
         if (colon > 0) name = name.Substring(0, colon).Trim();
         if (name.Length == 0) name = title!.Trim();
-        return "Copies " + name;
+        return Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.Copies, ("Name", name));
     }
 
     /// <summary>The strip's damage caption, "Deals N".</summary>
-    public static string LiveDeals(int amount) => $"Deals {amount}";
+    public static string LiveDeals(int amount) => Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.Deals, ("Amount", amount));
+
+    /// <summary>A Counter Plan that pays Energy, "Energy N".</summary>
+    public static string LiveEnergy(int amount) => Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.Energy, ("Amount", amount));
+
+    /// <summary>A Plan that hits each enemy that attacked, "N attackers".</summary>
+    public static string LiveAttackers(int n) => Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.Attackers, ("N", n));
 
     /// <summary>Kyouka Fuushi's caption, "N hits" (the Inazuma pool rework,
     /// 2026-10-18). Display only.</summary>
-    public static string LiveHits(int hits) => hits == 1 ? "1 hit" : $"{hits} hits";
+    public static string LiveHits(int hits) => Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.Hits, ("N", hits));
 
     /// <summary>
     /// THE INAZUMA POOL REWORK (2026-10-18): Kyouka Fuushi's hits at
@@ -3931,7 +3962,7 @@ public static class KokomiPlan
 
     /// <summary>Unbroken Tide's caption once she has lost HP in its window
     /// (Kokomi v3, 2026-10-18). Display only.</summary>
-    public const string HpLostCaption = "HP lost";
+    public static string HpLostCaption => Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.HpLost);
 
     /// <summary>
     /// KOKOMI V3 (2026-10-18): a waiting Chain Plan's count if the queue lands
@@ -3963,28 +3994,30 @@ public static class KokomiPlan
 
     /// <summary>Kelp Wall's running count, "N blocked so far" (Kokomi
     /// review r5, 2026-10-14, A3).</summary>
-    public static string LiveBlocked(int amount) => $"{amount} blocked so far";
+    public static string LiveBlocked(int amount) => Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.Blocked, ("Amount", amount));
 
     /// <summary>Kelp Wall's caption with what it deals (Kokomi seat triage,
     /// 2026-10-23): "7 blocked, deals 11" where an upgrade's flat bonus or
     /// Resolve of Watatsumi adds to the count; the bare count otherwise.
     /// </summary>
     public static string LiveBlocked(int amount, int deals) =>
-        deals == amount ? LiveBlocked(amount) : $"{amount} blocked, deals {deals}";
+        deals == amount ? LiveBlocked(amount)
+            : Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.BlockedDeals, ("Amount", amount), ("Deals", deals));
 
     /// <summary>Turnabout's running count, "N taken so far".</summary>
-    public static string LiveTaken(int amount) => $"{amount} taken so far";
+    public static string LiveTaken(int amount) => Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.Taken, ("Amount", amount));
 
     /// <summary>Turnabout's caption with what it deals, as
     /// <see cref="LiveBlocked(int, int)"/>.</summary>
     public static string LiveTaken(int amount, int deals) =>
-        deals == amount ? LiveTaken(amount) : $"{amount} taken, deals {deals}";
+        deals == amount ? LiveTaken(amount)
+            : Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.TakenDeals, ("Amount", amount), ("Deals", deals));
 
     /// <summary>Kelp Wall on a board with no attack intended (Kokomi seat
     /// triage, 2026-10-23): <see cref="NoAttackIntended"/>, and what the
     /// upgrade's flat bonus still deals where it deals something.</summary>
     public static string NoAttackDeals(int deals) =>
-        deals > 0 ? $"{NoAttackIntended}: deals {deals}" : NoAttackIntended;
+        deals > 0 ? Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.NoAttackDeals, ("Deals", deals)) : NoAttackIntended;
 
     /// <summary>
     /// KOKOMI SEAT TRIAGE (2026-10-23): what a waiting Counter Plan (Kelp
@@ -4032,12 +4065,12 @@ public static class KokomiPlan
     }
 
     /// <summary>A Counter Plan no enemy has attacked into yet.</summary>
-    public const string NoAttackYet = "No attack yet";
+    public static string NoAttackYet => Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.NoAttackYet);
 
     /// <summary>KOKOMI REVIEW R6 (2026-10-14, item 7): a Counter Plan that
     /// pays only for an enemy Attack, on a board where no enemy intends one,
     /// so as things stand it lands nothing.</summary>
-    public const string NoAttackIntended = "No enemy intends to attack";
+    public static string NoAttackIntended => Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.NoAttackIntended);
 
     /// <summary>
     /// THE KOKOMI REVIEW (2026-10-13), Tide Wall's live total. "Tide Wall
@@ -4203,12 +4236,12 @@ public static class KokomiPlan
         if (twoLine && flipped)
             return doubleLost ? Vfx.KokomiPlanStrip.NowLineNotDoubledCaption
                               : Vfx.KokomiPlanStrip.NowLineCaption;
-        if (blockNow is { } block) return $"Block {block}";
+        if (blockNow is { } block) return Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.Block, ("Amount", block));
         // THE POOL OVERHAUL (2026-10-13): a Counter or Chain Plan's number
         // as it stands (<see cref="LiveLine"/>).
         if (live != null) return live;
-        if (keptBlock > 0) return $"into {keptBlock} Block";
-        if (defends) return "into Block";
+        if (keptBlock > 0) return Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.IntoBlockOf, ("Amount", keptBlock));
+        if (defends) return Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.IntoBlock);
         return twoLine ? Vfx.KokomiPlanStrip.PlanLineCaption : null;
     }
 

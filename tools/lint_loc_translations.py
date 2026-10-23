@@ -31,6 +31,14 @@ THE CHECKS, per translated row:
   * a hash is recorded, and it is the hash of today's English: a row whose
     English moved since it was translated is STALE.
 
+THE TEYVAT FRAME'S ROWS are not to translate while the frame is off. The
+reference lists them because its build turns the frame arm on; a release
+build merges none of them. `klee-mod/localization/reference/teyvat_frame_rows.json`
+({table: [key, ...]}, written beside the reference by the same test) names
+them, and a translated row among them is a finding (the work would ship
+nowhere, and its English has had no full pass: review/active/story-text-audit-2026-10-23.md).
+The clean report counts the rows left to translate without them.
+
 There are no translations today, so it passes vacuously.
 """
 from __future__ import annotations
@@ -46,6 +54,7 @@ ROOT = Path(__file__).resolve().parent.parent
 REFERENCE = ROOT / "klee-mod" / "localization" / "reference" / "eng.json"
 TRANSLATIONS = ROOT / "klee-mod" / "pck-src" / "klee" / "localization"
 HASHES = ROOT / "klee-mod" / "localization" / "hashes"
+FRAME_ROWS = ROOT / "klee-mod" / "localization" / "reference" / "teyvat_frame_rows.json"
 
 #: The game's languages (`LocManager._supportedLanguages`, v0.111.0).
 LANGUAGES = frozenset({
@@ -98,9 +107,26 @@ def translation_files(root: Path = TRANSLATIONS):
             yield lang_dir.name, path.stem, path
 
 
+def frame_rows(path: Path = FRAME_ROWS) -> dict[str, set[str]]:
+    """The Teyvat frame's rows, {table: {key}}; empty when the list is
+    missing."""
+    if not path.exists():
+        return {}
+    return {table: set(keys) for table, keys in load_json(path).items()}
+
+
+def to_translate(reference: dict, frame: dict[str, set[str]]) -> int:
+    """The rows a translation covers: the reference less the frame's."""
+    return sum(1 for table, rows in reference.items()
+               for key in rows if key not in frame.get(table, ()))
+
+
 def check(reference: dict, translations_root: Path = TRANSLATIONS,
-          hashes_root: Path = HASHES) -> list[str]:
-    """Every finding, as one line each."""
+          hashes_root: Path = HASHES,
+          frame: dict[str, set[str]] | None = None) -> list[str]:
+    """Every finding, as one line each. `frame` is the Teyvat frame's rows
+    (`frame_rows()`), not to translate."""
+    frame = frame or {}
     findings: list[str] = []
     for lang, table, path in translation_files(translations_root):
         where = f"{path.relative_to(translations_root).as_posix()}"
@@ -122,6 +148,10 @@ def check(reference: dict, translations_root: Path = TRANSLATIONS,
             source = english.get(key)
             if source is None:
                 findings.append(f"{where}: {key}: no such English row (orphan)")
+                continue
+            if key in frame.get(table, ()):
+                findings.append(f"{where}: {key}: a Teyvat frame row, not to "
+                                "translate while the frame is off")
                 continue
             want, got = placeholders(source), placeholders(text)
             if want != got:
@@ -177,14 +207,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f"lint_loc_translations: stamped {n} row(s) for {args.stamp}")
         return 0
 
-    findings = check(reference)
+    frame = frame_rows()
+    findings = check(reference, frame=frame)
     files = sum(1 for _ in translation_files())
     if findings:
         for line in findings:
             print(line)
         print(f"lint_loc_translations: {len(findings)} finding(s) in {files} file(s)")
         return 1
-    print(f"lint_loc_translations: OK ({files} translated table file(s))")
+    skipped = sum(len(keys) for keys in frame.values())
+    print(f"lint_loc_translations: OK ({files} translated table file(s); "
+          f"{to_translate(reference, frame)} rows to translate, "
+          f"{skipped} Teyvat frame rows skipped)")
     return 0
 
 

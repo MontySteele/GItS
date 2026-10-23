@@ -119,9 +119,11 @@ public static class AbyssDisplay
     public static string ShadowsText(IEnumerable<(AbyssShadow Shadow, int Act)> shadows, int? elementAct = null)
     {
         var lines = shadows.Where(e => e.Shadow != AbyssShadow.None)
-            .Select(e => $"[gold]{AbyssText.Name(e.Shadow)}[/gold]: {AbyssText.Text(e.Shadow, e.Act, elementAct ?? AbyssText.NoAct)}")
+            .Select(e => CodeText.Format(AbyssOverlayText.ShadowLine, CodeText.Vars(
+                ("Name", AbyssText.Name(e.Shadow)),
+                ("Text", AbyssText.Text(e.Shadow, e.Act, elementAct ?? AbyssText.NoAct)))))
             .ToList();
-        return lines.Count == 0 ? "None yet." : string.Join("\n", lines);
+        return lines.Count == 0 ? CodeText.Format(AbyssOverlayText.NoShadows) : string.Join("\n", lines);
     }
 
     // ---- The models ---------------------------------------------------------

@@ -107,11 +107,17 @@ public class AbyssOverlayTests
     [Fact]
     public void Every_strip_entry_has_a_tooltip_title_row()
     {
-        var rows = AbyssChoicePage.LocRows();
-        foreach (var name in AbyssDraft.AllBlessings.Select(AbyssText.Name)
-                     .Concat(AbyssDraft.AllShadows.Select(AbyssText.Name)))
+        // The names' own rows, keyed by the enum (the localization census,
+        // 2026-10-23), in the table the strip's hover reads.
+        var rows = CodeText.Sources().Where(r => r.Table == "events")
+            .ToDictionary(r => r.Key, r => r.English);
+        foreach (var b in AbyssDraft.AllBlessings)
         {
-            Assert.Equal(name, rows[AbyssChoicePage.StripTitleKey(name)]);
+            Assert.Equal(AbyssText.Name(b), rows[AbyssChoicePage.StripTitleKey(b)]);
+        }
+        foreach (var s in AbyssDraft.AllShadows)
+        {
+            Assert.Equal(AbyssText.Name(s), rows[AbyssChoicePage.StripTitleKey(s)]);
         }
     }
 

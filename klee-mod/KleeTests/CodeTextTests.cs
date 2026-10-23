@@ -234,8 +234,11 @@ public class CodeTextTests
     {
         var rows = CodeText.Sources().ToList();
         Assert.Equal(rows.Count, rows.Select(r => (r.Table, r.Key)).Distinct().Count());
-        Assert.All(rows, r => Assert.Equal("card_keywords", r.Table));
-        Assert.All(rows, r => Assert.StartsWith("KLEEMOD-", r.Key));
+        // Our rows, in the table the surface's own rows live in: the keyword
+        // table, or the Spiral Abyss's event rows (step 3).
+        Assert.All(rows, r => Assert.True(
+            (r.Table == "card_keywords" && r.Key.StartsWith("KLEEMOD-"))
+            || (r.Table == "events" && r.Key.StartsWith("KLEE_SPIRAL_ABYSS.")), r.Table + "/" + r.Key));
         // A row a var fills names the var, never the law's number.
         Assert.Contains(rows, r => r.English.Contains("{BombGrowth}"));
         Assert.DoesNotContain(rows, r => r.Key.StartsWith("KLEEMOD-ARM_BOMB.") && r.English.Contains(

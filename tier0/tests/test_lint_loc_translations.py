@@ -68,3 +68,25 @@ def test_the_English_folder_and_an_unknown_language_are_handled(tmp_path):
 def test_the_tree_is_clean_today():
     rc = subprocess.run([sys.executable, "tools/lint_loc_translations.py"]).returncode
     assert rc == 0
+
+
+def test_a_translated_teyvat_frame_row_is_a_finding(tmp_path):
+    from tools.lint_loc_translations import to_translate
+    tr, hs = tmp_path / "tr", tmp_path / "hs"
+    frame = {"cards": {"KLEEMOD-COUNTDOWN.title"}}
+    _write(tr, "zhs", "cards", {"KLEEMOD-COUNTDOWN.title": "倒计时"})
+    stamp(REFERENCE, "zhs", tr, hs)
+    findings = check(REFERENCE, tr, hs, frame=frame)
+    assert len(findings) == 1 and "Teyvat frame row" in findings[0]
+    assert check(REFERENCE, tr, hs) == []
+    assert to_translate(REFERENCE, frame) == 1
+
+
+def test_the_committed_frame_list_names_rows_of_the_reference():
+    from tools.lint_loc_translations import FRAME_ROWS, REFERENCE as REF, frame_rows, load_json
+    assert FRAME_ROWS.exists()
+    reference = load_json(REF)
+    frame = frame_rows()
+    assert frame.get("events")
+    for table, keys in frame.items():
+        assert keys <= set(reference[table])

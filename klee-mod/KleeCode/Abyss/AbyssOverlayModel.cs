@@ -13,16 +13,18 @@ public sealed record AbyssOverlayCard(
     int Index, AbyssBlessing Blessing, AbyssShadow Shadow,
     string BlessingName, string BlessingText, string ShadowName, string ShadowText,
     string BlessingIconFile, string ShadowIconFile,
-    string BlessingTag = AbyssOverlayContent.WholeRunTag,
-    string ShadowTag = AbyssOverlayContent.WholeRunTag);
+    string BlessingTag, string ShadowTag);
 
 /// <summary>One icon in the top-right strip: a Blessing or Shadow in force,
-/// with its hover text and its duration.</summary>
+/// with its hover text and its duration. <paramref name="TitleKey"/> is the
+/// name's row, the hover's title (built from the enum: the localization
+/// census, 2026-10-23).</summary>
 public sealed record AbyssOverlayStripEntry(
-    string Name, string Text, string IconFile, string Duration = AbyssOverlayContent.WholeRunTag)
+    string Name, string Text, string IconFile, string Duration, string TitleKey = "")
 {
     /// <summary>The hover text: the entry's text, then its duration.</summary>
-    public string HoverText => $"{Text}\n[gold]{Duration}[/gold]";
+    public string HoverText =>
+        CodeText.Format(AbyssOverlayText.Hover, CodeText.Vars(("Text", Text), ("Duration", Duration)));
 
     public bool ThisAct => Duration == AbyssOverlayContent.ThisActTag;
 }
@@ -36,32 +38,31 @@ public sealed record AbyssOverlayStripEntry(
 /// </summary>
 public sealed class AbyssOverlayContent
 {
-    public const string Heading = "The Spiral Abyss";
+    public static string Heading => CodeText.Format(AbyssOverlayText.Heading);
 
     /// <summary>Co-op Abyss run, 2026-10-14: in all three acts both seats
     /// read the Shadow beside a Blessing as the one that came with it. The
     /// line now says where the enemies' Shadow comes from.</summary>
-    public const string Whisper =
-        "The Abyss whispers, urging you deeper. Take one Blessing. "
-      + "The enemies take one Shadow, at random, from the Blessings you pass.";
+    public static string Whisper => CodeText.Format(AbyssOverlayText.Whisper);
 
-    public const string WholeRunTag = "Whole run";
+    public static string WholeRunTag => AbyssDurations.Tag(AbyssDuration.WholeRun);
 
-    public const string ThisActTag = "This act";
+    public static string ThisActTag => AbyssDurations.Tag(AbyssDuration.ThisAct);
 
     /// <summary>The label over each card's lower band (owner, 2026-10-12:
     /// "IF PASSED" renamed "SHADOW"; the view prints it in capitals). The
     /// whisper line and the result line say where the enemies' Shadow comes
     /// from (co-op Abyss run, 2026-10-14).</summary>
-    public const string ShadowBandLabel = "Shadow";
+    public static string ShadowBandLabel => CodeText.Format(AbyssOverlayText.ShadowBand);
 
-    public const string BlessingsLabel = "Blessings";
+    public static string BlessingsLabel => CodeText.Format(AbyssOverlayText.Blessings);
 
-    public const string ShadowsLabel = "Shadows";
+    public static string ShadowsLabel => CodeText.Format(AbyssOverlayText.Shadows);
 
     /// <summary>"The Spiral Abyss · Act N". Neow is act 1: the act index is
     /// zero-based.</summary>
-    public static string TitleFor(int actIndex) => $"{Heading} · Act {Math.Max(0, actIndex) + 1}";
+    public static string TitleFor(int actIndex) =>
+        CodeText.Format(AbyssOverlayText.Title, CodeText.Vars(("Act", Math.Max(0, actIndex) + 1)));
 
     public AbyssOverlayContent(
         string title, IReadOnlyList<AbyssOverlayCard> cards,
@@ -106,12 +107,12 @@ public sealed class AbyssOverlayContent
         var blessings = record.BlessingsInForce(offer.ActIndex)
             .Select(b => new AbyssOverlayStripEntry(
                 AbyssText.Name(b), AbyssText.Text(b, record.ActTaken(b), act), BlessingIconFile(b),
-                AbyssDurations.Tag(AbyssDurations.Of(b))))
+                AbyssDurations.Tag(AbyssDurations.Of(b)), AbyssText.NameKey(b)))
             .ToList();
         var shadows = record.ShadowsInForce(offer.ActIndex)
             .Select(s => new AbyssOverlayStripEntry(
                 AbyssText.Name(s), AbyssText.Text(s, record.ActTaken(s), act), ShadowIconFile(s),
-                AbyssDurations.Tag(AbyssDurations.Of(s))))
+                AbyssDurations.Tag(AbyssDurations.Of(s)), AbyssText.NameKey(s)))
             .ToList();
         return new AbyssOverlayContent(TitleFor(offer.ActIndex), cards, blessings, shadows);
     }
@@ -271,10 +272,13 @@ public sealed class AbyssOverlayFlow
     /// enemies took (none named when the offer had no Shadow to give).</summary>
     public static string ResultLineFor(string chosenName, string? shadowName, bool coop, bool split)
     {
-        var chose = !coop ? $"You chose {chosenName}."
-            : split ? $"The vote split; the draw gave {chosenName}."
-            : $"The party chose {chosenName}.";
-        return string.IsNullOrEmpty(shadowName) ? chose : $"{chose} The enemies took {shadowName}.";
+        var chose = CodeText.Format(!coop ? AbyssOverlayText.YouChose
+                                    : split ? AbyssOverlayText.VoteSplit
+                                    : AbyssOverlayText.PartyChose,
+                                    CodeText.Vars(("Name", chosenName)));
+        return string.IsNullOrEmpty(shadowName)
+            ? chose
+            : CodeText.Format(AbyssOverlayText.EnemiesTook, CodeText.Vars(("Chose", chose), ("Name", shadowName!)));
     }
 }
 
@@ -303,4 +307,48 @@ public static class AbyssVoteOutcome
         }
         return known.Where(v => v.HasValue).Select(v => v!.Value).Distinct().Count() > 1;
     }
+}
+
+/// <summary>
+/// THE BLESSING SCREEN'S WORDS, KEYED (the localization census, 2026-10-23,
+/// step 3): rows in the <c>events</c> table beside the Abyss page's own
+/// (<c>KLEE_SPIRAL_ABYSS.overlay.*</c>). The seat bridge's option text
+/// (<see cref="AbyssOverlayContent.BridgeDescription"/>) is seat text and
+/// stays English.
+/// </summary>
+public static class AbyssOverlayText
+{
+    private const string Table = "events";
+    private static CodeRow R(string leaf, string english) => new(Table, "KLEE_SPIRAL_ABYSS.overlay." + leaf, english);
+
+    internal static readonly CodeRow Heading = R("heading", "The Spiral Abyss");
+    internal static readonly CodeRow Title = R("title", "The Spiral Abyss · Act {Act}");
+    internal static readonly CodeRow Whisper = R("whisper",
+        "The Abyss whispers, urging you deeper. Take one Blessing. "
+      + "The enemies take one Shadow, at random, from the Blessings you pass.");
+    internal static readonly CodeRow WholeRun = R("whole_run", "Whole run");
+    internal static readonly CodeRow ThisAct = R("this_act", "This act");
+    internal static readonly CodeRow ShadowBand = R("shadow_band", "Shadow");
+    internal static readonly CodeRow Blessings = R("blessings", "Blessings");
+    internal static readonly CodeRow Shadows = R("shadows", "Shadows");
+    internal static readonly CodeRow Hover = R("hover", "{Text}\n[gold]{Duration}[/gold]");
+    internal static readonly CodeRow YouChose = R("you_chose", "You chose {Name}.");
+    internal static readonly CodeRow PartyChose = R("party_chose", "The party chose {Name}.");
+    internal static readonly CodeRow VoteSplit = R("vote_split", "The vote split; the draw gave {Name}.");
+    internal static readonly CodeRow EnemiesTook = R("enemies_took", "{Chose} The enemies took {Name}.");
+
+    /// <summary>The Abyss Shadows relic's list (<see cref="AbyssDisplay.ShadowsText"/>).</summary>
+    internal static readonly CodeRow ShadowLine = R("shadow_line", "[gold]{Name}[/gold]: {Text}");
+    internal static readonly CodeRow NoShadows = R("no_shadows", "None yet.");
+
+    /// <summary>An event option: the Blessing, then the Shadow it may leave
+    /// (<c>AbyssChoicePage.OptionDescription</c>).</summary>
+    internal static readonly CodeRow Option = R("option",
+        "{Blessing}\n[red]If you pass this, the enemies may take its Shadow:[/red] [gold]{ShadowName}[/gold]. {Shadow}");
+
+    public static IEnumerable<CodeRow> Rows() => new[]
+    {
+        Heading, Title, Whisper, WholeRun, ThisAct, ShadowBand, Blessings, Shadows, Hover,
+        YouChose, PartyChose, VoteSplit, EnemiesTook, ShadowLine, NoShadows, Option,
+    };
 }

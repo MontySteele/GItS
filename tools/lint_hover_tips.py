@@ -201,12 +201,13 @@ PLACEHOLDERS = {
 
 
 def annotation_rules() -> dict[tuple[str, str], str]:
-    """`YaeAnnotationText.Rule` and `.SakuraRule`'s arms, rendered, keyed
-    (method, member)."""
+    """`YaeAnnotationText.Rule` and `.SakuraRule`'s keyed rows (their
+    `RuleTemplate` / `SakuraRuleTemplate` arms, the localization census
+    step 3), template text, keyed (method, member)."""
     src = tc.read(MOD / "Powers" / "Prototype" / "YaeAnnotations.cs")
     out: dict[tuple[str, str], str] = {}
     for method in ("Rule", "SakuraRule"):
-        body = src[src.index(f"public static string {method}("):]
+        body = src[src.index(f"static string {method}Template("):]
         body = body[:body.index("_ =>")]
         arms = re.split(r"YaeAnnotation\.(\w+) =>", body)[1:]
         for member, expr in zip(arms[::2], arms[1::2]):
@@ -266,10 +267,7 @@ def guest_body(halves: tuple[str, str], card_src: str) -> str:
 #: keyed row yet, curated: a new tip a player reads must have a row in
 #: `PlayerTips` (the localization census, 2026-10-23). An entry no player
 #: chain raises FAILS.
-UNKEYED_OK: dict[str, str] = {
-    "ForAnnotation": "Yae's Annotation rules are `YaeAnnotationText`'s, "
-                     "keyed in step 2 of the localization census",
-}
+UNKEYED_OK: dict[str, str] = {}
 
 
 class Bodies:
@@ -300,7 +298,8 @@ class Bodies:
             # Base-game tips and card previews: one box, base length.
             return 1, None, method
         if method == "ForAnnotation":
-            self.unkeyed.add(method)
+            # Keyed rows since the localization census's step 3
+            # (`YaeAnnotationText.Rows`).
             return 1, visible(annotation_body(args)), method
         if method == "ForSakura" and cls.startswith("ProtoYm"):
             return 1, "@YaeSakuraTip", method

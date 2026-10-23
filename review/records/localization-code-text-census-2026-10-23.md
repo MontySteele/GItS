@@ -109,3 +109,51 @@ assembly (`KleeTests/Fixtures/code_text_before_2026_10_23.json`).
 
 Left: groups 2, 4 and 5, the four leftovers of group 6, the story offer line,
 and the Abyss strip title's key.
+
+## Step 3, closed 2026-10-23
+
+Kokomi, Yae, the Spiral Abyss and the leftovers, on step 1's mechanism.
+The English a player reads is unchanged, pinned by
+`klee-mod/KleeTests/CodeTextStep3Tests.cs` against the English the same calls
+printed off the old assembly (main 2b5f235b1,
+`KleeTests/Fixtures/code_text_before_step3_2026_10_23.json`, about 1,180
+cases), plus the nine inline sentences copied from their literals.
+
+- **Kokomi (38 rows, `Vfx/Prototype/KokomiPlanText.cs`).** The strip's
+  captions and marks, the pager, the Plans view's captions, hint, prompts
+  and flip refusals (`KokomiPlan.FlipRefusalShown`; the bridge keeps its
+  lower-case reasons), Scry's auto-take bubble. "N attackers" and "N hits"
+  are SmartFormat plurals. Not keyed, on purpose: `KurageBeat.Line` ("Bake-
+  Kurage: Ambush, 12"), which only the blind page prints since the caption
+  over the pet replaced the bubble (2026-10-21).
+- **Yae (40 rows).** The Annotations' names (their tip titles), rules,
+  Sakura readings and Red Ink's planting box (`YaeAnnotationText.Rows`), so
+  `lint_hover_tips` measures `ForAnnotation` as keyed and its `UNKEYED_OK`
+  entry is gone; the Masterpiece's two bodies (hover summary and face line,
+  lists SmartFormat's); the Tenko token's clause and amounts
+  (`YaeShrineFace.Rows`); the shrine row's previews, rules and mark letters
+  (`YaeSakuraSlots.Rows`). The Edit prompts, Reborn faces and keyword
+  fallback, which are English rows themselves, read the English.
+- **Spiral Abyss (73 rows, `events`).** Every Blessing and Shadow name and
+  text, whole sentences with the act's numbers and the element's name as
+  vars (`AbyssText.Rows`), and the Blessing screen, strip hover, result line
+  and the Shadows relic's list (`AbyssOverlayText.Rows`). The strip title's
+  key is built from the enum (`AbyssText.NameKey`): seven keys moved
+  (`BLOODINTHEWATER` became `RIPTIDE`, and `THELEYLINE`, `JADESHIELD`,
+  `THECLOCK`, `ABYSSMAGESHIELD`, `ABYSSHERALD` took their enum names); no
+  translation existed. The event page's 504 option rows stay composed
+  English rows (now through `AbyssOverlayText.Option`).
+- **Leftovers (6 rows).** The whole-bank X (`MeterCostBadge`), the four
+  nation initials (`NationEmblem`), the cue's ALL (`FurinaStageCueNodes`).
+  `TurnEndPreviewBridge.cs:435` has nothing to key: its source table
+  (`TurnEndAttribution.Order`) is empty since 2026-10-11.
+- **The story offer line is not player text.** `StoryOffer.Text` is read
+  only by `StoryRewardsTests` as the oracle for the authored option rows,
+  which are keyed; nothing shows it, so it stays as it is.
+- **The Teyvat frame's rows are marked.** `LocReferenceTests` writes
+  `klee-mod/localization/reference/teyvat_frame_rows.json` (1,804 rows a
+  frame-off build does not merge), and `tools/lint_loc_translations.py`
+  fails a translated row among them and counts 3,403 rows to translate.
+
+Left after steps 2 and 3: whatever step 2 (Varka, Furina, the card-hover
+riders) reports open.

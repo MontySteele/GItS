@@ -62,7 +62,18 @@ public static class CodeText
         Cards.PlayerTips.Rows()
             .Concat(Powers.StagePerformerBadge.TipRows())
             .Concat(Elements.ReactionGuide.Rows())
-            .Concat(Elements.ElementWords.Rows());
+            .Concat(Elements.ElementWords.Rows())
+            // Step 3: Kokomi's strip and view, Yae's Annotations, Tenko
+            // clause and shrine row, the Spiral Abyss, the leftovers.
+            .Concat(Vfx.KokomiPlanText.Rows())
+            .Concat(Powers.YaeAnnotationText.Rows())
+            .Concat(Powers.YaeShrineFace.Rows())
+            .Concat(Vfx.YaeSakuraSlots.Rows())
+            .Concat(Abyss.AbyssText.Rows())
+            .Concat(Abyss.AbyssOverlayText.Rows())
+            .Concat(Vfx.MeterCostBadge.Rows())
+            .Concat(Vfx.NationEmblem.Rows())
+            .Concat(Vfx.FurinaStageCueNodes.Rows());
 
     /// <summary>Merge every row into the ENGLISH table it names.</summary>
     internal static void Inject()

@@ -39,6 +39,9 @@ public sealed class AbyssOverlayViewData
     public sealed class StripIcon
     {
         public string Name = "";
+
+        /// <summary>The hover title's row (<c>AbyssText.NameKey</c>).</summary>
+        public string TitleKey = "";
         public string Text = "";
         public Texture2D? Icon;
 

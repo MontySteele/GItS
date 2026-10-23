@@ -72,14 +72,11 @@ public static class AbyssChoicePage
                 "[gold]The Spiral Abyss[/gold] stirs before the Ancient. Take one "
               + "Blessing. The enemies take one of the two Shadows you pass, at random.",
         };
-        foreach (var s in AbyssDraft.AllShadows)
-        {
-            rows[StripTitleKey(AbyssText.Name(s))] = AbyssText.Name(s);
-        }
+        // The strip's hover titles are the names' own rows (`AbyssText`,
+        // `CodeText`), keyed by the enum.
         foreach (var b in AbyssDraft.AllBlessings)
         {
-            rows[StripTitleKey(AbyssText.Name(b))] = AbyssText.Name(b);
-            rows[OptionTitleKey(b)] = AbyssText.Name(b);
+            rows[OptionTitleKey(b)] = AbyssText.NameEnglish(b);
             foreach (var s in AbyssDraft.AllShadows)
             {
                 for (var act = 0; act < AbyssNumbers.ActRows; act++)
@@ -91,9 +88,13 @@ public static class AbyssChoicePage
         return rows;
     }
 
+    /// <summary>An option's English row: the Blessing, then the Shadow it
+    /// may leave (<see cref="AbyssOverlayText.Option"/>).</summary>
     internal static string OptionDescription(AbyssBlessing b, AbyssShadow s, int act) =>
-        $"{AbyssText.Text(b, act)}\n[red]If you pass this, the enemies may take its Shadow:[/red] [gold]{AbyssText.Name(s)}[/gold]. "
-        + AbyssText.Text(s, act);
+        CodeText.English(AbyssOverlayText.Option, CodeText.Vars(
+            ("Blessing", AbyssText.English(b, act)),
+            ("ShadowName", AbyssText.NameEnglish(s)),
+            ("Shadow", AbyssText.English(s, act))));
 
     /// <summary>Events showing the Abyss page right now. A weak table, so a
     /// finished event is never kept alive by it.</summary>
@@ -105,9 +106,13 @@ public static class AbyssChoicePage
     internal static AbyssOffer? OfferOf(EventModel e) => Showing.TryGetValue(e, out var offer) ? offer : null;
 
     /// <summary>The Blessing screen's strip tooltips: one title row per
-    /// Blessing and Shadow name.</summary>
-    public static string StripTitleKey(string name) =>
-        $"{KeyPrefix}.strip.{new string(name.Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant()}.title";
+    /// Blessing and Shadow, the name's own row, keyed by the ENUM so a
+    /// renamed entry keeps its translation (the localization census,
+    /// 2026-10-23; it was built from the display name, and Riptide's became
+    /// <c>BLOODINTHEWATER</c>).</summary>
+    public static string StripTitleKey(AbyssBlessing b) => AbyssText.NameKey(b);
+
+    public static string StripTitleKey(AbyssShadow s) => AbyssText.NameKey(s);
 
     private static readonly MethodInfo? SetEventStateMethod = AccessTools.Method(
         typeof(EventModel), "SetEventState",
