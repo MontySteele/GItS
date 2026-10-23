@@ -77,16 +77,17 @@ Steam cloud off for the app) and a co-op host's restore.
 it is safe while the game runs.
 
 ```sh
-.venv/Scripts/python.exe tools/package_workshop.py --variant public --version 0.3.0 --dry-run
-.venv/Scripts/python.exe tools/package_workshop.py --variant public --version 0.3.0
-.venv/Scripts/python.exe tools/package_workshop.py --variant beta   --version 0.3.0
+.venv/Scripts/python.exe tools/package_workshop.py --variant public --version 0.3.0 --telemetry-endpoint https://gits-telemetry.gits-telemetry-worker.workers.dev --dry-run
+.venv/Scripts/python.exe tools/package_workshop.py --variant public --version 0.3.0 --telemetry-endpoint https://gits-telemetry.gits-telemetry-worker.workers.dev
+.venv/Scripts/python.exe tools/package_workshop.py --variant beta   --version 0.3.0 --telemetry-endpoint https://gits-telemetry.gits-telemetry-worker.workers.dev
 ```
 
 `--version` is required and plain (`0.3.0`), never the dev `0.2.N+dirty`.
 `--visibility` (private, public, unlisted, friends_only; default
 friends_only), `--change-note`, `--image` (preview png, under 1 MB),
-`--skip-build`, `--pck`, `--images-root`, `--out` and
-`--telemetry-endpoint` are the options.
+`--skip-build`, `--pck`, `--images-root` and `--out` are the options. Every
+run, dry runs and `--skip-build` included, needs exactly one of
+`--telemetry-endpoint URL` or `--no-telemetry` (Run stats, below).
 
 **What it writes**, under `.workshop/<variant>/` (gitignored):
 `workshop.json` (title, the DRAFT description, visibility, changeNote, tags,
@@ -119,7 +120,10 @@ variant in: "Include the telemetry as opt-out." Both variants take the same
 option and ship the same tickbox, on by default. Add the deployed Worker's URL
 (`telemetry-worker/README.md`, Deploy; today
 `https://gits-telemetry.gits-telemetry-worker.workers.dev`). It stays an
-option, never a constant in the code:
+option, never a constant in the code, but the choice is required: the tool
+refuses to run unless it gets either `--telemetry-endpoint URL` or
+`--no-telemetry`, because beta 0.3.11 and 0.3.12 went out with the option
+left off and no run uploaded:
 
 ```sh
 .venv/Scripts/python.exe tools/package_workshop.py --variant beta --version 0.3.0 \
@@ -135,7 +139,7 @@ failure, is logged and dropped.
 
 That builds with `-p:GitsTelemetryEndpoint=<URL>/v1/run` (the route is
 appended if absent), which compiles `klee-mod/KleeCode/RunStats/`, and adds
-the privacy paragraph to the description. Without the option a package has
+the privacy paragraph to the description. With `--no-telemetry` a package has
 no uploader, and dev, seat and test builds never name the property, so
 they compile no RunStats file at all. The dll
 check fails a `--skip-build` whose dll does not match (endpoint missing, or

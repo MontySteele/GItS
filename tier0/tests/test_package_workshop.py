@@ -315,7 +315,7 @@ def test_a_dry_run_writes_nothing(tmp_path, capsys):
     dll, pck, art, image = _stand_ins(tmp_path)
     out = tmp_path / "out"
     rc = pw.main(["--variant", "public", "--version", "0.3.0", "--dry-run",
-                  "--pck", str(pck), "--images-root", str(tmp_path / "noart"),
+                  "--no-telemetry", "--pck", str(pck), "--images-root", str(tmp_path / "noart"),
                   "--image", str(image), "--out", str(out)])
     assert rc == 0
     assert not out.exists()
@@ -357,6 +357,38 @@ def test_an_endpoint_is_normalised_and_compiled_in(name, tmp_path):
 def test_an_endpoint_must_be_plain_https(bad):
     with pytest.raises(SystemExit):
         pw.telemetry_endpoint(pw.VARIANTS["beta"], bad)
+
+
+@pytest.mark.parametrize("mode", [["--dry-run"], ["--skip-build"], []])
+@pytest.mark.parametrize("choice", [[], ["--telemetry-endpoint", URL, "--no-telemetry"]])
+def test_packaging_refuses_without_exactly_one_run_stats_choice(mode, choice, tmp_path,
+                                                                 monkeypatch):
+    # Beta 0.3.11 and 0.3.12 went out with no uploader: the option was left
+    # off and nothing said so. Every path now refuses before building.
+    monkeypatch.setattr(pw.subprocess, "run",
+                        lambda *a, **k: pytest.fail("built without a run-stats choice"))
+    out = tmp_path / "out"
+    with pytest.raises(SystemExit) as exc:
+        pw.main(["--variant", "beta", "--version", "0.3.0", "--out", str(out),
+                 *mode, *choice])
+    msg = str(exc.value)
+    assert "--telemetry-endpoint" in msg and "--no-telemetry" in msg
+    assert "docs/current/operations/workshop.md" in msg
+    assert not out.exists()
+
+
+@pytest.mark.parametrize("choice", [["--no-telemetry"], ["--telemetry-endpoint", URL]])
+def test_either_run_stats_choice_is_accepted(choice, tmp_path, capsys):
+    dll, pck, art, image = _stand_ins(tmp_path)
+    rc = pw.main(["--variant", "beta", "--version", "0.3.0", "--dry-run", *choice,
+                  "--pck", str(pck), "--images-root", str(tmp_path / "noart"),
+                  "--image", str(image), "--out", str(tmp_path / "out")])
+    assert rc == 0
+    text = capsys.readouterr().out
+    if "--no-telemetry" in choice:
+        assert "run stats: none" in text
+    else:
+        assert "posts to " + ROUTE in text
 
 
 def test_the_public_variant_takes_an_endpoint_and_names_the_mod():

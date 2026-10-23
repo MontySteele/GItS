@@ -5,9 +5,9 @@
 the uploader himself, friends-only first, Yae held back from the first
 upload. This tool prepares the workspace and never uploads anything.
 
-    python tools/package_workshop.py --variant public --version 0.3.0 --dry-run
-    python tools/package_workshop.py --variant public --version 0.3.0
-    python tools/package_workshop.py --variant beta   --version 0.3.0
+    python tools/package_workshop.py --variant public --version 0.3.0 --no-telemetry --dry-run
+    python tools/package_workshop.py --variant public --version 0.3.0 --telemetry-endpoint URL
+    python tools/package_workshop.py --variant beta   --version 0.3.0 --telemetry-endpoint URL
     # then, by hand:  ModUploader.exe upload -w .workshop/public
 
 WHAT IT BUILDS. `dotnet build -c Release -p:WorkshopRelease=true
@@ -65,9 +65,10 @@ the telemetry as opt-out."). `--telemetry-endpoint URL` (the deployed
 Worker, `telemetry-worker/README.md`) compiles the uploader into either
 variant: `-p:GitsTelemetryEndpoint=<URL>/v1/run`, which compiles
 `klee-mod/KleeCode/RunStats/` and adds the privacy paragraph to the
-description ("This beta" or "This mod"). Without it a build has no
-uploader. The dll check confirms the endpoint is in the dll when asked for
-and absent when not.
+description ("This beta" or "This mod"). `--no-telemetry` builds without
+the uploader. One of the two is required: beta 0.3.11 and 0.3.12 went out
+with the option simply left off, so no run uploaded. The dll check confirms
+the endpoint is in the dll when asked for and absent when not.
 """
 from __future__ import annotations
 
@@ -173,6 +174,18 @@ def check_version(version: str) -> str:
         raise SystemExit(f"--version must be plain MAJOR.MINOR.PATCH (0.3.0), "
                          f"got {version!r}")
     return version
+
+
+RUN_STATS_CHOICE = ("choose run stats: --telemetry-endpoint URL (the Worker's URL, "
+                    "docs/current/operations/workshop.md, Run stats) or --no-telemetry")
+
+
+def run_stats_choice(url: str | None, no_telemetry: bool) -> None:
+    """Exactly one of --telemetry-endpoint and --no-telemetry, on every path
+    (dry run, --skip-build, full build). Beta 0.3.11 and 0.3.12 shipped with
+    no uploader because leaving the option off was silent."""
+    if bool(url) == bool(no_telemetry):
+        raise SystemExit(RUN_STATS_CHOICE)
 
 
 def telemetry_endpoint(variant: Variant, url: str | None) -> str | None:
@@ -492,7 +505,11 @@ def main(argv=None) -> int:
     ap.add_argument("--telemetry-endpoint", metavar="URL",
                     help="compile the run-stats uploader (on by default, switchable off), posting "
                          "to URL (the Worker; /v1/run is appended if absent)")
+    ap.add_argument("--no-telemetry", action="store_true",
+                    help="build without the run-stats uploader (one of this or "
+                         "--telemetry-endpoint is required)")
     args = ap.parse_args(argv)
+    run_stats_choice(args.telemetry_endpoint, args.no_telemetry)
 
     variant = VARIANTS[args.variant]
     version = check_version(args.version)
