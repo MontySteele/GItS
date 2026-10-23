@@ -209,6 +209,14 @@
       <HintPath>$(GameDataDir)\GodotSharp.dll</HintPath>
       <Private>true</Private>
     </Reference>
+    <Reference Include="SmartFormat">
+      <HintPath>$(GameDataDir)\SmartFormat.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SmartFormat.ZString">
+      <HintPath>$(GameDataDir)\SmartFormat.ZString.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
     <Reference Include="BaseLib">
       <HintPath>$(BaseLibDll)</HintPath>
       <Private>true</Private>

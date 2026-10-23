@@ -11449,6 +11449,24 @@ def stage_guest_tip_calls(card: dict) -> list[str]:
     return calls
 
 
+def guest_face_interface(card: dict, face: str) -> str | None:
+    """The marker a Guest Star row's class carries for the half of its
+    guest's sentence its face already prints (`Cards.PlayerTips.Guest`): the
+    act ("Act: ...") -> `IPrintsGuestAct`, so the guest's tip shows the line;
+    the line (its `{GuestLine}` number) -> `IPrintsGuestLine`, so the tip
+    shows the act; neither -> no marker, and the tip shows both. Read off the
+    row's own face here, at generation, so the C# never reads English
+    (the localization census, 2026-10-23, group 3)."""
+    if not any(fx.get("op") == "stage_guest"
+               for fx in iter_effects(card.get("effects") or [])):
+        return None
+    if "Act:" in face:
+        return "IPrintsGuestAct"
+    if "{GuestLine" in face:
+        return "IPrintsGuestLine"
+    return None
+
+
 #: The ops whose one printed number is a CEILING, and the var that prints it:
 #: R252's Careful Now (and the co-op set's Hide Here!). One `cap` delta key,
 #: bound to the first top-level op here.
@@ -18075,6 +18093,12 @@ def emit(
     # row (localization route b, 2026-10-19).
     if sets_off_first(desc):
         interfaces += ", ISetsOffFirstCard"
+    # The localization census (2026-10-23, group 3): which half of its
+    # guest's sentence a Guest Star face prints, so `PlayerTips.Guest` reads
+    # a flag instead of searching the English face.
+    guest_face = guest_face_interface(card, desc)
+    if guest_face is not None:
+        interfaces += ", " + guest_face
     # YAE MIKO, RED INK ON A PLANTING CARD (ruled 2026-10-14): a row whose own
     # play plants a Sakura (`yae` plant / plant_level) says so on the class,
     # a MARKER read by `YaeAnnotationReach.Plants` (the Edit filter, and Red

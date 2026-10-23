@@ -133,7 +133,8 @@ def test_the_counter_and_the_face_print_no_line_number():
 # ---- 2. Rising Applause teaches Fanfare -----------------------------------------
 
 def test_rising_applause_says_lost_hp_becomes_fanfare():
-    tips = TIPS_CS.read_text(encoding="utf-8")
+    # The tip's keyed row (the localization census, 2026-10-23).
+    tips = TIPS_CS.with_name("PlayerTips.cs").read_text(encoding="utf-8")
     assert ('"Whenever you lose HP, gain that much [gold]Fanfare[/gold]. Its "'
             in tips)
     src = (PROTOTYPE_DIR / "ProtoFsStandingOvation.cs").read_text(

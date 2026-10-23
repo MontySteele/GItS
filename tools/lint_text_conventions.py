@@ -92,7 +92,16 @@ YAE_SPELLINGS = ("hand-plain", "bare-hand", "pile-plain", "parenthesis")
 #: card text pass of 2026-10-12 (`review/ruled/card-text-pass-2026-10-12.md`,
 #: rules 1 and 8): Team Effort, Sparkling Burst, Treasure Map and Come Back and
 #: Play! took the spellings they were held from.
-DEFERRED: dict[tuple[str, str], str] = {}
+DEFERRED: dict[tuple[str, str], str] = {
+    # The localization census (2026-10-23): Escoffier's line printed its
+    # number from a parenthesised `upgraded ? ... : ...` the old reader
+    # rendered as nothing, so "N more damage" was never seen; the keying made
+    # the number a var and the lint can read it. The English is unchanged by
+    # rule (the keying is plumbing).
+    ("EscoffierKey", "more-damage"): (
+        "Escoffier's line, 'Your guests' acts deal N more damage'; a "
+        "rewording is the Furina text audit's"),
+}
 
 # --- the exceptions: id -> reason. Rot semantics, see the module doc. ----
 EXCEPTIONS = {
@@ -135,6 +144,24 @@ EXCEPTIONS = {
         "and the Swirl payout) plus the Gravestone's own first-Oath "
         "Ascension, upgraded and free that turn: three rules of the one "
         "Ancient relic"),
+    # The localization census (2026-10-23): keying the tip bodies brought
+    # this one into the lint's sight. It was a `static readonly` the reader
+    # took for an empty name, so it met no ceiling before; the keying moved
+    # it unchanged, by rule (plumbing, not rewording).
+    "FullShrineKey.player": (
+        "Yae review r5, item 5 (four of five seats could not read the short "
+        "form until it bit them): the full-shrine plant by kind, two branches "
+        "in one box, shown on every planting card. Measured for the first "
+        "time by the 2026-10-23 keying at 161 of 135; a rewording is the "
+        "Yae text audit's"),
+    # Two guests' sentences, the same story: their line's number sat in a
+    # parenthesised `upgraded ? ... : ...` the old reader rendered as no
+    # numeral at all, so neither row met its rule until the keying made the
+    # number a var (2026-10-23). The English is unchanged, by rule.
+    "NeuvilletteKey": (
+        "Neuvillette's line and act, 136 of 135 with its number measured; "
+        "unseen until the 2026-10-23 keying. A rewording is the Furina text "
+        "audit's"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.
@@ -511,16 +538,35 @@ _ACT_ARM = re.compile(
     re.S)
 
 
-def _act_texts() -> dict[str, str]:
-    src = read(MOD / "Powers" / "Prototype" / "FurinaStageBadges.cs")
-    body = src[src.index("public static string ActText"):]
-    # The card text pass (2026-10-12): the method holds TWO switches, the act
-    # amounts and then the text, and reading to the first `_ =>` measured the
-    # amounts switch -- every guest tip rendered empty and met no rule. The
-    # text is the `return who switch`.
-    body = body[body.index("return who switch"):]
+def _switch_arms(src: str, head: str) -> dict[str, str]:
+    """The `StagePerformer.X => ...` arms of the switch after `head`, each
+    arm's English joined; an `upgraded ? A : B` arm reads B, the base card."""
+    body = src[src.index(head):]
+    body = body[body.index("who switch"):]
     body = body[:body.index("_ =>") + 4]
-    return {who: csharp_text(expr) for who, expr in _ACT_ARM.findall(body)}
+    out: dict[str, str] = {}
+    for who, expr in _ACT_ARM.findall(body):
+        expr = re.sub(r"^\s*//.*$", "", expr, flags=re.M).strip()
+        base = re.match(r"upgraded\s*\?.*?\n\s*:\s*(.*)", expr, re.S)
+        out[who] = csharp_text(base.group(1) if base else expr)
+    return out
+
+
+def _guest_halves() -> dict[str, tuple[str, str]]:
+    """Each guest's line and act, base card: `StagePerformerBadge.
+    LineTemplate` and `.ActTemplate`, the two keyed rows `ActText` joins (the
+    localization census, 2026-10-23). A var hole renders as one numeral
+    (`render`)."""
+    src = read(MOD / "Powers" / "Prototype" / "FurinaStageBadges.cs")
+    lines = _switch_arms(src, "internal static string? LineTemplate(")
+    acts = _switch_arms(src, "internal static string? ActTemplate(")
+    return {who: (lines[who], acts[who]) for who in lines if who in acts}
+
+
+def _act_texts() -> dict[str, str]:
+    """`StagePerformerBadge.ActText` per guest: its line, a space, its act."""
+    return {who: line + " " + act
+            for who, (line, act) in _guest_halves().items()}
 
 
 def _tip_body(body: str, consts: dict[str, str]) -> str:
@@ -585,8 +631,9 @@ def player_tip_rows() -> list[Row]:
     src = re.sub(r"^\s*//.*$", "", read(path), flags=re.M)
     where = str(path.relative_to(REPO))
     rows: list[Row] = []
-    for m in re.finditer(r"\[ArmKeywordTips\.(\w+Key)\]\s*=\s*", src):
-        i, n, depth = m.end(), len(src), 0
+
+    def entry_end(i: int) -> int:
+        n, depth = len(src), 0
         while i < n:
             c = src[i]
             if c == '"':
@@ -599,10 +646,20 @@ def player_tip_rows() -> list[Row]:
             elif c in ",}" and depth == 0:
                 break
             i += 1
-        expr = src[m.end():i].strip()
+        return i
+
+    for m in re.finditer(r"\[ArmKeywordTips\.(\w+Key)\]\s*=\s*", src):
+        expr = src[m.end():entry_end(m.end())].strip()
         if re.fullmatch(r"\w+", expr):
             continue
         rows.append(Row("tip", m.group(1) + ".player", csharp_text(expr),
+                        where))
+    # The variant rows (`PlayerTips.Variants`, the localization census,
+    # 2026-10-23): Klee's opening bank, the no-Bomb own-line rider, Yae's
+    # Sakura.
+    for m in re.finditer(r"\[\(ArmKeywordTips\.(\w+Key), (\w+)\)\]\s*=\s*", src):
+        expr = src[m.end():entry_end(m.end())].strip()
+        rows.append(Row("tip", f"{m.group(1)}.{m.group(2)}", csharp_text(expr),
                         where))
     return rows
 
@@ -626,7 +683,11 @@ def tip_rows() -> list[Row]:
         if "SparkBody(" in body:
             continue
         rows.append(Row("tip", name, _tip_body(body, consts), where))
-    concat = r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
+    # A guest's tip is its whole sentence (the seat's) or a half of it (the
+    # player's, `PlayerTips.Guest`), both off the badge's keyed rows.
+    for who, text in _act_texts().items():
+        rows.append(Row("tip", who + "Key", text, where))
+    concat =r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
     word = csharp_text(re.search(r"const string word =\s*" + concat + ";", src).group(1))
     shared = csharp_text(re.search(r"const string shared =\s*" + concat + ";", src).group(1))
     arm = re.search(r'return word \+ "Start each combat with "((?:[^;])*);', src)

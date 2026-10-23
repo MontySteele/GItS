@@ -119,8 +119,9 @@ FULL_SHRINE = ("planting makes the Sakura closest to withering act. Same "
 
 def test_full_shrine_text_on_the_page_and_the_hover():
     assert blindplay_render.SHRINE_FULL_LINE == "- Shrine full: " + FULL_SHRINE
+    # The tip's keyed row (the localization census, 2026-10-23).
     tips = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+            / "PlayerTips.cs").read_text(encoding="utf-8")
     assert '"Planting makes the Sakura closest to withering act. Same kind: it "' in tips
 
 

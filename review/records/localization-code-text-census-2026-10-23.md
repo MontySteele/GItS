@@ -75,3 +75,37 @@ English hover boxes and live clauses beside translated cards.
 - Number formatting is clean (`InvariantCulture` everywhere).
 - The gameplay rule that read English text is now a flag
   (`KleeCardTooltips.cs:523`, `ISetsOffFirstCard`), as ruled.
+
+## Step 1, closed 2026-10-23
+
+The mechanism is `CodeText` (`klee-mod/KleeCode/Localization/CodeText.cs`,
+written up in `docs/current/operations/localization.md`, "Code-built text"):
+a row is authored in C#, merged into the English table, and read through the
+game's `LocString`, numbers as vars. 91 rows, all in `card_keywords`; the
+English a player reads is unchanged, pinned by
+`klee-mod/KleeTests/CodeTextTests.cs` against the English dumped off the old
+assembly (`KleeTests/Fixtures/code_text_before_2026_10_23.json`).
+
+- **Group 1, tip bodies: closed but for Yae's Annotations.** 38 rows in
+  `PlayerTips.cs` (every arm tip a player reads, its variants, Yae's six),
+  24 in `FurinaStageBadges.cs` (each guest's line and act, the join).
+  Not keyed, on purpose: the seat's long forms in `ArmKeywordTips.cs`, the
+  eight riders only a seat's chain raises, and every `BaseKeywordTips` body
+  (a player reads the base game's own tip for those words). The Annotation
+  tips (`YaeAnnotationText`) are step 2's, with the rest of
+  `YaeAnnotations.cs`.
+- **Group 3: closed.** A card face's hit element is a token
+  (`[gold]{Hydro}[/gold] damage`, 212 of our card rows), filled with the
+  element's own row (`KLEEMOD-ELEMENT_NAME.*`, 6 rows); a guest's tip half is
+  a generated marker (`IPrintsGuestAct`, `IPrintsGuestLine`, 10 cards).
+- **Group 6, the reaction guide and chart: closed.** 23 rows (a tip per
+  element, a cell per reaction, the notes, the chart's labels and its button).
+- **Found on the way:** three texts no lint had measured are now read, and
+  over their rules: the full-shrine tip (161 of 135, and of the hover's 100),
+  Neuvillette's guest sentence (136 of 135) and Escoffier's ("N more
+  damage"). Carried as named exceptions; a rewording is each kit's text
+  audit's. The Drained counter shows the seat's Drain sentence to a player
+  (`DrainedCounter.cs:148`), left for group 4.
+
+Left: groups 2, 4 and 5, the four leftovers of group 6, the story offer line,
+and the Abyss strip title's key.

@@ -33,3 +33,41 @@ cd klee-mod/KleeTests && GITS_WRITE_LOC_REFERENCE=1 dotnet test --filter LocRefe
 The hashes live outside the pck, `klee-mod/localization/hashes/<lang>/<table>.json`
 (key to the first 16 hex digits of sha256 of the English), so the shipped file
 stays flat.
+
+### Code-built text
+
+English that C# builds (a tip body, a chart label, a guest's sentence) is a
+`CodeRow`: table, key, English template, authored beside the code that shows
+it and listed in `CodeText.Sources()`
+(`klee-mod/KleeCode/Localization/CodeText.cs`). `CodeText.Inject` merges every
+row into the English table through `EnglishLoc.Table`, so the English
+reference picks it up, and a surface reads its row with
+`CodeText.Format(row, vars)`, a `LocString` through the game's SmartFormat: a
+translated row in the local table wins per key, and the vars fill its holes.
+Headless (the C# suite) a row formats from its English through the same
+SmartFormat extensions, so a test reads the text a player would.
+
+- **Keys.** The surface's own key with a leaf for the box, in the table its
+  title already lives in: `card_keywords`, `KLEEMOD-ARM_MEND.description`; a
+  variant `KLEEMOD-ARM_SPARK.description_opening_bank`; a chart's parts
+  `KLEEMOD-REACTION_CHART.cells.VAPORIZE`. An element's name is
+  `KLEEMOD-ELEMENT_NAME.PYRO`.
+- **Adding a row.** Add the template to the surface's rows (a tip body to
+  `PlayerTips.Bodies`, or a `CodeRow` the surface lists), read it with
+  `CodeText.Format`, rewrite the English reference, and pin the rendered
+  English in a test.
+- **The rule.** A row is a whole sentence or a whole box; code never glues
+  English fragments, and where two sentences join, the join is its own row
+  (`{Line} {Act}`). A number is a var read from the law constant
+  (`{BombGrowth}`, `CodeText.Num` for a decimal), never baked in; a plural is
+  SmartFormat's (`card{N:plural:|s}`). A word code fills in that is itself
+  player text (an element) is a var whose value is its own row. SmartFormat
+  reads a backslash as an escape, so a literal one is written twice.
+- **Seat text is not keyed.** A sentence only a blind seat reads (the long
+  forms in `ArmKeywordTips`, the riders only a seat's chain raises) stays an
+  English literal. `tools/lint_hover_tips.py` fails a player chain that raises
+  a tip with no keyed row.
+- **A display rule never reads English.** A card face's hit element is a
+  token (`[gold]{Hydro}[/gold] damage`), written into our card rows as they
+  reach the English table (`EnglishLoc.ModelRowText`); a guest's tip half is a
+  marker the generator stamps (`IPrintsGuestAct`, `IPrintsGuestLine`).

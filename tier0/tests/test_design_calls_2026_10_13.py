@@ -50,8 +50,9 @@ def test_four_winds_ascension_says_its_hit_gains_no_oath():
     src = (PROTOTYPE_DIR / "ProtoVkFourWindsAscension.cs").read_text(
         encoding="utf-8")
     assert "ArmKeywordTips.ForAscensionNoOath(" in src
-    assert '"This hit does not gain Oath."' in TIPS_CS.read_text(
-        encoding="utf-8")
+    # The tip's keyed row (the localization census, 2026-10-23).
+    assert '"This hit does not gain Oath."' in TIPS_CS.with_name(
+        "PlayerTips.cs").read_text(encoding="utf-8")
     for rid, row in _rows().items():
         assert gen.ascension_hit_gains_no_oath(row) == (
             rid == "proto_vk_four_winds_ascension"), rid

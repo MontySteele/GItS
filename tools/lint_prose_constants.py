@@ -263,7 +263,8 @@ ALLOWED: dict[tuple[str, str, str], str] = {
         "the card's own energy, not Bouquet of Roses'",
     # KLEE'S STORY (2026-10-12): Confinement's "After 3 combats" is a story
     # Curse's length; these strings print their own numbers.
-    ("klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs",
+    # The totem's tip body moved to its keyed row (2026-10-23).
+    ("klee-mod/KleeCode/Cards/Prototype/PlayerTips.cs",
      "StoryRules.StoryCurseCombats", "3"):
         "the totem's own fire cap, not the story Curse's length",
     # A Letter from Jean's "Upgrade 2 random cards that place a Bomb" is the
