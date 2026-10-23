@@ -99,3 +99,12 @@ more Sakura." (was Rare, cost 2 [1]). This matches Defect's Capacitor
 reverted alone. Her pool is now 20 / 39 / 19, and 7 cost-only upgrades
 remain. Two upgraded copies reach nine Sakura, the last one with a status
 badge; a tenth still stands and strikes without one.
+
+Rare audit, Sacred Thunderbolt (the one generic Rare). [USER], 2026-10-23:
+"Sacred Thunderbolt - agreed, but is that enough at 2 cost? It sounds
+expensive... either go to 1 cost or buff the effect, what do you think?"
+Claude's call: 1 cost. Now a Rare Attack, cost 1: "Deal 9 [12] Electro
+damage. If it triggers an Elemental Reaction, each Sakura gains a Level."
+(was cost 2: deal 13 [17], and 13 [17] more on a reaction). The Level is
+Mikage Thunder's "each Sakura gains a Level" op, paid only when this card's
+own hit reacts.

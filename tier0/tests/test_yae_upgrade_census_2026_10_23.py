@@ -91,3 +91,39 @@ def test_saiguus_lesson_unupgraded_applies_no_weak():
     _play(st, _card("saiguus_lesson"))
     assert [e.powers.get("weak", 0) for e in st.enemies] == [0, 0]
     assert all(e.hp == 100 for e in st.enemies)
+
+
+# --- Rare audit: Sacred Thunderbolt (2026-10-23) ----------------------------
+# [USER]: "Sacred Thunderbolt - agreed, but is that enough at 2 cost? It
+# sounds expensive... either go to 1 cost or buff the effect". Cost 1:
+# "Deal 9 [12] Electro damage. If it triggers an Elemental Reaction, each
+# Sakura gains a Level."
+
+def test_sacred_thunderbolt_is_a_one_cost_nine_twelve():
+    base, plus = _card("sacred_thunderbolt"), _card("sacred_thunderbolt+")
+    assert (base.rarity, base.cost, plus.cost) == ("rare", 1, 1)
+    hit = lambda c: next(fx["amount"] for fx in c.effects
+                         if fx["op"] == "damage")
+    assert (hit(base), hit(plus)) == (9, 12)
+
+
+def _levels(st):
+    return [s.level for s in Y.ledger(st.player).sakura]
+
+
+def test_sacred_thunderbolt_levels_each_sakura_on_a_reaction():
+    st = _state(n_enemies=1)
+    st.enemies[0].aura, st.enemies[0].aura_turns_left = "hydro", 2
+    Y.plant(st, 2)
+    before = _levels(st)
+    _play(st, _card("sacred_thunderbolt"))
+    assert _levels(st) == [lv + 1 for lv in before]
+
+
+def test_sacred_thunderbolt_without_a_reaction_levels_nothing():
+    st = _state(n_enemies=1)
+    Y.plant(st, 2)
+    before = _levels(st)
+    _play(st, _card("sacred_thunderbolt"))
+    assert _levels(st) == before
+    assert st.enemies[0].hp == 100 - 9

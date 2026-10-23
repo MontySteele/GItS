@@ -2840,8 +2840,7 @@
       "yae_amount": 1
     },
     "proto_ym_sacred_thunderbolt": {
-      "damage": 4,
-      "conditional_then_damage": 4
+      "damage": 3
     },
     "proto_ym_saiguus_lesson": {
       "yae_upgraded": true

@@ -1380,7 +1380,7 @@
     "KLEEMOD-PROTO_YM_REWRITE.title": "Rewrite",
     "KLEEMOD-PROTO_YM_ROYALTIES.description": "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Royalties[/gold] (when played, gain {energyPrefix:energyIcons(1)}).",
     "KLEEMOD-PROTO_YM_ROYALTIES.title": "Royalties",
-    "KLEEMOD-PROTO_YM_SACRED_THUNDERBOLT.description": "Deal {Damage:diff()} [gold]Electro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {BranchDamage:diff()} more.",
+    "KLEEMOD-PROTO_YM_SACRED_THUNDERBOLT.description": "Deal {Damage:diff()} [gold]Electro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], each [gold]Sakura[/gold] gains a Level.",
     "KLEEMOD-PROTO_YM_SACRED_THUNDERBOLT.title": "Sacred Thunderbolt",
     "KLEEMOD-PROTO_YM_SAIGUUS_LESSON.description": "Whenever you apply [gold]Weak[/gold] to an enemy, a striking [gold]Sakura[/gold] strikes it.{IfUpgraded:show: Apply 1 [gold]Weak[/gold] to ALL enemies.|}",
     "KLEEMOD-PROTO_YM_SAIGUUS_LESSON.title": "Saiguu's Lesson",

@@ -75,4 +75,25 @@ public class YaeUpgradeCensusTests
         Assert.Contains(body, c => c.Contains("get_IsUpgraded"));
         Assert.Contains(body, c => c.Contains("PowerCmd.Apply") && c.Contains("WeakPower"));
     }
+
+    /// <summary>Rare audit (2026-10-23). [USER]: "Sacred Thunderbolt - agreed,
+    /// but is that enough at 2 cost? It sounds expensive... either go to 1
+    /// cost or buff the effect". Cost 1: "Deal 9 [12] Electro damage. If it
+    /// triggers an Elemental Reaction, each Sakura gains a Level."</summary>
+    [Fact]
+    public void Sacred_thunderbolt_costs_one_and_levels_each_sakura_on_a_reaction()
+    {
+        var card = new ProtoYmSacredThunderbolt();
+        Assert.Equal((1, CardRarity.Rare), (card.EnergyCost.Canonical, card.Rarity));
+        Assert.Equal((9m, 12m), (card.DynamicVars.Damage.BaseValue,
+                                 Upgraded<ProtoYmSacredThunderbolt>().DynamicVars.Damage.BaseValue));
+        Assert.Equal("Deal {Damage:diff()} [gold]Electro[/gold] damage. If it triggers an "
+                   + "[gold]Elemental Reaction[/gold], each [gold]Sakura[/gold] gains a Level.",
+                     Face(card));
+        var play = Il.CallSequence(Il.Method(nameof(ProtoYmSacredThunderbolt), "OnPlay")).ToList();
+        var hit = play.FindIndex(c => c.Contains("DamageCmd.Attack"));
+        var level = play.FindIndex(c => c.Contains("YaeCards.LevelUp"));
+        Assert.True(hit >= 0 && level > hit, string.Join(" | ", play));
+        Assert.Contains(play, c => c.Contains("ReactionEffects.get_TotalResolved"));
+    }
 }
