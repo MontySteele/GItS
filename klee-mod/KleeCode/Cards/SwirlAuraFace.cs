@@ -24,8 +24,13 @@ public static class SwirlAuraFace
     /// <summary>The description token the clause rides on.</summary>
     public const string Token = "SwirlAura";
 
+    /// <summary>The clause's row (the localization census, 2026-10-23, step
+    /// 2): a translation words it; the leading space is the row's.</summary>
+    internal static readonly CodeRow NoAuraRow =
+        new("card_keywords", "KLEEMOD-FACE_SWIRL_AURA.no_aura", " (no aura: no Swirl)");
+
     /// <summary>The clause with nothing to Swirl.</summary>
-    public const string NoAura = " (no aura: no Swirl)";
+    public static string NoAura => CodeText.Format(NoAuraRow);
 
     /// <summary>The words for a board: <see cref="NoAura"/> when there is no
     /// aura to Swirl, else empty. PURE.</summary>

@@ -58,7 +58,11 @@ SmartFormat extensions, so a test reads the text a player would.
   title already lives in: `card_keywords`, `KLEEMOD-ARM_MEND.description`; a
   variant `KLEEMOD-ARM_SPARK.description_opening_bank`; a chart's parts
   `KLEEMOD-REACTION_CHART.cells.VAPORIZE`. An element's name is
-  `KLEEMOD-ELEMENT_NAME.PYRO`. The Spiral Abyss's rows live in `events` beside
+  `KLEEMOD-ELEMENT_NAME.PYRO`, a guest's `KLEEMOD-STAGE_PERFORMER_NAME.CLORINDE`.
+  A card face's in-combat line is keyed by its token
+  (`KLEEMOD-FACE_STAGE_REPAY.repays`), and its leading line break or space
+  is the row's, so a translation places it.
+  The Spiral Abyss's rows live in `events` beside
   its page (`KLEE_SPIRAL_ABYSS.blessings.LEYLINE.description`), a name keyed
   by its enum, never its display name (`KLEE_SPIRAL_ABYSS.strip.RIPTIDE.title`).
 - **A row that is itself English reads the English.** Where code composes a

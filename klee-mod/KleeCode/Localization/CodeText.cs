@@ -63,6 +63,15 @@ public static class CodeText
             .Concat(Powers.StagePerformerBadge.TipRows())
             .Concat(Elements.ReactionGuide.Rows())
             .Concat(Elements.ElementWords.Rows())
+            // Step 2: Varka and Furina, their face lines, captions and
+            // counters, and the card-hover reaction riders.
+            .Concat(Powers.VarkaOath.TextRows())
+            .Concat(Powers.FurinaStageBowPreview.TextRows())
+            .Concat(Vfx.DrainedCounter.TextRows())
+            .Concat(new[] { Vfx.FanfareCounter.BodyRow })
+            .Concat(Vfx.FurinaStageCues.TextRows())
+            .Concat(new[] { Cards.SwirlAuraFace.NoAuraRow, Cards.HalfHpFace.Row })
+            .Concat(Cards.KleeCardTooltips.TextRows())
             // Step 3: Kokomi's strip and view, Yae's Annotations, Tenko
             // clause and shrine row, the Spiral Abyss, the leftovers.
             .Concat(Vfx.KokomiPlanText.Rows())

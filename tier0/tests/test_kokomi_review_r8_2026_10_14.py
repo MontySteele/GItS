@@ -180,8 +180,9 @@ def test_sucrose_swirl_faces_carry_the_no_aura_clause():
 def test_the_words_match_the_mods():
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "SwirlAuraFace.cs"
            ).read_text(encoding="utf-8")
-    assert (f'public const string NoAura = "{gen_klee_cards.SWIRL_AURA_WORDS}";'
-            in src)
+    # The localization census (2026-10-23, step 2): a keyed row.
+    assert (f'"KLEEMOD-FACE_SWIRL_AURA.no_aura", '
+            f'"{gen_klee_cards.SWIRL_AURA_WORDS}"' in src)
     assert gen_klee_cards.SWIRL_AURA_WORDS == " (no aura: no Swirl)"
 
 

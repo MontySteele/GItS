@@ -32,4 +32,7 @@ def test_the_generated_faces_carry_the_token_and_the_gate_s_price():
         assert ('description.Add("StageSpendShort", '
                 f"FurinaStageFacePreview.SpendShort(this, {price}));") in src
     face = (POWERS / "FurinaStageBowPreview.cs").read_text(encoding="utf-8")
-    assert r'NotEnoughFanfare = "\n(Not enough Fanfare)";' in face
+    # The localization census (2026-10-23, step 2): the words are a keyed
+    # row, read through `CodeText`.
+    assert ('"KLEEMOD-FACE_STAGE_SPEND_SHORT.description", '
+            r'"\n(Not enough Fanfare)"') in face

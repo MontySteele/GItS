@@ -91,8 +91,10 @@ def test_the_preview_words_are_one_short_line():
            / "Powers" / "Prototype" / "FurinaStageBowPreview.cs").read_text(
                encoding="utf-8")
     # Paper 3 (2026-10-16): the floor first, "(Repay 0: gain 3 Block)".
-    assert '$"\\n(Repay {repays}: {what})"' in src
-    assert '$"gain {pays} {payout}"' in src
+    # The localization census (2026-10-23, step 2): a keyed row per payout.
+    assert r'"\n(Repay {Repays}: gain {Pays} Block)"' in src
+    assert r'"\n(Repay {Repays}: gain {Pays} Vigor)"' in src
+    assert r'"\n(Repay {Repays}: +{Pays} damage)"' in src
     for word in ('"Block"', '"Vigor"', '"damage"'):
         assert word in src
 

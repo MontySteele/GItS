@@ -77,8 +77,7 @@ public static class KleeCardTooltips
     /// because a gem swapped under a reader who has already read the face is
     /// the same silence one step quieter.</summary>
     public static string OverriddenElementBody(Element applied) =>
-        $"While the buff stands, this card's hit applies "
-      + $"[gold]{applied}[/gold] instead of the element it prints.";
+        CodeText.Format(OverriddenElementRow, CodeText.Vars(("Element", ElementWords.Name(applied))));
 
     /// <summary>
     /// <paramref name="appliesWithoutHit"/> is `EB-338`. See
@@ -174,8 +173,7 @@ public static class KleeCardTooltips
             {
                 previews.Add(new HoverTip(
                     new LocString(Table, PreviewKey(reaction, false) + ".title"),
-                    (elementOnlyOnSpend ? SpendOnlyPrefix : "")
-                        + SwirlBody(card, aura.Element, several)));
+                    SpendOnlyIf(elementOnlyOnSpend, SwirlBody(card, aura.Element, several))));
                 continue;
             }
 
@@ -219,12 +217,12 @@ public static class KleeCardTooltips
                 var debuffKey = PreviewKey(reaction, false);
                 previews.Add(new HoverTip(
                     new LocString(Table, debuffKey + ".title"),
-                    (elementOnlyOnSpend ? SpendOnlyPrefix : "")
-                        + new LocString(Table, debuffKey + ".description")
-                            .GetFormattedText()
-                        + " " + DebuffArtifactSentence(
+                    SpendOnlyIf(elementOnlyOnSpend, CodeText.Format(WithArtifactRow, CodeText.Vars(
+                        ("Body", new LocString(Table, debuffKey + ".description")
+                            .GetFormattedText()),
+                        ("Artifact", DebuffArtifactSentence(
                             ReactionEffects.ArtifactBlockedDebuff(reaction)!,
-                            several ? enemy.Name : null)));
+                            several ? enemy.Name : null)))))));
                 continue;
             }
             if (blocked)
@@ -233,9 +231,8 @@ public static class KleeCardTooltips
                 previews.Add(new HoverTip(
                     new LocString(Table, (boss ? FrozenBossPreviewKey
                                                : FrozenPreviewKey) + ".title"),
-                    (elementOnlyOnSpend ? SpendOnlyPrefix : "")
-                        + FrozenArtifactBody(boss,
-                              several ? enemy.Name : null)));
+                    SpendOnlyIf(elementOnlyOnSpend, FrozenArtifactBody(boss,
+                              several ? enemy.Name : null))));
                 continue;
             }
             // 2026-10-04 (Furina v2 seat round): Tidal Flourish previewed
@@ -249,7 +246,7 @@ public static class KleeCardTooltips
                 previews.Add(new HoverTip(
                     new LocString(Table, (substitute == null
                         ? key : NoHitTitleKey(reaction)) + ".title"),
-                    SpendOnlyPrefix + (substitute
+                    SpendOnly(substitute
                         ?? new LocString(Table, key + ".description")
                             .GetFormattedText())));
             }
@@ -372,9 +369,7 @@ public static class KleeCardTooltips
             var own = TargetAlreadyFolded(card)
                 ? Capped(enemy, printed)
                 : SimDamagePipeline.ResolveOnTarget(enemy, printed, 1m);
-            return $"The [gold]Set off[/gold] takes the {aura} aura first, so "
-                 + $"the {mult:0.##}x is the [gold]Bomb[/gold]'s. This card's "
-                 + $"own {printed} lands {own}." + UnblockedRaiserClause(dealer);
+            return WithBoot(SetOffFirstBody(aura, mult, printed, own), Boot(dealer));
         }
         // THE FACE MAY ALREADY CARRY THE AMPLIFIER (the Varka element
         // identities round, 2026-10-01). Amber: Sharpshooter's face read 18
@@ -386,10 +381,8 @@ public static class KleeCardTooltips
         // landed one and only the cap is left to apply.
         if (TargetAlreadyFolded(card) && ReferenceEquals(FaceBody(card), enemy))
         {
-            return $"The triggering hit deals {mult:0.##}x damage and consumes "
-                 + $"the aura. The {printed} on this card already counts it: "
-                 + $"into that {aura} aura it lands {Capped(enemy, printed)}."
-                 + UnblockedRaiserClause(dealer);
+            return WithBoot(FoldedHereBody(mult, printed, aura, Capped(enemy, printed)),
+                            Boot(dealer));
         }
         // THE FACE FOLDED A DIFFERENT BODY (Kokomi seats, 2026-10-14). Two
         // seats read "Reaction preview: Vaporize ... lands 31" on a Chevreuse
@@ -405,10 +398,127 @@ public static class KleeCardTooltips
                 BodyTerms(enemy, card, dealer),
                 SimDamagePipeline.TargetCap(enemy))
             : SimDamagePipeline.ResolveOnTarget(enemy, printed, mult);
-        return $"The triggering hit deals {mult:0.##}x damage and consumes "
-             + $"the aura. Into that {aura} aura this card's {printed} lands "
-             + $"{landed}." + UnblockedRaiserClause(dealer);
+        return WithBoot(FoldedElsewhereBody(mult, aura, printed, landed), Boot(dealer));
     }
+
+    // ---- THE RIDERS' ROWS (the localization census, 2026-10-23, step 2).
+    // Every rider this class builds is a row in `card_keywords` under the
+    // preview's own key, read through `CodeText`: the multiplier and the
+    // numbers are vars, an element's name its own row (`ElementWords`), an
+    // enemy's name the game's; where two sentences join, the join is a row.
+
+    internal static readonly CodeRow OverriddenElementRow = new(Table, OverriddenElementKey + ".description",
+        "While the buff stands, this card's hit applies [gold]{Element}[/gold] instead of the "
+      + "element it prints.");
+    private static readonly string PreviewRowKey = "KLEEMOD-REACTION_PREVIEW";
+    internal static readonly CodeRow SetOffFirstRow = new(Table, PreviewRowKey + ".amplified_set_off_first",
+        "The [gold]Set off[/gold] takes the {Aura} aura first, so the {Mult}x is the "
+      + "[gold]Bomb[/gold]'s. This card's own {Printed} lands {Landed}.");
+    internal static readonly CodeRow FoldedHereRow = new(Table, PreviewRowKey + ".amplified_folded_here",
+        "The triggering hit deals {Mult}x damage and consumes the aura. The {Printed} on this "
+      + "card already counts it: into that {Aura} aura it lands {Landed}.");
+    internal static readonly CodeRow FoldedElsewhereRow = new(Table, PreviewRowKey + ".amplified_folded_elsewhere",
+        "The triggering hit deals {Mult}x damage and consumes the aura. Into that {Aura} aura "
+      + "this card's {Printed} lands {Landed}.");
+    public static readonly CodeRow BootRow = new(Table, PreviewRowKey + ".boot",
+        "[gold]The Boot[/gold] raises an unblocked hit after Block, so it is not in that number.");
+    internal static readonly CodeRow WithBootRow = new(Table, PreviewRowKey + ".with_boot", "{Body} {Boot}");
+    internal static readonly CodeRow WithArtifactRow = new(Table, PreviewRowKey + ".with_artifact",
+        "{Body} {Artifact}");
+    internal static readonly CodeRow DebuffArtifactRow = new(Table, PreviewRowKey + ".artifact",
+        "But its [gold]Artifact[/gold] blocks the [gold]{Debuff}[/gold].");
+    internal static readonly CodeRow DebuffArtifactNamedRow = new(Table, PreviewRowKey + ".artifact_named",
+        "But {Enemy}'s [gold]Artifact[/gold] blocks the [gold]{Debuff}[/gold].");
+    internal static readonly CodeRow SpendOnlyRow = new(Table, PreviewRowKey + ".only_if_spend",
+        "Only if you [gold]Spend[/gold]: {Body}");
+    internal static readonly CodeRow FrozenArtifactRow = new(Table, FrozenPreviewKey + ".description_artifact",
+        "[gold]Hydro[/gold] meets [gold]Cryo[/gold] and the aura is used up, but its "
+      + "[gold]Artifact[/gold] blocks the Frozen.");
+    internal static readonly CodeRow FrozenArtifactNamedRow = new(Table,
+        FrozenPreviewKey + ".description_artifact_named",
+        "[gold]Hydro[/gold] meets [gold]Cryo[/gold] and the aura is used up, but {Enemy}'s "
+      + "[gold]Artifact[/gold] blocks the Frozen.");
+    internal static readonly CodeRow FrozenBossArtifactRow = new(Table,
+        FrozenBossPreviewKey + ".description_artifact",
+        "[gold]Hydro[/gold] meets [gold]Cryo[/gold] and the aura is used up, but its "
+      + "[gold]Artifact[/gold] blocks the [gold]Vulnerable[/gold].");
+    internal static readonly CodeRow FrozenBossArtifactNamedRow = new(Table,
+        FrozenBossPreviewKey + ".description_artifact_named",
+        "[gold]Hydro[/gold] meets [gold]Cryo[/gold] and the aura is used up, but {Enemy}'s "
+      + "[gold]Artifact[/gold] blocks the [gold]Vulnerable[/gold].");
+    internal static readonly CodeRow VaporizeNoHitRow = new(Table, VaporizePreviewKey + ".description_no_hit",
+        "This card deals no damage. Pyro plus Hydro is still consumed, and there is no hit here "
+      + "for the {Mult}x to multiply.");
+    internal static readonly CodeRow MeltNoHitRow = new(Table, MeltPreviewKey + ".description_no_hit",
+        "This card deals no damage. Pyro plus Cryo is still consumed, and there is no hit here "
+      + "for the {Mult}x to multiply.");
+    private static readonly string SwirlKey = "KLEEMOD-SWIRL_PREVIEW";
+    internal static readonly CodeRow SwirlSpreadsRow = new(Table, SwirlKey + ".description_spreads",
+        "Spreads [gold]{Element}[/gold] to the other enemies and deals [blue]{Damage}[/blue] damage "
+      + "to ALL enemies.");
+    internal static readonly CodeRow SwirlRemovesRow = new(Table, SwirlKey + ".description_removes",
+        "Removes the [gold]{Element}[/gold] aura and deals [blue]{Damage}[/blue] damage to ALL "
+      + "enemies.");
+    internal static readonly CodeRow SwirlOathRow = new(Table, SwirlKey + ".description_oath",
+        "{Body} +1 [gold]{Oath}[/gold] Oath.");
+    internal static readonly CodeRow SwirlOathPaysRow = new(Table, SwirlKey + ".description_oath_pays",
+        "{Body} +1 [gold]{Oath}[/gold] Oath; {Pays}.");
+    internal static readonly CodeRow SwirlPaysRow = new(Table, SwirlKey + ".description_pays",
+        "{Body} {Pays}.");
+
+    /// <summary>The debuff words an Artifact blocks, each its own row
+    /// (<see cref="ReactionEffects.ArtifactBlockedDebuff"/>'s English).</summary>
+    internal static CodeRow DebuffWordRow(string debuff) =>
+        new(Table, PreviewRowKey + ".debuff_" + debuff.ToUpperInvariant(), debuff);
+
+    private static readonly string[] Debuffs = { "Weak", "Vulnerable", "Poison" };
+
+    /// <summary>Every rider's row (<see cref="CodeText.Sources"/>).</summary>
+    public static IEnumerable<CodeRow> TextRows() =>
+        new[]
+        {
+            OverriddenElementRow, SetOffFirstRow, FoldedHereRow, FoldedElsewhereRow, BootRow,
+            WithBootRow, WithArtifactRow, DebuffArtifactRow, DebuffArtifactNamedRow, SpendOnlyRow,
+            FrozenArtifactRow, FrozenArtifactNamedRow, FrozenBossArtifactRow, FrozenBossArtifactNamedRow,
+            VaporizeNoHitRow, MeltNoHitRow, SwirlSpreadsRow, SwirlRemovesRow, SwirlOathRow,
+            SwirlOathPaysRow, SwirlPaysRow,
+        }.Concat(Debuffs.Select(DebuffWordRow));
+
+    /// <summary>A multiplier as the riders print it: two places at most, as
+    /// the old <c>0.##</c> did.</summary>
+    private static decimal Mult(decimal mult) =>
+        CodeText.Num(decimal.Round(mult, 2, System.MidpointRounding.AwayFromZero));
+
+    private static IReadOnlyDictionary<string, object> AmpVars(
+        Element aura, decimal mult, int printed, int landed) =>
+        CodeText.Vars(("Aura", ElementWords.Name(aura)), ("Mult", Mult(mult)),
+                      ("Printed", printed), ("Landed", landed));
+
+    /// <summary>A card that sets off first: the Bomb's multiplier, this
+    /// card's own number.</summary>
+    public static string SetOffFirstBody(Element aura, decimal mult, int printed, int own) =>
+        CodeText.Format(SetOffFirstRow, AmpVars(aura, mult, printed, own));
+
+    /// <summary>The face already folded this body's amplifier.</summary>
+    public static string FoldedHereBody(decimal mult, int printed, Element aura, int landed) =>
+        CodeText.Format(FoldedHereRow, AmpVars(aura, mult, printed, landed));
+
+    /// <summary>The face folded another body, or none.</summary>
+    public static string FoldedElsewhereBody(decimal mult, Element aura, int printed, int landed) =>
+        CodeText.Format(FoldedElsewhereRow, AmpVars(aura, mult, printed, landed));
+
+    /// <summary>The body, and The Boot's sentence after it when
+    /// <paramref name="boot"/>.</summary>
+    public static string WithBoot(string body, bool boot) =>
+        boot ? CodeText.Format(WithBootRow, CodeText.Vars(("Body", body), ("Boot", CodeText.Format(BootRow))))
+             : body;
+
+    /// <summary>Only if you Spend: the body.</summary>
+    public static string SpendOnly(string body) =>
+        CodeText.Format(SpendOnlyRow, CodeText.Vars(("Body", body)));
+
+    private static string SpendOnlyIf(bool onlyOnSpend, string body) =>
+        onlyOnSpend ? SpendOnly(body) : body;
 
     /// <summary>
     /// The order the reaction loop visits bodies in: where the face folded a
@@ -502,11 +612,8 @@ public static class KleeCardTooltips
     /// to name it and say WHERE it runs. "" for a player not holding it, which
     /// is every board the clause would be noise on.
     /// </summary>
-    private static string UnblockedRaiserClause(Creature? dealer) =>
-        dealer?.Player?.Relics.Any(relic => relic is TheBoot) == true
-            ? " [gold]The Boot[/gold] raises an unblocked hit after Block, so "
-            + "it is not in that number."
-            : "";
+    private static bool Boot(Creature? dealer) =>
+        dealer?.Player?.Relics.Any(relic => relic is TheBoot) == true;
 
     /// <summary>
     /// `EB-733`. Does this card's printed face put <b>Set off</b> before its
@@ -657,22 +764,23 @@ public static class KleeCardTooltips
     /// With several enemies, <paramref name="who"/> names the one.
     /// </summary>
     public static string FrozenArtifactBody(bool boss, string? who = null) =>
-        "[gold]Hydro[/gold] meets [gold]Cryo[/gold] and the aura is used up, "
-      + "but " + (string.IsNullOrEmpty(who) ? "its" : who + "'s")
-      + " [gold]Artifact[/gold] blocks the "
-      + (boss ? "[gold]Vulnerable[/gold]." : "Frozen.");
+        string.IsNullOrEmpty(who)
+            ? CodeText.Format(boss ? FrozenBossArtifactRow : FrozenArtifactRow)
+            : CodeText.Format(boss ? FrozenBossArtifactNamedRow : FrozenArtifactNamedRow,
+                              CodeText.Vars(("Enemy", who)));
 
     /// <summary>Kit display pass (2026-10-18): the sentence a debuffing
     /// reaction's preview ends with when the target's Artifact will negate
     /// the debuff. The reaction still happens and the aura is still used up.
     /// With several enemies, <paramref name="who"/> names the one.</summary>
     public static string DebuffArtifactSentence(string debuff, string? who = null) =>
-        "But " + (string.IsNullOrEmpty(who) ? "its" : who + "'s")
-      + " [gold]Artifact[/gold] blocks the [gold]" + debuff + "[/gold].";
+        string.IsNullOrEmpty(who)
+            ? CodeText.Format(DebuffArtifactRow, CodeText.Vars(("Debuff", CodeText.Format(DebuffWordRow(debuff)))))
+            : CodeText.Format(DebuffArtifactNamedRow, CodeText.Vars(
+                ("Enemy", who), ("Debuff", CodeText.Format(DebuffWordRow(debuff)))));
 
     /// <summary>2026-10-04: the condition a Spend-gated element's
     /// reaction preview opens with.</summary>
-    public const string SpendOnlyPrefix = "Only if you [gold]Spend[/gold]: ";
 
     /// <summary>The loc key of a reaction's preview keyword, the keys
     /// `KleeMod.InjectLocStrings` registers.</summary>
@@ -729,12 +837,10 @@ public static class KleeCardTooltips
     /// </summary>
     public static string? NoHitBody(Reaction reaction) => reaction switch
     {
-        Reaction.Vaporize =>
-            "This card deals no damage. Pyro plus Hydro is still consumed, "
-          + "and there is no hit here for the 1.5x to multiply.",
-        Reaction.Melt =>
-            "This card deals no damage. Pyro plus Cryo is still consumed, "
-          + "and there is no hit here for the 1.75x to multiply.",
+        Reaction.Vaporize => CodeText.Format(VaporizeNoHitRow,
+            CodeText.Vars(("Mult", Mult(ReactionConstants.VaporizeMult)))),
+        Reaction.Melt => CodeText.Format(MeltNoHitRow,
+            CodeText.Vars(("Mult", Mult(ReactionConstants.MeltMult)))),
         _ => null,
     };
 
@@ -767,14 +873,13 @@ public static class KleeCardTooltips
     public static string SwirlPreviewBody(Element aura, bool others, int damage,
                                           Element oath, string pays)
     {
-        var body = (others
-                ? $"Spreads [gold]{aura}[/gold] to the other enemies"
-                : $"Removes the [gold]{aura}[/gold] aura")
-            + $" and deals [blue]{damage}[/blue] damage to ALL enemies.";
-        var varka = new List<string>();
-        if (oath != Element.None) varka.Add($"+1 [gold]{oath}[/gold] Oath");
-        if (!string.IsNullOrEmpty(pays)) varka.Add(pays);
-        return varka.Count == 0 ? body : body + " " + string.Join("; ", varka) + ".";
+        var body = CodeText.Format(others ? SwirlSpreadsRow : SwirlRemovesRow, CodeText.Vars(
+            ("Element", ElementWords.Name(aura)), ("Damage", damage)));
+        var vars = CodeText.Vars(("Body", body), ("Oath", ElementWords.Name(oath)), ("Pays", pays));
+        var paid = !string.IsNullOrEmpty(pays);
+        return oath != Element.None
+            ? CodeText.Format(paid ? SwirlOathPaysRow : SwirlOathRow, vars)
+            : paid ? CodeText.Format(SwirlPaysRow, vars) : body;
     }
 }
 
