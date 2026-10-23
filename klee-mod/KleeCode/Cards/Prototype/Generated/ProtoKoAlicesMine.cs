@@ -45,7 +45,7 @@ public sealed class ProtoKoAlicesMine : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Mine"),
-        ("description", "Place a [gold]Mine[/gold] {BombSize:diff()} on an enemy."),
+        ("description", "Place a [gold]Mine[/gold] {BombSize:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

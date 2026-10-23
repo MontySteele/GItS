@@ -150,7 +150,7 @@ public sealed class KnightsCommission : VarkaArmRelic
         ("title", "Knight's Commission"),
         ("description",
             "At the start of each combat, gain [blue]" + Oath
-          + "[/blue] [gold]Oath[/gold] in your starting [gold]Knight[/gold]'s "
+          + "[/blue] [gold]Oath[/gold] of your starting [gold]Knight[/gold]'s "
           + "element."),
     };
 

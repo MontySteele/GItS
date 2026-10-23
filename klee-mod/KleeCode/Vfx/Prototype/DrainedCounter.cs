@@ -103,15 +103,53 @@ public static class DrainedCounter
     /// </summary>
     public static string BufferSentence(int bufferLeft, bool lineZero = false,
                                         bool pastReturns = false) =>
-        "Drain buffer: [blue]"
-      + bufferLeft.ToString(CultureInfo.InvariantCulture) + "[/blue] HP left. "
-      + (lineZero
-            ? "Your HP is inside it, so all your [gold]Drain[/gold] returns "
-              + "after combat."
-         : pastReturns
-            ? "All your [gold]Drain[/gold] returns after combat, past it too."
-            : "[gold]Drain[/gold] inside it returns after combat; past it "
-              + "(past your line), only [gold]Repay[/gold] returns.");
+        CodeText.Format(lineZero ? BufferLineZeroRow
+                        : pastReturns ? BufferPastReturnsRow
+                        : BufferRow,
+                        CodeText.Vars(("Buffer", bufferLeft)));
+
+    // ---- The hover's rows (the localization census, 2026-10-23, step 2):
+    // each sentence a row in `card_keywords` under the hover's title key,
+    // each number a var; the box is a join row.
+    private const string Table = "card_keywords";
+
+    internal static readonly CodeRow BufferRow = new(Table, TitleKey + ".buffer",
+        "Drain buffer: [blue]{Buffer}[/blue] HP left. [gold]Drain[/gold] inside it returns after "
+      + "combat; past it (past your line), only [gold]Repay[/gold] returns.");
+    internal static readonly CodeRow BufferLineZeroRow = new(Table, TitleKey + ".buffer_line_zero",
+        "Drain buffer: [blue]{Buffer}[/blue] HP left. Your HP is inside it, so all your "
+      + "[gold]Drain[/gold] returns after combat.");
+    internal static readonly CodeRow BufferPastReturnsRow = new(Table, TitleKey + ".buffer_past_returns",
+        "Drain buffer: [blue]{Buffer}[/blue] HP left. All your [gold]Drain[/gold] returns after "
+      + "combat, past it too.");
+    internal static readonly CodeRow DrainedRow = new(Table, TitleKey + ".drained",
+        "Drained [blue]{Drained}[/blue] HP");
+    internal static readonly CodeRow DrainedPastRow = new(Table, TitleKey + ".drained_past",
+        "Drained [blue]{Drained}[/blue] HP ([blue]{Past}[/blue] past your line: lost unless you "
+      + "[gold]Repay[/gold])");
+    internal static readonly CodeRow DrainedPastReturnsRow = new(Table, TitleKey + ".drained_past_returns",
+        "Drained [blue]{Drained}[/blue] HP ([blue]{Past}[/blue] past your line)");
+    internal static readonly CodeRow ReturnsRow = new(Table, TitleKey + ".returns",
+        "Returns after combat: [blue]{Returning}[/blue]");
+    internal static readonly CodeRow GuestsDrainRow = new(Table, TitleKey + ".coming_guests",
+        "At end of turn: guests Drain [blue]{Drain}[/blue]");
+    internal static readonly CodeRow ReginaDrainRow = new(Table, TitleKey + ".coming_regina",
+        "Next turn: Regina Drains [blue]{Drain}[/blue]");
+    /// <summary>The rule the hover ends on: the Drain tip's long sentence,
+    /// as it has always printed here (a player reads it; a rewording is the
+    /// Furina text audit's).</summary>
+    internal static readonly CodeRow RuleRow = new(Table, TitleKey + ".description_rule",
+        ArmKeywordTips.DrainBody);
+    /// <summary>The whole box: the buffer, the drained count, what returns,
+    /// the drains coming (each its own line) and the rule.</summary>
+    internal static readonly CodeRow BodyRow = new(Table, TitleKey + ".description",
+        "{Buffer}\n{Drained}.\n{Returns}\n{Coming}{Rule}");
+
+    public static IEnumerable<CodeRow> TextRows() => new[]
+    {
+        BufferRow, BufferLineZeroRow, BufferPastReturnsRow, DrainedRow, DrainedPastRow,
+        DrainedPastReturnsRow, ReturnsRow, GuestsDrainRow, ReginaDrainRow, RuleRow, BodyRow,
+    };
 
     /// <summary>THE "LOST FOR GOOD" COUNTER (the quarter-line round,
     /// 2026-10-10, "What to change" 1): the drained count and, when any of
@@ -120,18 +158,13 @@ public static class DrainedCounter
     /// draining past the line only by losing the HP. Pure.</summary>
     public static string DrainedPhrase(int drained, int past,
                                        bool pastReturns = false) =>
-        "Drained [blue]" + drained.ToString(CultureInfo.InvariantCulture)
-      + "[/blue] HP"
-      + (past > 0
-            ? " ([blue]" + past.ToString(CultureInfo.InvariantCulture)
-              + "[/blue] past your line"
-              // The Spend round (2026-10-10): under A Five-Century Act the
-              // past-line part returns at the curtain call, so it is not
-              // "lost unless you Repay".
-              + (pastReturns
-                    ? ")"
-                    : ": lost unless you [gold]Repay[/gold])")
-            : "");
+        CodeText.Format(past <= 0 ? DrainedRow
+                        // The Spend round (2026-10-10): under A Five-Century
+                        // Act the past-line part returns at the curtain call,
+                        // so it is not "lost unless you Repay".
+                        : pastReturns ? DrainedPastReturnsRow
+                        : DrainedPastRow,
+                        CodeText.Vars(("Drained", drained), ("Past", past)));
 
     /// <summary>The hover's body: the buffer left, the drained count (and
     /// how much of it is past the buffer), what returns after combat, the
@@ -141,11 +174,12 @@ public static class DrainedCounter
                                    bool pastReturns = false,
                                    int returning = 0, int guestDrain = 0,
                                    int reginaDrain = 0) =>
-        BufferSentence(bufferLeft, lineZero, pastReturns) + "\n"
-      + DrainedPhrase(drained, past, pastReturns)
-      + ".\n" + ReturnsLine(returning) + "\n"
-      + ComingLines(guestDrain, reginaDrain)
-      + ArmKeywordTips.DrainBody;
+        CodeText.Format(BodyRow, CodeText.Vars(
+            ("Buffer", BufferSentence(bufferLeft, lineZero, pastReturns)),
+            ("Drained", DrainedPhrase(drained, past, pastReturns)),
+            ("Returns", ReturnsLine(returning)),
+            ("Coming", ComingLines(guestDrain, reginaDrain)),
+            ("Rule", CodeText.Format(RuleRow))));
 
     /// <summary>THE RETURNING HP (her HP legibility pass, 2026-10-19,
     /// change 1): "Returns after combat: N", the HP the curtain call would
@@ -153,9 +187,7 @@ public static class DrainedCounter
     /// figure the pale segment on her HP bar draws
     /// (<see cref="FurinaReturningHpBar"/>). Pure.</summary>
     public static string ReturnsLine(int returning) =>
-        "Returns after combat: [blue]"
-      + Math.Max(0, returning).ToString(CultureInfo.InvariantCulture)
-      + "[/blue]";
+        CodeText.Format(ReturnsRow, CodeText.Vars(("Returning", Math.Max(0, returning))));
 
     /// <summary>THE TURN'S COMING DRAINS (her HP legibility pass,
     /// 2026-10-19, change 3: no total showed before End Turn). "At end of
@@ -164,14 +196,10 @@ public static class DrainedCounter
     /// </summary>
     public static string ComingLines(int guestDrain, int reginaDrain) =>
         (guestDrain > 0
-            ? "At end of turn: guests Drain [blue]"
-              + guestDrain.ToString(CultureInfo.InvariantCulture)
-              + "[/blue]\n"
+            ? CodeText.Format(GuestsDrainRow, CodeText.Vars(("Drain", guestDrain))) + "\n"
             : "")
       + (reginaDrain > 0
-            ? "Next turn: Regina Drains [blue]"
-              + reginaDrain.ToString(CultureInfo.InvariantCulture)
-              + "[/blue]\n"
+            ? CodeText.Format(ReginaDrainRow, CodeText.Vars(("Drain", reginaDrain))) + "\n"
             : "");
 
     /// <summary>What the guests' acts will Drain at the end of this turn at

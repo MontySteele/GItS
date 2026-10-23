@@ -43,7 +43,7 @@ public class VarkaNextRound5Tests
     public void Twin_gales_reads_the_new_words_on_the_card_and_the_power()
     {
         const string words = "Your [gold]Swirls[/gold] also pay the element "
-            + "they [gold]Swirl[/gold]. If it's your [gold]current "
+            + "they [gold]Swirl[/gold]. If that is your [gold]current "
             + "element[/gold], it pays twice.";
         Assert.Equal(words, Face(new ProtoVkTwinGales()));
         Assert.Equal(words, Face(new TwinGalesPower()));

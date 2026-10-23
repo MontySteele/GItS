@@ -229,14 +229,15 @@ public class ReactionPreviewNoHitTests
         // it is reached; that both returns carry it is the file's one line of
         // source review, and the clause being a method is what keeps the two
         // from drifting apart.)
-        Assert.Contains("KleeCardTooltips.UnblockedRaiserClause",
-                        Il.Calls(Il.Method("KleeCardTooltips",
-                                           "AmplifiedBody")));
+        // The localization census (2026-10-23, step 2): the clause is a keyed
+        // row (`BootRow`), joined by `WithBoot` and gated by `Boot`.
+        var calls = Il.Calls(Il.Method("KleeCardTooltips", "AmplifiedBody"));
+        Assert.Contains("KleeCardTooltips.Boot", calls);
+        Assert.Contains("KleeCardTooltips.WithBoot", calls);
 
-        var said = Il.Strings(
-            Il.Method("KleeCardTooltips", "UnblockedRaiserClause"));
-        Assert.Contains(said, line => line.Contains("after Block"));
-        Assert.Contains(said, line => line.Contains("The Boot"));
+        var said = KleeCardTooltips.BootRow.English;
+        Assert.Contains("after Block", said);
+        Assert.Contains("The Boot", said);
     }
 
     private static IReadOnlyCollection<string> Registered()

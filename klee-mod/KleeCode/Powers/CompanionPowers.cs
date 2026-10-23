@@ -145,7 +145,7 @@ public sealed class ReplayNextCompanionPower : PowerModel, ILocalizationProvider
     {
         ("title", "Study Buddy"),
         ("description",
-            "The next [gold]Companion[/gold] card you play this turn is "
+            "The next [gold]Companion[/gold] you play this turn is "
           + "played {Amount} extra time{Amount:plural:|s}."),
         // `EB-420` PUT AN ARM FACE HERE AND `EB-464` TOOK IT AWAY. It read
         // "Your Salon performs on the first play only", printing a rule this

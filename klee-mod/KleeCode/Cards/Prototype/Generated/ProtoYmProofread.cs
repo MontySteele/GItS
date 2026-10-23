@@ -45,7 +45,7 @@ public sealed class ProtoYmProofread : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Proofread"),
-        ("description", "[gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold]."),
+        ("description", "[gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Reprint[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -90,8 +90,7 @@ public class FanfareCounterPinTests
         Assert.Contains("gained [blue]5[/blue]", body);
         Assert.Contains("spent [blue]2[/blue]", body);
         // Under the keyword's own definition, one sentence and not a fork.
-        var definition = (string)typeof(ArmKeywordTips)
-            .GetField("FanfareBody", All)!.GetRawConstantValue()!;
+        var definition = TipText.Named("FanfareBody");
         Assert.EndsWith(definition, body);
         // The face keeps the number alone: the flow is the hover's.
         Assert.Equal(3, FanfareCounter.Read(seat.Creature));

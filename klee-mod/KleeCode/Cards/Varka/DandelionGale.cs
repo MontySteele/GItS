@@ -74,7 +74,7 @@ public sealed class DandelionGale : CustomCardModel, IElementalCard, ICharacterC
         ("title", "Dandelion Gale"),
         ("description",
             "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. "
-          + "Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your "
+          + "Then deal {VkPer:diff()} damage for each [gold]Oath[/gold] of your "
           + "[gold]current element[/gold] to each, as that element."
           + "{InCombat:\n(Deals {VkHit:diff()} damage)|}"),
     };

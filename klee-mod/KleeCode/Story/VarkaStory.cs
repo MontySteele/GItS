@@ -212,7 +212,7 @@ public static class VarkaStory
                 Options: new[]
                 {
                     new StoryOption("SIGN_BY_LAMPLIGHT", "Sign them by lamplight.",
-                        "Lose 8 HP. Upgrade 2 random cards. Remove every [gold]Overdue Reports[/gold].",
+                        "Lose 8 HP. Upgrade 2 random cards. Remove all [gold]Overdue Reports[/gold] from your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 8),
                         "He signs the last page at dawn, then goes back and reads the casualty lists twice.")
                     {
@@ -230,7 +230,7 @@ public static class VarkaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.RemoveCard) },
                     },
                     new StoryOption("LOSE_THEM_ON_THE_STAIRS", "Lose them on the stairs.",
-                        "Gain 2 random potions. Add [gold]Overdue Reports[/gold].",
+                        "Gain 2 random potions. Add [gold]Overdue Reports[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.GainRandomPotions, 2),
                         "He keeps the satchel. It had snacks in it.")
                     {
@@ -277,7 +277,7 @@ public static class VarkaStory
                         new StoryEffect(StoryEffectKind.RemoveEveryCurseLoseGoldEach, 50),
                         "\"Every word. I'm buying.\""),
                     new StoryOption("CARRY_HER_LEDGER", "Carry her ledger the rest of the way.",
-                        "Upgrade 3 random cards. Add [gold]Overdue Reports[/gold].",
+                        "Upgrade 3 random cards. Add [gold]Overdue Reports[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.UpgradeRandomCards, 3),
                         "He reads it on the way. It's mostly complaints about him.")
                     {
@@ -315,7 +315,7 @@ public static class VarkaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.RemoveCard) },
                     },
                     new StoryOption("SEND_THEM_DOWN", "Send them down with a message.",
-                        "Gain 2 random potions. Add [gold]Overdue Reports[/gold].",
+                        "Gain 2 random potions. Add [gold]Overdue Reports[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.GainRandomPotions, 2),
                         "\"Tell Jean we're fine.\" They press their potions on him, and their paperwork.")
                     {
@@ -361,7 +361,7 @@ public static class VarkaStory
                 Options: new[]
                 {
                     new StoryOption("KNOCK_THEM_ALL_DOWN", "Knock them all down again.",
-                        "Lose 8 HP. Add an upgraded [gold]Four Winds' Ascension[/gold].",
+                        "Lose 8 HP. Add an upgraded [gold]Four Winds' Ascension[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 8),
                         "Every dummy down in one pass. Nobody here to reject him.")
                     {

@@ -70,6 +70,10 @@ public static class EnglishLoc
     {
         KleeMod.InjectLocStrings();
 
+        // Player English that code builds (tip bodies, the reaction guide,
+        // element names): `CodeText`'s rows. Its own try/catch.
+        CodeText.Inject();
+
         // THE TEYVAT RUN FRAME ARM's rows (spike, -p:TeyvatFrame=true). A
         // no-op with the arm off — `TeyvatLoc.Inject`'s first line is the
         // flag — so a release build merges not one row.
@@ -226,9 +230,30 @@ public static class EnglishLoc
             }
             foreach (var (key, value) in rows)
             {
-                bucket[id.Entry + "." + key] = SimpleLoc.TrySimplify(value);
+                var text = ModelRowText(model, key, value);
+                bucket[id.Entry + "." + key] = text;
+                if (text != SimpleLoc.TrySimplify(value))
+                {
+                    // A face with element tokens: its formatting is handed
+                    // the names (`OverriddenElementFace_Format_Patch`).
+                    Cards.OverriddenElementFace.TokenRows.Add(id.Entry + "." + key);
+                }
             }
         }
+    }
+
+    /// <summary>
+    /// One of our model rows as it is written to the English table: BaseLib's
+    /// <c>SimpleLoc.TrySimplify</c>, then, on a card's face, its hit-element
+    /// words as tokens (<see cref="Cards.OverriddenElementFace.Templatize"/>).
+    /// The English reference is built through this too.
+    /// </summary>
+    public static string ModelRowText(AbstractModel model, string key, string value)
+    {
+        var text = SimpleLoc.TrySimplify(value);
+        return model is CardModel && key == "description"
+            ? Cards.OverriddenElementFace.Templatize(text)
+            : text;
     }
 
     /// <summary>The captured model rows, table by table (read-only view).</summary>

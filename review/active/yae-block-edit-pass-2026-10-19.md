@@ -74,3 +74,37 @@ once-a-combat Footnote like Reprint.
    use"). The fallback if it gets excessive: a second Reprint on the same card
    adds uses instead of extra replays, so the card still plays twice, not three
    times.
+
+## Upgrade census (2026-10-23)
+
+Yae's pool had 10 cost-only and 6 Innate-only upgrades (her two starter
+cards' cost cuts not counted; starters never change). Base Ironclad has 6 and
+2, Silent 9 and 3. [USER], 2026-10-23: "Otherwise I agreed on all the cards!"
+Built, upgraded values in []:
+
+| Card | Was | Now |
+|---|---|---|
+| Kitsune Rite (U Skill, 1) | upgrade cost -1 | Tenko. Draw 1 [2] card(s). |
+| Royalties (R Skill, 1) | upgrade cost -1 | Edit up to 2 [3] cards in your hand: Royalties. |
+| Scattered Blossoms (U Power, 1) | upgrade Innate | Whenever a Sakura withers, draw 2 [3] cards. |
+| Saiguu's Lesson (U Power, 1) | upgrade Innate | Whenever you apply Weak to an enemy, a striking Sakura strikes it. [Apply 1 Weak to ALL enemies.] |
+
+Saiguu's Lesson+ applies its Weak after the power is in, so the Weak
+triggers the Lesson itself. After this pass the pool has 8 cost-only and 4
+Innate-only upgrades.
+
+Sakura Channeling becomes an Uncommon Power, cost 1: "You can have 2 [3]
+more Sakura." (was Rare, cost 2 [1]). This matches Defect's Capacitor
+(Uncommon, 1, 2 [3] more orb slots). Built as its own commit so it can be
+reverted alone. Her pool is now 20 / 39 / 19, and 7 cost-only upgrades
+remain. Two upgraded copies reach nine Sakura, the last one with a status
+badge; a tenth still stands and strikes without one.
+
+Rare audit, Sacred Thunderbolt (the one generic Rare). [USER], 2026-10-23:
+"Sacred Thunderbolt - agreed, but is that enough at 2 cost? It sounds
+expensive... either go to 1 cost or buff the effect, what do you think?"
+Claude's call: 1 cost. Now a Rare Attack, cost 1: "Deal 9 [12] Electro
+damage. If it triggers an Elemental Reaction, each Sakura gains a Level."
+(was cost 2: deal 13 [17], and 13 [17] more on a reaction). The Level is
+Mikage Thunder's "each Sakura gains a Level" op, paid only when this card's
+own hit reacts.

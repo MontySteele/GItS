@@ -65,8 +65,8 @@ def _led(st):
 def test_the_pool_stays_78_with_the_two_rarities_swapped():
     rows = [c for c in loader.prototype_cards()
             if c.id.startswith(Y.ID_PREFIX) and c.rarity != "basic"]
-    assert Counter(c.rarity for c in rows) == {"common": 20, "uncommon": 38,
-                                               "rare": 20}
+    assert Counter(c.rarity for c in rows) == {"common": 20, "uncommon": 39,
+                                               "rare": 19}
     assert _card("editorial_priority").rarity == "rare"
     assert _card("mischievous_teasing").rarity == "uncommon"
 

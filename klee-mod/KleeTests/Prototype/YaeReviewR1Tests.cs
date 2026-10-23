@@ -152,12 +152,14 @@ public class YaeReviewR1Tests : IDisposable
     {
         var rite = new ProtoYmKitsuneRite();
         Assert.Equal(1, rite.EnergyCost.Canonical);
-        Assert.EndsWith("|}. Draw 1 card.", Face(rite));
+        Assert.EndsWith("|}. Draw {Cards:diff()} card{Cards:plural:|s}.", Face(rite));
         var calls = Il.CallSequence(Il.Method("ProtoYmKitsuneRite", "OnPlay")).ToList();
         var tenko = calls.FindIndex(c => c.Contains("YaeCards.Tenko"));
         var draw = calls.FindIndex(c => c.Contains("CardPileCmd.Draw"));
         Assert.True(tenko >= 0 && draw > tenko, string.Join(" | ", calls));
-        Assert.Contains(Il.Calls(Il.Method("ProtoYmKitsuneRite", "OnUpgrade")),
-                        c => c.Contains("EnergyCost"));
+        // Upgrade census (2026-10-23, [USER]): draw 1 [2] (was cost -1).
+        Assert.DoesNotContain(Il.Calls(Il.Method("ProtoYmKitsuneRite", "OnUpgrade")),
+                              c => c.Contains("EnergyCost"));
+        Assert.Equal(1m, rite.DynamicVars.Cards.BaseValue);
     }
 }

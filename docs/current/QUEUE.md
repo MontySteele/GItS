@@ -15,18 +15,15 @@ public launch; listen for the modded death sound (`set_hp player 1`).
 
 ## Eyes-on looks (materials ready; no build waits on them)
 
+- **Read the character dialogue and story events before translation** (user,
+  2026-10-23: "the writing surfaces for character dialogue / new events still
+  needs a human inspection before translation"): the four chains, the run
+  lines and the Ancients' lines; the translation waits on it.
 - **Models and screens in motion** (from the backlog, 2026-10-19): Klee,
   Varka and Furina in motion (the facing flip with an enemy behind, multi-hit
   timing at Normal speed, Varka's two ground bursts, a pale bar behind a
-  summoned Freminet, Furina's eleven guest effects); the Bake-Kurage beside a
-  non-Kokomi character; Kokomi's Plans grid with a controller (open, flip,
-  captions, focus return) and the pet by D-pad; Varka's element-switch hover;
+  summoned Freminet, Furina's eleven guest effects); the Kokomi pet by D-pad; Varka's element-switch hover;
   the drag-aimed reaction preview. Polish only what bothers you.
-
-- **Klee in motion** (next build): H1 + H3 lite shading, the new battle
-  stance and her ground shadow are ruled and built
-  (`review/active/klee-visual-paper-2026-10-12.md`); the bomb size is being
-  fixed. What is left is [USER]'s look at them in motion in the game.
 
 ## Open packets in `review/active/`
 

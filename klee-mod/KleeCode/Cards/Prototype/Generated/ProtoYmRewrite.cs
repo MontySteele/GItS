@@ -45,7 +45,7 @@ public sealed class ProtoYmRewrite : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rewrite"),
-        ("description", "Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold]."),
+        ("description", "Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Red Ink[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

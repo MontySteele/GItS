@@ -223,6 +223,8 @@ def test_kitsune_rite_tenkos_then_draws_one():
     _play(st, _ym("kitsune_rite"))
     assert any(r["event"] == "yae_tenko" for r in st.log)
     assert len(st.player.hand) == hand + 1
+    # Upgrade census (2026-10-23, [USER]): draw 1 [2], cost unchanged.
     plus = loader.get_card(_ym("kitsune_rite") + "+")
-    assert plus.cost == 0 and loader.get_card(_ym("kitsune_rite")).cost == 1
+    assert plus.cost == 1 == loader.get_card(_ym("kitsune_rite")).cost
+    assert [fx["amount"] for fx in plus.effects if fx["op"] == "draw"] == [2]
     assert plus.exhaust

@@ -431,7 +431,7 @@ public static class KleeMod
                     // trusted it at a boss, which only gains Vulnerable.
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Vulnerable (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion can't be Frozen; it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion cannot be Frozen; it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
                     ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
                     // THE ELEMENT PORT (sec.4 A, 2026-09-28; spent removed
                     // 2026-10-03): Swirl removes the aura, deals a flat 2 to
@@ -773,12 +773,12 @@ public static class KleeMod
                     // Unpowered on both engines -- is not one.
                     ["THORNS_POWER.description"] =
                         "When hit by an attack, deal your [gold]Thorns[/gold] "
-                      + "damage back. Every card hit is one, a Skill's too; a "
-                      + "potion's is not.",
+                      + "damage back. Card hits count, Skills included, but "
+                      + "not potions.",
                     ["THORNS_POWER.smartDescription"] =
                         "When hit by an attack, deal [blue]{Amount}[/blue] "
-                      + "damage back. Every card hit is one, a Skill's too; a "
-                      + "potion's is not.",
+                      + "damage back. Card hits count, Skills included, but "
+                      + "not potions.",
 
                     // `EB-597`, AND IT IS THE SAME FINDING A FOURTH TIME.
                     //

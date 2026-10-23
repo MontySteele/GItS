@@ -94,7 +94,7 @@ def test_the_spend_tip_says_whose_fanfare_pays():
     # The re-founding (2026-10-04): her one Fanfare number pays a Spend.
     # The Spend paper (2026-10-10): the second sentence names Spend up to X.
     assert ARM_KEYWORDS["Spend"] == (
-        "Pay that much Fanfare. With less, you can't play the card or its "
+        "Pay that much Fanfare. With less, you cannot play the card or its "
         "Spend mode. "
         "Spend up to X pays X, or all you have if that is less.")
 
@@ -128,7 +128,7 @@ def test_four_winds_prints_its_oath_hit_total_in_combat():
     row = sheet[sheet.index("id: proto_vk_four_winds_ascension"):]
     row = row[:row.index("\n\n")]
     assert "in one hit" not in row
-    assert ("damage per [gold]Oath[/gold] of your [gold]current element"
+    assert ("damage for each [gold]Oath[/gold] of your [gold]current element"
             "[/gold], as that element.{InCombat:\\n(Deals {VkHit:diff()} "
             "damage)|}") in row
     assert "per: 3" in row                      # no number moved

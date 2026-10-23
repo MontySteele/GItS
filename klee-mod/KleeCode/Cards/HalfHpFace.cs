@@ -1,4 +1,3 @@
-using System.Globalization;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 
@@ -21,10 +20,14 @@ public static class HalfHpFace
     /// up.</summary>
     public static int Threshold(int maxHp) => (maxHp + 1) / 2;
 
+    /// <summary>The words' row (the localization census, 2026-10-23, step
+    /// 2); the leading space is the row's.</summary>
+    internal static readonly CodeRow Row =
+        new("card_keywords", "KLEEMOD-FACE_HALF_HP.description", " ({Hp} HP)");
+
     /// <summary>The in-combat words, " (39 HP)", for the pins.</summary>
     public static string Words(int maxHp) =>
-        " (" + Threshold(maxHp).ToString(CultureInfo.InvariantCulture)
-        + " HP)";
+        CodeText.Format(Row, CodeText.Vars(("Hp", Threshold(maxHp))));
 
     /// <summary>The card's owner's line, or nothing with no owner to
     /// read.</summary>

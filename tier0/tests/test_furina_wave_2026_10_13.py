@@ -122,18 +122,20 @@ def test_the_mod_notes_the_stop_for_lyney_and_regina():
 def test_the_counter_and_the_face_print_no_line_number():
     counter = (REPO / "klee-mod" / "KleeCode" / "Vfx" / "Prototype"
                / "DrainedCounter.cs").read_text(encoding="utf-8")
-    assert '"Drain buffer: [blue]"' in counter
-    assert '"Drain line [blue]"' not in counter
+    # The localization census (2026-10-23, step 2): keyed rows.
+    assert '"Drain buffer: [blue]{Buffer}[/blue] HP left.' in counter
+    assert '"Drain line [blue]' not in counter
     face = (POWERS / "FurinaStageBowPreview.cs").read_text(encoding="utf-8")
     # Her HP legibility pass (2026-10-19): the all-past tag.
-    assert '"\\n(Past your line: lost unless you Repay)";' in face
+    assert '"\\n(Past your line: lost unless you Repay)");' in face
     assert "Drain line of {line}" not in face
 
 
 # ---- 2. Rising Applause teaches Fanfare -----------------------------------------
 
 def test_rising_applause_says_lost_hp_becomes_fanfare():
-    tips = TIPS_CS.read_text(encoding="utf-8")
+    # The tip's keyed row (the localization census, 2026-10-23).
+    tips = TIPS_CS.with_name("PlayerTips.cs").read_text(encoding="utf-8")
     assert ('"Whenever you lose HP, gain that much [gold]Fanfare[/gold]. Its "'
             in tips)
     src = (PROTOTYPE_DIR / "ProtoFsStandingOvation.cs").read_text(
@@ -154,7 +156,7 @@ def test_crashing_waves_previews_what_its_spend_buys():
     assert ('description.Add("StageSpendHits", '
             "FurinaStageFacePreview.SpendUpToHits(this, 16));") in src
     face = (POWERS / "FurinaStageBowPreview.cs").read_text(encoding="utf-8")
-    assert '0 => "no extra hit"' in face
+    assert ': no extra hit)"' in face
     for rid, row in _rows().items():
         assert (gen.stage_spend_hits_call(row) is not None) == (
             rid == "proto_fs_crashing_waves"), rid

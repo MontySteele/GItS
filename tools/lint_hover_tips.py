@@ -18,10 +18,13 @@ The house rule for a PLAYER's static hover:
 WHAT IT READS. A generated card's `ExtraHoverTips` is either one chain or
 `TipAudience.Seat ? <seat chain> : <player chain>`; the player chain is the
 one measured (the seat chain is the blind seats' and keeps every rider, word
-for word). Bodies are read off the C#: `PlayerTips.Bodies` where a key has
-player words, the seat sentence in `ArmKeywordTips` where it does not, the
-guest half `PlayerTips.Guest` picks off the face, and the Applies-X rows in
-`KleeMod.cs`. A base-game tip (`BaseKeywordTips`, a card preview) is a box
+for word). Bodies are read off the C#: the keyed rows in `PlayerTips.Bodies`
+and `PlayerTips.Variants` (a var hole measured as one numeral), the guest
+half `PlayerTips.Guest` picks by the card's `IPrintsGuestAct` /
+`IPrintsGuestLine` marker off the badge's line and act rows, and the
+Applies-X rows in `KleeMod.cs`. A player-chain tip with no keyed row is a
+finding (the localization census, 2026-10-23: a translation could not reach
+it), but for the curated `UNKEYED_OK`. A base-game tip (`BaseKeywordTips`, a card preview) is a box
 of the base game's own length and is counted, not measured.
 
 NOT COUNTED: a tip that shows only on a board in the state it names
@@ -68,13 +71,23 @@ BOX_DEBT = {
 
 #: Long tips a ruled pick keeps, curated. An entry no card raises FAILS.
 LONG_OK: dict[str, str] = {
+    # The full-shrine plant by kind (Yae review r5, item 5: four of five
+    # seats could not read the short form until it bit them). It was a
+    # `static readonly` this reader took for an empty body until the
+    # localization census keyed it (2026-10-23) and the lint saw its 161.
+    "ForFullShrine": "Yae review r5 item 5's long form; a rewording is the "
+                     "Yae text audit's",
 }
 
 _GOLD = re.compile(r"\[/?(gold|blue)\]")
+_PLURAL = re.compile(r"\{[A-Za-z]+:plural:([^|}]*)\|([^}]*)\}")
+_HOLE = re.compile(r"\{[A-Za-z]+\}")
 
 
 def visible(text: str) -> str:
-    return _GOLD.sub("", text)
+    """Markup gone; a keyed row's var hole is one numeral and a plural its
+    plural form, the measure the old interpolated constants got."""
+    return _HOLE.sub("6", _PLURAL.sub(r"\2", _GOLD.sub("", text)))
 
 
 def split_layers(expr: str) -> list[tuple[str, str]]:
@@ -120,11 +133,6 @@ def mod_keywords(src: str) -> list[str]:
     return list(dict.fromkeys(re.findall(r"KleeKeywords\.(\w+)", m.group(1))))
 
 
-def face(src: str) -> str:
-    m = re.search(r'\("description", "((?:[^"\\]|\\.)*)"\)', src)
-    return m.group(1) if m else ""
-
-
 # --- the bodies, read off the C# --------------------------------------------
 
 def _expr_until_comma(src: str, i: int) -> str:
@@ -147,6 +155,9 @@ def _expr_until_comma(src: str, i: int) -> str:
 
 
 def player_bodies() -> dict[str, str]:
+    """The keyed tip bodies (`PlayerTips.Bodies`, by tip key, and
+    `PlayerTips.Variants`, as `Key.variant`), template text: a var hole is
+    measured as one numeral (`visible`)."""
     src = re.sub(r"^\s*//.*$", "", tc.read(PLAYER), flags=re.M)
     statics = {name: tc.csharp_text(expr) for name, expr in re.findall(
         r"static readonly string (\w+) =\s*(.*?);", src, re.S)}
@@ -154,9 +165,13 @@ def player_bodies() -> dict[str, str]:
     for m in re.finditer(r"\[ArmKeywordTips\.(\w+Key)\]\s*=\s*", src):
         expr = _expr_until_comma(src, m.end()).strip()
         out[m.group(1)] = statics.get(expr, tc.csharp_text(expr))
-    spark = re.search(r"SparkBody\(bool openingBank\) =>\s*openingBank\s*"
-                      r"\?\s*(.*?)\n\s*:\s*(.*?);", src, re.S)
-    out["SparkKey"] = tc.csharp_text(spark.group(1))
+    for m in re.finditer(r"\[\(ArmKeywordTips\.(\w+Key), (\w+)\)\]\s*=\s*", src):
+        expr = _expr_until_comma(src, m.end()).strip()
+        variant = re.search(rf"const string {m.group(2)} = \"(\w+)\"", src)
+        out[f"{m.group(1)}.{variant.group(1) if variant else m.group(2)}"] = (
+            tc.csharp_text(expr))
+    # The Spark box is measured as a Klee reads it, with the opening bank.
+    out["SparkKey"] = out["SparkKey.opening_bank"]
     return out
 
 
@@ -172,17 +187,17 @@ def method_keys() -> dict[str, str]:
         r"public static IEnumerable<IHoverTip> (For\w+)\(", src))
     for n, m in enumerate(heads):
         end = heads[n + 1].start() if n + 1 < len(heads) else len(src)
-        key = re.search(r"With\(inherited, (\w+Key)", src[m.end():end])
+        key = re.search(r"With(?:Text)?\(inherited, (\w+Key)", src[m.end():end])
         if key:
             out[m.group(1)] = key.group(1)
     return out
 
 
-def arm_statics() -> dict[str, str]:
-    """`static readonly string` tip bodies in `ArmKeywordTips`, rendered."""
-    src = re.sub(r"^\s*//.*$", "", tc.read(ARM), flags=re.M)
-    return {name: tc.csharp_text(expr) for name, expr in re.findall(
-        r"static readonly string (\w+) =\s*(.*?);", src, re.S)}
+#: A placeholder body (`@Name`) and the keyed row it is measured by: the Yae
+#: text audit (2026-10-23) held Yae's own Sakura tip to the cap through it.
+PLACEHOLDERS = {
+    "YaeSakuraTip": "SakuraKey.yae",
+}
 
 
 def annotation_rules() -> dict[tuple[str, str], str]:
@@ -227,36 +242,34 @@ def keyword_bodies() -> dict[str, str]:
     return out
 
 
-def line_opening(line: str) -> str:
-    """Up to the line's first number. The C# reads a digit; here a number
-    read off a method call (`NaviaDiscount(upgraded)`) renders empty, which
-    leaves a double space where the digit was."""
-    m = re.search(r"\d|  ", line)
-    return line[:m.start()] if m else line
+def act_texts() -> dict[str, tuple[str, str]]:
+    """Each guest's line and act, base card: the badge's two keyed rows
+    (`StagePerformerBadge.LineTemplate` / `.ActTemplate`)."""
+    return tc._guest_halves()
 
 
-def act_texts() -> dict[str, str]:
-    """`StagePerformerBadge.ActText` per guest, base card: the upgraded
-    clause `(upgraded ? ... : "")` is dropped before the literals join."""
-    src = tc.read(MOD / "Powers" / "Prototype" / "FurinaStageBadges.cs")
-    body = src[src.index("public static string ActText"):]
-    body = body[body.index("return who switch"):]
-    body = body[:body.index("_ =>") + 4]
-    body = re.sub(r'\(upgraded\s*\?.*?:\s*""\)', "", body, flags=re.S)
-    return {who: tc.csharp_text(expr)
-            for who, expr in tc._ACT_ARM.findall(body)}
-
-
-def guest_body(full: str, card_face: str) -> str:
-    """`PlayerTips.Guest`, mirrored."""
-    if " Act: " not in full:
-        return full
-    line, act = full.split(" Act: ", 1)
-    if "Act:" in card_face:
+def guest_body(halves: tuple[str, str], card_src: str) -> str:
+    """`PlayerTips.Guest`, mirrored: the half the face does not print, read
+    off the marker the generator stamps on the card's class
+    (`gen_klee_cards.guest_face_interface`)."""
+    line, act = halves
+    head = re.search(r"\bclass \w+ :[^\n{]*", card_src)
+    decl = head.group(0) if head else ""
+    if "IPrintsGuestAct" in decl:
         return line
-    if line_opening(line) in card_face:
-        return "Act: " + act
-    return full
+    if "IPrintsGuestLine" in decl:
+        return act
+    return line + " " + act
+
+
+#: Player-chain tips measured off the seat's English because they have no
+#: keyed row yet, curated: a new tip a player reads must have a row in
+#: `PlayerTips` (the localization census, 2026-10-23). An entry no player
+#: chain raises FAILS.
+UNKEYED_OK: dict[str, str] = {
+    "ForAnnotation": "Yae's Annotation rules are `YaeAnnotationText`'s, "
+                     "keyed in step 2 of the localization census",
+}
 
 
 class Bodies:
@@ -266,9 +279,10 @@ class Bodies:
         self.keys = method_keys()
         self.keywords = keyword_bodies()
         self.acts = act_texts()
+        self.unkeyed: set[str] = set()
 
     def layer(self, call: str, args: str, cls: str,
-              card_face: str) -> tuple[int, str | None, str]:
+              card_src: str) -> tuple[int, str | None, str]:
         """(boxes, visible body or None when unmeasured, label)."""
         owner, _, method = call.partition(".")
         if call in BOARD_ONLY:
@@ -286,11 +300,8 @@ class Bodies:
             # Base-game tips and card previews: one box, base length.
             return 1, None, method
         if method == "ForAnnotation":
+            self.unkeyed.add(method)
             return 1, visible(annotation_body(args)), method
-        if method == "ForTenko":
-            return 1, visible(arm_statics()["YaeTenkoTip"]), method
-        if method == "ForEdit":
-            return 1, visible(arm_statics()["YaeEditTip"]), method
         if method == "ForSakura" and cls.startswith("ProtoYm"):
             return 1, "@YaeSakuraTip", method
         if method == "ForSpark":
@@ -302,7 +313,8 @@ class Bodies:
             return 1, visible(self.player[key]), method
         who = method[3:]
         if who in self.acts:
-            return 1, visible(guest_body(self.acts[who], card_face)), method
+            return 1, visible(guest_body(self.acts[who], card_src)), method
+        self.unkeyed.add(method)
         return 1, visible(self.seat.get(key, "")), method
 
 
@@ -310,12 +322,11 @@ def measure(path: Path, bodies: Bodies) -> dict:
     src = tc.read(path)
     chain = player_chain(src)
     kws = mod_keywords(src)
-    card_face = face(src)
     boxes: list[tuple[str, str | None]] = []
     for kw in kws:
         boxes.append((kw, visible(bodies.keywords.get(kw, ""))))
     for call, args in split_layers(chain) if chain else []:
-        n, body, label = bodies.layer(call, args, path.stem, card_face)
+        n, body, label = bodies.layer(call, args, path.stem, src)
         for _ in range(n):
             boxes.append((label, body))
     title = re.search(r'\("title", "((?:[^"\\]|\\.)*)"\)', src)
@@ -328,7 +339,7 @@ def chars(card: dict) -> int:
                if b is not None and not b.startswith("@"))
 
 
-def findings(cards: list[dict]) -> list[str]:
+def findings(cards: list[dict], bodies: "Bodies | None" = None) -> list[str]:
     bad: list[str] = []
     used_long: set[str] = set()
     for card in cards:
@@ -344,19 +355,43 @@ def findings(cards: list[dict]) -> list[str]:
         for label, body in card["boxes"]:
             if body is None:
                 continue
+            if label in LONG_OK:
+                used_long.add(label)
+                continue
             if body.startswith("@"):
                 used_long.add(body[1:])
-                continue
+                if body[1:] in LONG_OK:
+                    continue
+                # The Yae text audit (2026-10-23): a placeholder is measured
+                # by the keyed row it names, so the cap holds there too.
+                body = visible(Bodies_player()[PLACEHOLDERS[body[1:]]])
             if len(body) > CAP_CHARS:
                 bad.append(f"{card['cls']}: {label} is {len(body)} "
                            f"characters (cap {CAP_CHARS}): {body!r}")
     for name in sorted(set(LONG_OK) - used_long):
         bad.append(f"LONG_OK names {name}, which no card raises: drop it")
+    if bodies is not None:
+        for method in sorted(bodies.unkeyed - set(UNKEYED_OK)):
+            bad.append(f"{method}: a player's hover raises it and it has no "
+                       "keyed row in `PlayerTips.Bodies` (a translation "
+                       "could not reach it)")
+        for method in sorted(set(UNKEYED_OK) - bodies.unkeyed):
+            bad.append(f"UNKEYED_OK names {method}, which no player chain "
+                       "raises unkeyed: drop it")
     return bad
 
 
-def load() -> list[dict]:
-    bodies = Bodies()
+_PLAYER: list[dict[str, str]] = []
+
+
+def Bodies_player() -> dict[str, str]:  # noqa: N802 -- a memo, not a class
+    if not _PLAYER:
+        _PLAYER.append(player_bodies())
+    return _PLAYER[0]
+
+
+def load(bodies: "Bodies | None" = None) -> list[dict]:
+    bodies = bodies or Bodies()
     return [measure(p, bodies) for p in sorted(GEN.glob("Proto*.cs"))]
 
 
@@ -374,11 +409,12 @@ def main(argv: list[str]) -> int:
     tc_console = getattr(sys.stdout, "reconfigure", None)
     if tc_console:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    cards = load()
+    bodies = Bodies()
+    cards = load(bodies)
     if "--census" in argv:
         census(cards)
         return 0
-    bad = findings(cards)
+    bad = findings(cards, bodies)
     for line in bad:
         print(line)
     if bad:

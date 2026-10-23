@@ -54,13 +54,109 @@ public abstract class StagePerformerBadge : PowerModel
     /// What a guest does, in two short sentences: its line (while on stage)
     /// and its act (at the end of your turn). The texts are the papers'; the
     /// numbers <see cref="FurinaStageLaw"/>'s (`EB-89`), upgraded where
-    /// <paramref name="upgraded"/>.
+    /// <paramref name="upgraded"/>. ENGLISH, whatever the language: it is the
+    /// badge's model row (written once, at boot) and the blind seat's tip. A
+    /// player's guest tip reads the keyed rows (<see cref="LineText"/>,
+    /// <see cref="ActOnlyText"/>, <see cref="GuestText"/>).
     /// </summary>
     public static string ActText(StagePerformer who, bool upgraded = false)
     {
-        // Each guest's numbers read off `FurinaStageLaw` here, by name
-        // (`EB-89`), base and upgraded -- the same pairs
-        // `StageDirector.ActAmount` reads.
+        if (LineTemplate(who, upgraded) == null || ActTemplate(who) == null) return "";
+        var vars = GuestVars(who, upgraded);
+        return CodeText.English(LineRow(who, upgraded), vars) + " "
+             + CodeText.English(ActRow(who), vars);
+    }
+
+    // ---- the keyed rows (the localization census, 2026-10-23) ------------
+    //
+    // A guest's tip shows its line, its act, or both, by what its card's face
+    // already prints (`Cards.PlayerTips.Guest`), so the two sentences are two
+    // rows, and "both" is a third row that joins them. Keys:
+    // `KLEEMOD-ARM_STAGE_<GUEST>.description_line` (and `_line_upgraded`
+    // where the upgraded line is another sentence) and `.description_act`.
+
+    private const string Table = "card_keywords";
+
+    /// <summary>The guest's tip key, `KLEEMOD-ARM_STAGE_CHARLOTTE`
+    /// (<c>ArmKeywordTips.CharlotteKey</c>).</summary>
+    private static string KeyOf(StagePerformer who) =>
+        "KLEEMOD-ARM_STAGE_" + who.ToString().ToUpperInvariant();
+
+    /// <summary>The line's English, with its numbers as vars.</summary>
+    internal static string? LineTemplate(StagePerformer who, bool upgraded) => who switch
+    {
+        StagePerformer.Charlotte =>
+            "The first time each turn one of your cards [gold]Repays[/gold], draw "
+          + "{LineDraw} card{LineDraw:plural:|s}.",
+        StagePerformer.Wriothesley =>
+            "Whenever you [gold]Drain[/gold], deal that much [gold]Cryo[/gold] "
+          + "damage to a random enemy.",
+        StagePerformer.Lynette =>
+            "The first time each turn you lose HP to an enemy, gain that much "
+          + "[gold]Fanfare[/gold] again.",
+        StagePerformer.Clorinde =>
+            "Whenever you [gold]Repay[/gold], deal twice that much "
+          + "[gold]Electro[/gold] damage to a random enemy.",
+        StagePerformer.Lyney =>
+            // Furina round 5 (2026-10-11): in buffer words, the model since
+            // 2026-10-11 (`FurinaStageLaw.BufferOf` adds 10).
+            "Your [gold]Drain[/gold] buffer is {LineDrop} HP larger.",
+        StagePerformer.Sigewinne =>
+            "Whenever you [gold]Repay[/gold], gain that much [gold]Block[/gold].",
+        StagePerformer.Chevreuse => upgraded
+            ? "Whenever you [gold]Spend[/gold], apply {LineVulnerable} "
+              + "[gold]Vulnerable[/gold] and {LineWeak} [gold]Weak[/gold] to a "
+              + "random enemy."
+            : "Whenever you [gold]Spend[/gold], apply {LineVulnerable} "
+              + "[gold]Vulnerable[/gold] to a random enemy.",
+        StagePerformer.Freminet =>
+            "Whenever you [gold]Drain[/gold], gain that much [gold]Block[/gold].",
+        StagePerformer.Navia =>
+            "Your first [gold]Spend[/gold] each turn costs {LineDiscount} less.",
+        StagePerformer.Neuvillette =>
+            "Your [gold]Hydro[/gold] damage deals {LineBonus} additional damage.",
+        StagePerformer.Escoffier =>
+            "Your guests' acts deal {LineBonus} additional damage.",
+        _ => null,
+    };
+
+    /// <summary>The act's English, "Act: ...", with its numbers as vars.</summary>
+    internal static string? ActTemplate(StagePerformer who) => who switch
+    {
+        // furina-next paper 3 (2026-10-16): the Block floor is the Repay
+        // rule, so the act drops the clause.
+        StagePerformer.Charlotte => "Act: [gold]Repay[/gold] {Act}.",
+        StagePerformer.Wriothesley =>
+            "Act: deal {Act} [gold]Cryo[/gold] damage to a random enemy.",
+        StagePerformer.Lynette =>
+            "Act: deal {Act} [gold]Anemo[/gold] damage to an enemy, aura first.",
+        StagePerformer.Clorinde =>
+            "Act: deal {Act} [gold]Electro[/gold] damage to a random enemy.",
+        StagePerformer.Lyney =>
+            "Act: [gold]Drain[/gold] {ActDrain} and deal {Act} [gold]Pyro[/gold] "
+          + "damage to ALL enemies. It never [gold]Drains[/gold] past your line.",
+        StagePerformer.Sigewinne => "Act: [gold]Repay[/gold] {Act}.",
+        StagePerformer.Chevreuse => "Act: deal {Act} damage to a random enemy.",
+        StagePerformer.Freminet =>
+            "Act: gain {Act} [gold]Block[/gold], and more for "
+          + "[gold]Fanfare[/gold]: [gold]Spend[/gold] a quarter of it, rounded "
+          + "down, for that much.",
+        StagePerformer.Navia =>
+            "Act: [gold]Spend[/gold] a third of your [gold]Fanfare[/gold] to "
+          + "deal twice that much [gold]Geo[/gold] damage to a random enemy.",
+        StagePerformer.Neuvillette =>
+            "Act: deal [gold]Hydro[/gold] damage to ALL enemies equal to HP "
+          + "lost or [gold]Drained[/gold] since your last turn.",
+        StagePerformer.Escoffier =>
+            "Act: deal {Act} [gold]Cryo[/gold] damage to ALL enemies.",
+        _ => null,
+    };
+
+    /// <summary>The guest's numbers, read off <see cref="FurinaStageLaw"/> by
+    /// name (`EB-89`), base and upgraded -- the same pairs
+    /// `StageDirector.ActAmount` reads.</summary>
+    internal static IReadOnlyDictionary<string, object> GuestVars(StagePerformer who, bool upgraded)
+    {
         int Pick(int baseAmount, int upgradedAmount) =>
             upgraded ? upgradedAmount : baseAmount;
         var act = who switch
@@ -85,73 +181,62 @@ public abstract class StagePerformerBadge : PowerModel
                 FurinaStageLaw.EscoffierActDamageUpgraded),
             _ => 0,
         };
-        return who switch
+        var lineBonus = who == StagePerformer.Escoffier
+            ? Pick(FurinaStageLaw.EscoffierLineBonus, FurinaStageLaw.EscoffierLineBonusUpgraded)
+            : Pick(FurinaStageLaw.NeuvilletteHydroBonus, FurinaStageLaw.NeuvilletteHydroBonusUpgraded);
+        return CodeText.Vars(
+            ("Act", act),
+            ("LineDraw", FurinaStageLaw.CharlotteLineDraw),
+            ("LineDrop", FurinaStageLaw.LyneyLineDrop),
+            ("ActDrain", FurinaStageLaw.LyneyActDrain),
+            ("LineVulnerable", FurinaStageLaw.ChevreuseLineVulnerable),
+            ("LineWeak", FurinaStageLaw.ChevreuseLineWeakUpgraded),
+            ("LineDiscount", NaviaDiscount(upgraded)),
+            ("LineBonus", lineBonus));
+    }
+
+    /// <summary>The upgraded line is its own row only where it is another
+    /// sentence (Chevreuse); elsewhere only its number moves.</summary>
+    private static bool UpgradedLineIsItsOwn(StagePerformer who) =>
+        LineTemplate(who, true) != LineTemplate(who, false);
+
+    internal static CodeRow LineRow(StagePerformer who, bool upgraded) =>
+        upgraded && UpgradedLineIsItsOwn(who)
+            ? new(Table, KeyOf(who) + ".description_line_upgraded", LineTemplate(who, true)!)
+            : new(Table, KeyOf(who) + ".description_line", LineTemplate(who, false)!);
+
+    internal static CodeRow ActRow(StagePerformer who) =>
+        new(Table, KeyOf(who) + ".description_act", ActTemplate(who)!);
+
+    /// <summary>"Both", for a face that prints neither: the line, then the
+    /// act.</summary>
+    internal static readonly CodeRow LineAndActRow =
+        new(Table, "KLEEMOD-ARM_STAGE_GUEST_STAR.description_line_and_act", "{Line} {Act}");
+
+    /// <summary>The guest's line, as the player reads it.</summary>
+    internal static string LineText(StagePerformer who, bool upgraded) =>
+        CodeText.Format(LineRow(who, upgraded), GuestVars(who, upgraded));
+
+    /// <summary>The guest's act, as the player reads it.</summary>
+    internal static string ActOnlyText(StagePerformer who, bool upgraded) =>
+        CodeText.Format(ActRow(who), GuestVars(who, upgraded));
+
+    /// <summary>The line and the act, as the player reads them.</summary>
+    internal static string GuestText(StagePerformer who, bool upgraded) =>
+        CodeText.Format(LineAndActRow, CodeText.Vars(
+            ("Line", LineText(who, upgraded)), ("Act", ActOnlyText(who, upgraded))));
+
+    /// <summary>Every guest row (<see cref="CodeText.Sources"/>).</summary>
+    public static IEnumerable<CodeRow> TipRows()
+    {
+        foreach (var who in System.Enum.GetValues<StagePerformer>())
         {
-            StagePerformer.Charlotte =>
-                "The first time each turn one of your cards "
-              + "[gold]Repays[/gold], draw "
-              + FurinaStageLaw.CharlotteLineDraw + " card. Act: "
-              // furina-next paper 3 (2026-10-16): the Block floor is the
-              // Repay rule, so the act drops the clause.
-              + "[gold]Repay[/gold] " + act + ".",
-            StagePerformer.Wriothesley =>
-                "Whenever you [gold]Drain[/gold], deal that much "
-              + "[gold]Cryo[/gold] damage to a random enemy. Act: deal " + act
-              + " [gold]Cryo[/gold] damage to a random enemy.",
-            StagePerformer.Lynette =>
-                "The first time each turn you lose HP to an enemy, gain that much "
-              + "[gold]Fanfare[/gold] again. Act: deal " + act
-              + " [gold]Anemo[/gold] damage to an enemy, aura first.",
-            StagePerformer.Clorinde =>
-                "Whenever you [gold]Repay[/gold], deal twice that much "
-              + "[gold]Electro[/gold] damage to a random enemy. Act: deal "
-              + act + " [gold]Electro[/gold] damage to a random enemy.",
-            StagePerformer.Lyney =>
-                // Furina round 5 (2026-10-11): in buffer words, the model
-                // since 2026-10-11 (`FurinaStageLaw.BufferOf` adds 10).
-                "Your [gold]Drain[/gold] buffer is "
-              + FurinaStageLaw.LyneyLineDrop + " HP larger. Act: "
-              + "[gold]Drain[/gold] " + FurinaStageLaw.LyneyActDrain
-              + ", deal " + act + " [gold]Pyro[/gold] damage to ALL enemies. "
-              + "It never [gold]Drains[/gold] past your line.",
-            StagePerformer.Sigewinne =>
-                "Whenever you [gold]Repay[/gold], gain that much "
-              + "[gold]Block[/gold]. Act: [gold]Repay[/gold] " + act + ".",
-            StagePerformer.Chevreuse =>
-                "Whenever you [gold]Spend[/gold], apply "
-              + FurinaStageLaw.ChevreuseLineVulnerable
-              + " [gold]Vulnerable[/gold]"
-              + (upgraded
-                    ? " and " + FurinaStageLaw.ChevreuseLineWeakUpgraded
-                      + " [gold]Weak[/gold]"
-                    : "")
-              + " to a random enemy. Act: deal " + act
-              + " damage to a random enemy.",
-            StagePerformer.Freminet =>
-                "Whenever you [gold]Drain[/gold], gain that much "
-              + "[gold]Block[/gold]. Act: gain " + act
-              + " [gold]Block[/gold], and more for [gold]Fanfare[/gold]: "
-              + "[gold]Spend[/gold] a quarter of it, rounded down, for that "
-              + "much.",
-            StagePerformer.Navia =>
-                "Your first [gold]Spend[/gold] each turn costs "
-              + NaviaDiscount(upgraded) + " less. Act: [gold]Spend[/gold] "
-              + "a third of your [gold]Fanfare[/gold] to deal "
-              + "twice that much [gold]Geo[/gold] damage to a random enemy.",
-            StagePerformer.Neuvillette =>
-                "Your [gold]Hydro[/gold] damage deals "
-              + (upgraded ? FurinaStageLaw.NeuvilletteHydroBonusUpgraded
-                          : FurinaStageLaw.NeuvilletteHydroBonus)
-              + " additional damage. Act: deal [gold]Hydro[/gold] damage to ALL enemies "
-              + "equal to HP you lost or [gold]Drained[/gold] since your last turn.",
-            StagePerformer.Escoffier =>
-                "Your guests' acts deal "
-              + (upgraded ? FurinaStageLaw.EscoffierLineBonusUpgraded
-                          : FurinaStageLaw.EscoffierLineBonus)
-              + " more damage. Act: deal " + act
-              + " [gold]Cryo[/gold] damage to ALL enemies.",
-            _ => "",
-        };
+            if (LineTemplate(who, false) == null || ActTemplate(who) == null) continue;
+            yield return LineRow(who, false);
+            if (UpgradedLineIsItsOwn(who)) yield return LineRow(who, true);
+            yield return ActRow(who);
+        }
+        yield return LineAndActRow;
     }
 
     private static int NaviaDiscount(bool upgraded) =>

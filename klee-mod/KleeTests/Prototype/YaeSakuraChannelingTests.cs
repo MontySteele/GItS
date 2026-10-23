@@ -4,6 +4,7 @@ using BaseLib.Abstracts;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
@@ -12,8 +13,9 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// SAKURA CHANNELING (designed by the main session 2026-10-14: [USER] judged
-/// Yae "generally underpowered right now"; the Rare that bends the 3-Sakura
-/// limit): "You can have 2 more Sakura." Its amount, 2 per copy, raises the
+/// Yae "generally underpowered right now"; the card that bends the 3-Sakura
+/// limit, an Uncommon since the upgrade census, 2026-10-23): "You can have
+/// 2 [3] more Sakura." Its amount, 2 [3] per copy, raises the
 /// shrine's cap for the combat (<see cref="YaeShrine.MaxSakura"/>), and the
 /// full-shrine plant fires at the new cap. Headless, so the ledger is read by
 /// value and the door off its IL. Sim twin:
@@ -41,9 +43,17 @@ public class YaeSakuraChannelingTests : IDisposable
     [Fact]
     public void The_card_says_two_more_sakura_and_applies_two_per_copy()
     {
+        // Upgrade census (2026-10-23, [USER]): Uncommon, 1, 2 [3] more, as
+        // Defect's Capacitor (was Rare, 2 [1]).
         var card = new ProtoYmSakuraChanneling();
-        Assert.Equal("You can have 2 more [gold]Sakura[/gold].", Face(card));
-        Assert.Equal(2, card.EnergyCost.Canonical);
+        Assert.Equal("You can have {PowerAmount:diff()} more [gold]Sakura[/gold].", Face(card));
+        Assert.Equal((1, CardRarity.Uncommon), (card.EnergyCost.Canonical, card.Rarity));
+        Assert.Equal(2m, card.DynamicVars["PowerAmount"].BaseValue);
+        var plus = new ProtoYmSakuraChanneling();
+        Seat.Set(plus, "IsMutable", true);
+        typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
+            .Invoke(plus, Array.Empty<object>());
+        Assert.Equal((1, 3m), (plus.EnergyCost.Canonical, plus.DynamicVars["PowerAmount"].BaseValue));
         Assert.Contains(Il.CallSequence(Il.Method(nameof(ProtoYmSakuraChanneling), "OnPlay")),
                         c => c.Contains("SakuraChannelingPower"));
         var power = new SakuraChannelingPower();

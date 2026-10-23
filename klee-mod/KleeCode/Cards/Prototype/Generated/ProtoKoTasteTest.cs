@@ -48,7 +48,7 @@ public sealed class ProtoKoTasteTest : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Taste Test"),
-        ("description", "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off.{InCombat:\n(Deals {BombHit:diff()} damage)|}"),
+        ("description", "Deal [gold]Pyro[/gold] damage equal to twice the total size of your [gold]Bombs[/gold] on the enemy. They do not go off.{InCombat:\n(Deals {BombHit:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

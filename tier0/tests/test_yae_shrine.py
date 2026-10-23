@@ -92,7 +92,7 @@ def test_her_surface_rows_load_with_the_paper_counts(yae):
         assert c.character == Y.CHARACTER
         by[c.rarity] = by.get(c.rarity, 0) + 1
     # The pool to 78 (ruled 2026-10-15): 20 / 38 / 20.
-    assert by == {"basic": 2, "common": 20, "uncommon": 38, "rare": 20}
+    assert by == {"basic": 2, "common": 20, "uncommon": 39, "rare": 19}
 
 
 def test_her_rows_resolve_through_get_card_and_the_staging_sheet_is_gone(yae):
@@ -317,6 +317,18 @@ def test_channeling_lets_you_have_2_more_sakura_per_copy(yae):
     assert [s.level for s in _led(st).sakura] == [1] * 7
     Y.turn_end(st)
     assert len(_hits(st)) == 7
+
+
+def test_upgraded_channeling_lets_you_have_3_more(yae):
+    # Upgrade census (2026-10-23, [USER]): Uncommon, 1, 2 [3] more, as
+    # Defect's Capacitor (was Rare, 2 [1]).
+    base, plus = loader.get_card(_ym("sakura_channeling")),         loader.get_card(_ym("sakura_channeling") + "+")
+    assert (base.rarity, base.cost, plus.cost) == ("uncommon", 1, 1)
+    st = _state()
+    _play(st, plus)
+    assert Y.sakura_cap(st.player) == 6
+    _play(st, _ym("sakura_channeling") + "+")
+    assert Y.sakura_cap(st.player) == 9
 
 
 def test_the_full_shrine_rule_fires_at_channelings_cap(yae):
@@ -687,7 +699,7 @@ def test_the_harness_pool_is_the_staged_pool(yae):
     from tools import yae_expansion_sim as S
     pl = S.pool()
     assert {k: len(v) for k, v in pl.items()} == {
-        "common": 20, "uncommon": 38, "rare": 20}
+        "common": 20, "uncommon": 39, "rare": 19}
     for d in S.DECKS.values():
         for cid in d["core"] + d["support"]:
             loader.get_card(cid)

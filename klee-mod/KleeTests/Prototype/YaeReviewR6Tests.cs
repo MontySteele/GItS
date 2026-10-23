@@ -34,7 +34,7 @@ public class YaeReviewR6Tests
     [Fact]
     public void Manuscript_pile_draws_then_edits_red_ink()
     {
-        Assert.Equal("Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: "
+        Assert.Equal("Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: "
                      + "[gold]Red Ink[/gold].", Face(new ProtoYmManuscriptPile()));
         var calls = Il.CallSequence(typeof(ProtoYmManuscriptPile).GetMethod(
             "OnPlay", HeadlessGame.All)!).ToList();

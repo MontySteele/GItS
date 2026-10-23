@@ -124,12 +124,13 @@ public class PoolCountTests
     /// 20 / 38 / 20 with thirty-five cards (5 / 20 / 10), Sakura Grove and
     /// Fox's Mooncall swapping rarities. Her two Ancients since the Yae pass
     /// (2026-10-16), which also swapped Editorial Priority and Mischievous
-    /// Teasing; no co-op tier yet.
+    /// Teasing; no co-op tier yet. The upgrade census (2026-10-23) moved Sakura
+    /// Channeling to Uncommon: 20 / 39 / 19.
     /// </summary>
     [Fact]
-    public void Yae_is_78_and_20_38_20_with_her_two_ancients()
+    public void Yae_is_78_and_20_39_19_with_her_two_ancients()
     {
-        AssertPool("YaeRoster", "Pool", 20, 38, 20);
+        AssertPool("YaeRoster", "Pool", 20, 39, 19);
         Assert.Contains(typeof(global::KleeMod.RosterAncientCards).GetProperties(),
             p => p.Name == "Yae");
     }

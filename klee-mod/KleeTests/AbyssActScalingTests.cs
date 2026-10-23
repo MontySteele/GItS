@@ -70,27 +70,27 @@ public class AbyssActScalingTests
     [InlineData(AbyssShadow.ThornyGround, 0, "This act, enemies start each combat with 2 Thorns.")]
     [InlineData(AbyssShadow.ThornyGround, 1, "This act, enemies start each combat with 2 Thorns.")]
     [InlineData(AbyssShadow.ThornyGround, 2, "This act, enemies start each combat with 3 Thorns.")]
-    [InlineData(AbyssShadow.Riptide, 0, "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains 1 Strength, up to 3 times per combat.")]
-    [InlineData(AbyssShadow.Riptide, 1, "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains 1 Strength, up to 4 times per combat.")]
-    [InlineData(AbyssShadow.Riptide, 2, "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains 1 Strength, up to 5 times per combat.")]
-    [InlineData(AbyssShadow.ElementalMark, 0, "The first time each turn an enemy attack deals you unblocked damage, add a Burn to your discard pile.")]
-    [InlineData(AbyssShadow.ElementalMark, 1, "The first time each turn an enemy attack deals you unblocked damage, add a Burn to your discard pile.")]
-    [InlineData(AbyssShadow.ElementalMark, 2, "The first time each turn an enemy attack deals you unblocked damage, add a Burn to your discard pile.")]
+    [InlineData(AbyssShadow.Riptide, 0, "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains 1 Strength, up to 3 times each combat.")]
+    [InlineData(AbyssShadow.Riptide, 1, "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains 1 Strength, up to 4 times each combat.")]
+    [InlineData(AbyssShadow.Riptide, 2, "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains 1 Strength, up to 5 times each combat.")]
+    [InlineData(AbyssShadow.ElementalMark, 0, "The first time each turn an enemy's attack deals you unblocked damage, add a Burn into your Discard Pile.")]
+    [InlineData(AbyssShadow.ElementalMark, 1, "The first time each turn an enemy's attack deals you unblocked damage, add a Burn into your Discard Pile.")]
+    [InlineData(AbyssShadow.ElementalMark, 2, "The first time each turn an enemy's attack deals you unblocked damage, add a Burn into your Discard Pile.")]
     [InlineData(AbyssShadow.MageShield, 0, "Elites enter combat with a shield of [gold]Hydro[/gold], 6 hits deep, that stops all damage. A hit removes 1. A reaction or a [gold]Cryo[/gold] hit removes 3.")]
     [InlineData(AbyssShadow.MageShield, 1, "Elites enter combat with a shield of [gold]Pyro[/gold], 6 hits deep, that stops all damage. A hit removes 1. A reaction or a [gold]Hydro[/gold] hit removes 3.")]
     [InlineData(AbyssShadow.MageShield, 2, "Elites enter combat with a shield of [gold]Electro[/gold], 6 hits deep, that stops all damage. A hit removes 1. A reaction or a [gold]Cryo[/gold] hit removes 3.")]
     [InlineData(AbyssShadow.Clock, 0, "From turn 5, every enemy gains 2 Strength at the start of its turn.")]
     [InlineData(AbyssShadow.Clock, 1, "From turn 5, every enemy gains 2 Strength at the start of its turn.")]
     [InlineData(AbyssShadow.Clock, 2, "From turn 5, every enemy gains 3 Strength at the start of its turn.")]
-    [InlineData(AbyssShadow.Rally, 0, "When an enemy dies, every other enemy gains 2 Strength.")]
-    [InlineData(AbyssShadow.Rally, 1, "When an enemy dies, every other enemy gains 3 Strength.")]
-    [InlineData(AbyssShadow.Rally, 2, "When an enemy dies, every other enemy gains 3 Strength.")]
+    [InlineData(AbyssShadow.Rally, 0, "Whenever an enemy dies, every other enemy gains 2 Strength.")]
+    [InlineData(AbyssShadow.Rally, 1, "Whenever an enemy dies, every other enemy gains 3 Strength.")]
+    [InlineData(AbyssShadow.Rally, 2, "Whenever an enemy dies, every other enemy gains 3 Strength.")]
     [InlineData(AbyssShadow.SheerCold, 0, "If you end your turn with no Block, lose 3 HP.")]
     [InlineData(AbyssShadow.SheerCold, 1, "If you end your turn with no Block, lose 4 HP.")]
     [InlineData(AbyssShadow.SheerCold, 2, "If you end your turn with no Block, lose 5 HP.")]
-    [InlineData(AbyssShadow.FatuiSkirmishers, 0, "Elites and bosses enter combat with 3 Plated Armor (more in co-op).")]
-    [InlineData(AbyssShadow.FatuiSkirmishers, 1, "Elites and bosses enter combat with 4 Plated Armor (more in co-op).")]
-    [InlineData(AbyssShadow.FatuiSkirmishers, 2, "Elites and bosses enter combat with 6 Plated Armor (more in co-op).")]
+    [InlineData(AbyssShadow.FatuiSkirmishers, 0, "Elites and bosses enter combat with 3 Plated Armor, more in co-op.")]
+    [InlineData(AbyssShadow.FatuiSkirmishers, 1, "Elites and bosses enter combat with 4 Plated Armor, more in co-op.")]
+    [InlineData(AbyssShadow.FatuiSkirmishers, 2, "Elites and bosses enter combat with 6 Plated Armor, more in co-op.")]
     public void A_Shadows_text_prints_its_acts_number(AbyssShadow s, int act, string text) =>
         Assert.Equal(text, AbyssText.Text(s, act));
 
@@ -150,7 +150,7 @@ public class AbyssActScalingTests
         Assert.Equal("Start each combat with 8 Block.", content.BlessingsTaken[0].Text);
         Assert.Equal("From turn 5, every enemy gains 2 Strength at the start of its turn.",
                      content.ShadowsInForce[0].Text);
-        Assert.Equal("When an enemy dies, every other enemy gains 3 Strength.", content.ShadowsInForce[1].Text);
+        Assert.Equal("Whenever an enemy dies, every other enemy gains 3 Strength.", content.ShadowsInForce[1].Text);
         // ...while the act 3 card prints act 3's.
         Assert.Equal("Gain 20 Max HP.", content.Cards[0].BlessingText);
         Assert.Equal("This act, at the start of your turn, each enemy gains 8 Block.", content.Cards[0].ShadowText);

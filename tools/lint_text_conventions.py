@@ -78,6 +78,14 @@ MAX_SENTENCES = 4         # the base's longest card is four sentences
 #: joined; the retired Furina reframe (`fr`) has no rows left.
 IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|mf|fs|vk)_")
 
+#: The Yae text audit (2026-10-23, `review/active/yae-text-audit-2026-10-23.md`,
+#: fix 1): her faces are outside `IN_SCOPE` until her Balance pass, so
+#: "in your hand:" printed on ten of them and nothing read it. Her faces are
+#: held to the pile spellings and the no-parentheses rule the audit applied;
+#: the rest of the spellings and the ceilings wait for her full pass.
+YAE_SCOPE = re.compile(r"^proto_ym_")
+YAE_SPELLINGS = ("hand-plain", "bare-hand", "pile-plain", "parenthesis")
+
 #: THE DEFERRED ROWS (text pass 2026-10-08): spellings held for named rows by
 #: (row id, spelling name). ROT SEMANTICS, like `EXCEPTIONS`: an entry whose
 #: spelling no longer fires fails, so the list can only shrink. EMPTY since the
@@ -127,6 +135,16 @@ EXCEPTIONS = {
         "and the Swirl payout) plus the Gravestone's own first-Oath "
         "Ascension, upgraded and free that turn: three rules of the one "
         "Ancient relic"),
+    # The localization census (2026-10-23): keying the tip bodies brought
+    # this one into the lint's sight. It was a `static readonly` the reader
+    # took for an empty name, so it met no ceiling before; the keying moved
+    # it unchanged, by rule (plumbing, not rewording).
+    "FullShrineKey.player": (
+        "Yae review r5, item 5 (four of five seats could not read the short "
+        "form until it bit them): the full-shrine plant by kind, two branches "
+        "in one box, shown on every planting card. Measured for the first "
+        "time by the 2026-10-23 keying at 161 of 135; a rewording is the "
+        "Yae text audit's"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.
@@ -309,20 +327,20 @@ MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
                  "proto_fs_bis", "ExtendedRunPower.description",
                  # Kurage Vanguard (Kokomi boss ramp, 2026-10-21): "It deals
                  # 2 more each turn", its hit growing, Crescendo's shape.
-                 "proto_kk_kurage_vanguard", "KurageVanguardPower.description"}
+                 "proto_kk_kurage_vanguard", "KurageVanguardPower.description",
+                 # Glacial Edict (the Varka text audit, 2026-10-23): "Apply
+                 # 1 more of each for every 3 Cryo Oath", a status count
+                 # growing with Oath, not a bonus on a hit.
+                 "proto_vk_glacial_edict"}
 
-#: Card faces only: "your largest Bomb" says WHICH enemy's (the Klee round,
-#: 2026-10-11: Stoke the Fuse grew Torch Head's Bomb 16 by 49 when the seat
-#: meant the boss's). Every reading but Pocket Match's is board-wide, so a
-#: face says "on any enemy" or "on the enemy", or is listed here with why.
+#: Card faces only: "your largest Bomb" alone is board-wide, and the faces that
+#: read one enemy say "on the enemy" (Stoke the Fuse, Pocket Match). The Klee
+#: text audit (2026-10-23, pick 3; [USER]: "On Klee - agree on the defaults")
+#: retired ", on any enemy," from the eight carriers, so the lint now refuses
+#: the clause instead of requiring it (it required it from the Klee round of
+#: 2026-10-11, when Stoke the Fuse grew Torch Head's Bomb by 49).
 LARGEST_BOMB = re.compile(r"\blargest Bomb")
-LARGEST_BOMB_SAYS_WHERE = re.compile(r"\bon (?:the|any) enemy\b")
-LARGEST_BOMB_ALLOWED = {
-    "proto_ko_all_of_my_treasures": (
-        "it has no target and places on ALL enemies, so no enemy is "
-        "singled out to misread; a second 'enemy' clause in one sentence "
-        "reads worse than the gap it closes"),
-}
+LARGEST_BOMB_ANY_ENEMY = re.compile(r"\bon any enemy\b")
 
 TAG = re.compile(r"\[/?[a-z_]+\]")
 LIT = re.compile(r'"((?:[^"\\]|\\.)*)"')
@@ -503,16 +521,35 @@ _ACT_ARM = re.compile(
     re.S)
 
 
-def _act_texts() -> dict[str, str]:
-    src = read(MOD / "Powers" / "Prototype" / "FurinaStageBadges.cs")
-    body = src[src.index("public static string ActText"):]
-    # The card text pass (2026-10-12): the method holds TWO switches, the act
-    # amounts and then the text, and reading to the first `_ =>` measured the
-    # amounts switch -- every guest tip rendered empty and met no rule. The
-    # text is the `return who switch`.
-    body = body[body.index("return who switch"):]
+def _switch_arms(src: str, head: str) -> dict[str, str]:
+    """The `StagePerformer.X => ...` arms of the switch after `head`, each
+    arm's English joined; an `upgraded ? A : B` arm reads B, the base card."""
+    body = src[src.index(head):]
+    body = body[body.index("who switch"):]
     body = body[:body.index("_ =>") + 4]
-    return {who: csharp_text(expr) for who, expr in _ACT_ARM.findall(body)}
+    out: dict[str, str] = {}
+    for who, expr in _ACT_ARM.findall(body):
+        expr = re.sub(r"^\s*//.*$", "", expr, flags=re.M).strip()
+        base = re.match(r"upgraded\s*\?.*?\n\s*:\s*(.*)", expr, re.S)
+        out[who] = csharp_text(base.group(1) if base else expr)
+    return out
+
+
+def _guest_halves() -> dict[str, tuple[str, str]]:
+    """Each guest's line and act, base card: `StagePerformerBadge.
+    LineTemplate` and `.ActTemplate`, the two keyed rows `ActText` joins (the
+    localization census, 2026-10-23). A var hole renders as one numeral
+    (`render`)."""
+    src = read(MOD / "Powers" / "Prototype" / "FurinaStageBadges.cs")
+    lines = _switch_arms(src, "internal static string? LineTemplate(")
+    acts = _switch_arms(src, "internal static string? ActTemplate(")
+    return {who: (lines[who], acts[who]) for who in lines if who in acts}
+
+
+def _act_texts() -> dict[str, str]:
+    """`StagePerformerBadge.ActText` per guest: its line, a space, its act."""
+    return {who: line + " " + act
+            for who, (line, act) in _guest_halves().items()}
 
 
 def _tip_body(body: str, consts: dict[str, str]) -> str:
@@ -577,8 +614,9 @@ def player_tip_rows() -> list[Row]:
     src = re.sub(r"^\s*//.*$", "", read(path), flags=re.M)
     where = str(path.relative_to(REPO))
     rows: list[Row] = []
-    for m in re.finditer(r"\[ArmKeywordTips\.(\w+Key)\]\s*=\s*", src):
-        i, n, depth = m.end(), len(src), 0
+
+    def entry_end(i: int) -> int:
+        n, depth = len(src), 0
         while i < n:
             c = src[i]
             if c == '"':
@@ -591,10 +629,20 @@ def player_tip_rows() -> list[Row]:
             elif c in ",}" and depth == 0:
                 break
             i += 1
-        expr = src[m.end():i].strip()
+        return i
+
+    for m in re.finditer(r"\[ArmKeywordTips\.(\w+Key)\]\s*=\s*", src):
+        expr = src[m.end():entry_end(m.end())].strip()
         if re.fullmatch(r"\w+", expr):
             continue
         rows.append(Row("tip", m.group(1) + ".player", csharp_text(expr),
+                        where))
+    # The variant rows (`PlayerTips.Variants`, the localization census,
+    # 2026-10-23): Klee's opening bank, the no-Bomb own-line rider, Yae's
+    # Sakura.
+    for m in re.finditer(r"\[\(ArmKeywordTips\.(\w+Key), (\w+)\)\]\s*=\s*", src):
+        expr = src[m.end():entry_end(m.end())].strip()
+        rows.append(Row("tip", f"{m.group(1)}.{m.group(2)}", csharp_text(expr),
                         where))
     return rows
 
@@ -618,7 +666,11 @@ def tip_rows() -> list[Row]:
         if "SparkBody(" in body:
             continue
         rows.append(Row("tip", name, _tip_body(body, consts), where))
-    concat = r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
+    # A guest's tip is its whole sentence (the seat's) or a half of it (the
+    # player's, `PlayerTips.Guest`), both off the badge's keyed rows.
+    for who, text in _act_texts().items():
+        rows.append(Row("tip", who + "Key", text, where))
+    concat =r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
     word = csharp_text(re.search(r"const string word =\s*" + concat + ";", src).group(1))
     shared = csharp_text(re.search(r"const string shared =\s*" + concat + ";", src).group(1))
     arm = re.search(r'return word \+ "Start each combat with "((?:[^;])*);', src)
@@ -988,6 +1040,14 @@ def prototype_rows() -> list[Row]:
             + loc_rows(list(ANCIENT_CARD_FILES), "card", "proto"))
 
 
+def yae_face_findings() -> list[str]:
+    """Yae's card faces against `YAE_SPELLINGS` only (the Yae text audit,
+    2026-10-23)."""
+    rows = card_rows(MOD / "Cards" / "Prototype" / "Generated", YAE_SCOPE)
+    return [f for f in findings_for(rows, {}, gate=False)
+            if any(f": {name}: " in f for name in YAE_SPELLINGS)]
+
+
 def report_rows() -> list[Row]:
     """`--report`: the surfaces the gate does not read yet, top-level power
     badges and the relics. It was `--shipped` until the text pass of
@@ -1071,10 +1131,9 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
             out.append(f"{tag}: front-enemy: a Plan line names no target; "
                        f"the tip carries the rule: {text}")
         if (row.surface in ("card", "mode") and LARGEST_BOMB.search(text)
-                and not LARGEST_BOMB_SAYS_WHERE.search(text)
-                and base not in LARGEST_BOMB_ALLOWED):
-            out.append(f"{tag}: largest-bomb-where: say 'on any enemy' or "
-                       f"'on the enemy': {text}")
+                and LARGEST_BOMB_ANY_ENEMY.search(text)):
+            out.append(f"{tag}: largest-bomb-any: 'your largest Bomb' is "
+                       f"already any enemy's; drop 'on any enemy': {text}")
     if gate:
         known = {r.ident for r in rows}
         for ident, reason in exceptions.items():
@@ -1162,9 +1221,10 @@ def self_test() -> list[str]:
         Row("power", "fx_dash", "Draw {Amount} cards -- unless you play an Attack.", "fixture"),
         Row("card", "fx_upgrade", "Deal 6 damage.{IfUpgraded:show: Then draw 2 cards and gain 3 Block.|}", "fixture"),
         Row("tip", "fx_tip", "A " + "very " * 30 + "long tip.", "fixture"),
-        Row("card", "fx_largest", "Your largest [gold]Bomb[/gold] grows by 3.", "fixture"),
+        Row("card", "fx_largest", "Your largest [gold]Bomb[/gold], on any enemy, grows by 3.", "fixture"),
         Row("card", "fx_hand", "Add a [gold]Sting[/gold] to your hand.", "fixture"),
         Row("card", "fx_bare_hand", "Add a [gold]Sting[/gold] to your Hand.", "fixture"),
+        Row("card", "fx_hand_colon", "[gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold].", "fixture"),
         Row("card", "fx_status", "Whenever you draw a status, draw 1 card.", "fixture"),
         Row("card", "fx_once", "Once a turn, when you play a Skill, draw 1 card.", "fixture"),
         Row("card", "fx_first", "The first time you [gold]Spend[/gold] each turn, draw 1 card.", "fixture"),
@@ -1182,8 +1242,9 @@ def self_test() -> list[str]:
                 "fx_bare": ("bare-keyword",), "fx_gold_type": ("gold-cardtype",),
                 "fx_plan_front": ("front-enemy",), "fx_lasts": ("lasts-more",),
                 "fx_dash": ("dash",), "fx_upgrade": ("upgrade clause",),
-                "fx_tip": ("> 135",), "fx_largest": ("largest-bomb-where",),
+                "fx_tip": ("> 135",), "fx_largest": ("largest-bomb-any",),
                 "fx_hand": ("hand-plain",), "fx_bare_hand": ("bare-hand",),
+                "fx_hand_colon": ("hand-plain",),
                 "fx_status": ("status-lowercase",), "fx_once": ("first-time-order",),
                 "fx_first": ("first-time-order",), "fx_cause": ("reaction-verb",),
                 "fx_grey": ("british",), "fx_next": ("next-turn",),
@@ -1201,7 +1262,7 @@ def self_test() -> list[str]:
         Row("card", "ok_b", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal 5 damage to ALL enemies.", "fixture"),
         Row("power", "ok_c", "At the end of your turn, deal [blue]6[/blue] [gold]Cryo[/gold] damage to a random enemy. Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}.", "fixture"),
         Row("card", "ok_d", "Gain 4 [gold]Block[/gold]. Next turn, draw 2 cards if you play no Attacks this turn.", "fixture"),
-        Row("card", "ok_e", "Your largest [gold]Bomb[/gold], on any enemy, grows by 3.", "fixture"),
+        Row("card", "ok_e", "Your largest [gold]Bomb[/gold] grows by 3.", "fixture"),
         Row("card", "ok_f", "Next turn, gain {energyPrefix:energyIcons(1)}. Add a [gold]Sting[/gold] to your [gold]Hand[/gold].", "fixture"),
         Row("card", "ok_g", "The first time each turn you play a Status, [gold]Set off[/gold] the enemy.", "fixture"),
         Row("tip", "ok_h", "Some cards cost [gold]Sparks[/gold] instead of Energy. Plans happen next turn.", "fixture"),
@@ -1235,7 +1296,7 @@ def main(argv: list[str]) -> int:
         bad = self_test()
         for line in bad:
             print(line)
-        print("self-test: 25 bad + 8 clean case(s) + the EB-777 semicolon "
+        print("self-test: 26 bad + 8 clean case(s) + the EB-777 semicolon "
               f"face, {len(bad)} failure(s)")
         return 1 if bad else 0
     if "--report" in argv:
@@ -1256,7 +1317,8 @@ def main(argv: list[str]) -> int:
     if "--census" in argv:
         census(rows)
         return 0
-    found = loc_audit_findings() + findings_for(rows, EXCEPTIONS)
+    found = (loc_audit_findings() + findings_for(rows, EXCEPTIONS)
+             + yae_face_findings())
     for line in found:
         print(line)
     exceptions = [f"  {k}: {v}" for k, v in EXCEPTIONS.items()]

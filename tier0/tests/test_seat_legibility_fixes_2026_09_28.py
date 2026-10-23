@@ -108,8 +108,9 @@ def test_nereids_face_names_the_one_drain():
 
 def test_the_mend_tip_names_its_cap_as_a_moment():
     """Seat: the Mend cap and Yumemizuki's "HP over 70%" read as one HP."""
+    # The tip's keyed row (the localization census, 2026-10-23).
     tips = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+            / "PlayerTips.cs").read_text(encoding="utf-8")
     assert ('"[gold]Mend N[/gold]: heal N HP, but never above the HP you had "'
             '\n          + "at the start of this combat."') in tips
 

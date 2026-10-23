@@ -276,7 +276,7 @@ public static class AbyssText
         AbyssShadow.ElementalMark => "Elemental Mark",
         AbyssShadow.Herald => "Abyss Herald",
         AbyssShadow.Rally => "Rally",
-        AbyssShadow.Riptide => "Riptide",
+        AbyssShadow.Riptide => "Blood in the Water",
         AbyssShadow.FatuiSkirmishers => "Fatui Skirmishers",
         AbyssShadow.ThornyGround => "Thorny Ground",
         AbyssShadow.Bulwark => "Bulwark",
@@ -306,19 +306,19 @@ public static class AbyssText
         AbyssShadow.SheerCold => $"If you end your turn with no Block, lose {AbyssNumbers.SheerColdHpLoss(act)} HP.",
         // 2026-10-18: once per turn, so a multi-hit attack adds one Burn.
         AbyssShadow.ElementalMark =>
-            "The first time each turn an enemy attack deals you unblocked damage, add a Burn to "
-          + "your discard pile.",
+            "The first time each turn an enemy's attack deals you unblocked damage, add a Burn into "
+          + "your Discard Pile.",
         AbyssShadow.Herald => $"Enemies have {(int)(AbyssNumbers.HeraldHpBonus * 100)}% more HP.",
-        AbyssShadow.Rally => $"When an enemy dies, every other enemy gains {AbyssNumbers.RallyStrength(act)} Strength.",
+        AbyssShadow.Rally => $"Whenever an enemy dies, every other enemy gains {AbyssNumbers.RallyStrength(act)} Strength.",
         // This act from round 2 (pick 1 (a)), so its text says so. Bounded
         // 2026-10-18: once per turn per enemy, and a cap per combat.
         AbyssShadow.Riptide =>
             "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains "
-          + $"{AbyssNumbers.RiptideStrength} Strength, up to {AbyssNumbers.RiptideCap(act)} times per combat.",
+          + $"{AbyssNumbers.RiptideStrength} Strength, up to {AbyssNumbers.RiptideCap(act)} times each combat.",
         // 2026-10-18 ([USER]: pick (a)): base Plating scales in co-op (x3 for two
         // players, PlatingPower.GetScaledAmountForMultiplayer), so the text says so.
         AbyssShadow.FatuiSkirmishers =>
-            $"Elites and bosses enter combat with {AbyssNumbers.FatuiPlating(act)} Plated Armor (more in co-op).",
+            $"Elites and bosses enter combat with {AbyssNumbers.FatuiPlating(act)} Plated Armor, more in co-op.",
         AbyssShadow.ThornyGround =>
             $"This act, enemies start each combat with {AbyssNumbers.ThornyGroundThorns(act)} Thorns.",
         AbyssShadow.Bulwark =>

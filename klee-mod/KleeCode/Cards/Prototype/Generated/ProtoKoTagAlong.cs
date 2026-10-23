@@ -45,7 +45,7 @@ public sealed class ProtoKoTagAlong : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tag Along"),
-        ("description", "Choose 1 of 3 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. It costs 0 this turn."),
+        ("description", "Choose 1 of 3 [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It costs 0 this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

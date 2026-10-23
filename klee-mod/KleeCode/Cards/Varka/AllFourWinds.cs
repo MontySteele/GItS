@@ -39,8 +39,7 @@ public sealed class AllFourWinds : CustomCardModel, ICharacterCard
     {
         ("title", "All Four Winds"),
         ("description",
-            "Your cards read your [gold]Oath[/gold] of every element "
-          + "together."),
+            "Your cards read your total [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>

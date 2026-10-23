@@ -60,7 +60,7 @@ def test_the_tips_say_what_the_code_does():
     from tools import lint_text_conventions as ltc
     tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
     assert "Bombs on other enemies stay." in tips["SetOffKey"]
-    assert "Its plain Bombs stay." in tips["MineKey"]
+    assert "The enemy's other Bombs stay." in tips["MineKey"]
     for ident in ("BigBaddaBoomTotalKey", "BoomBadgeTurnKey",
                   "LionsFangLastTurnKey", "PassTheMatchActingKey"):
         assert ident in tips, ident

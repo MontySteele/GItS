@@ -435,7 +435,7 @@ public sealed class ResistanceMusterRoll : KokomiArmRelic
         ("description",
             "At the start of each combat, choose 1 of "
           + KokomiCompanionPlan.GeneralsOffered + " random Inazuma "
-          + "[gold]Companions[/gold] to add to your [gold]Hand[/gold]. It "
+          + "[gold]Companions[/gold] to add into your [gold]Hand[/gold]. It "
           + "costs 0 this turn."),
     };
 

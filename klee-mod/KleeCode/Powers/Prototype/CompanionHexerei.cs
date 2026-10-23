@@ -323,7 +323,7 @@ public sealed class LadderOfAscentPower : PowerModel, ILocalizationProvider
     {
         ("title", "Ladder of Divine Ascent"),
         ("description",
-            "Whenever you play a [gold]Companion[/gold] card, deal "
+            "Whenever you play a [gold]Companion[/gold], deal "
           + "[blue]{Amount}[/blue] damage of that card's element to a random "
           + "enemy."),
     };
@@ -384,8 +384,8 @@ public sealed class IntroductionMagicPower : PowerModel, ILocalizationProvider
     {
         ("title", "Introduction Magic"),
         ("description",
-            "The cards that were in your [gold]Hand[/gold] count as [gold]Companion[/gold] "
-          + "cards this turn."),
+            "The cards that were in your [gold]Hand[/gold] count as "
+          + "[gold]Companions[/gold] this turn."),
     };
 
     public override PowerType Type => PowerType.Buff;

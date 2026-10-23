@@ -268,8 +268,9 @@ public class PoolPassTwoTests
         var card = new ProtoKoStokeTheFuse();
 
         Assert.Contains("{Grow:diff()}", Face(card));
-        // `EB-612`: "Spend all your remaining Sparks", the price first.
-        Assert.Contains("all your remaining [gold]Sparks[/gold]", Face(card));
+        // `EB-612`: the price first. The Klee text audit (2026-10-23) took
+        // Fireworks Finale's spelling, "Spend all your Sparks".
+        Assert.StartsWith("Spend all your [gold]Sparks[/gold].", Face(card));
         // Klee balance review, pick 4a, 2026-09-25. 3 -> 5 per Spark.
         Assert.Equal(5m, Vars(card).Single().BaseValue);
         Assert.Contains(

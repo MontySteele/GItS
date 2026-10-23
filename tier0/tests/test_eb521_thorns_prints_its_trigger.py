@@ -62,9 +62,9 @@ def test_the_line_names_the_case_the_seat_met():
     three debuffs on one screen do not have three vocabularies."""
     for key in ("THORNS_POWER.description", "THORNS_POWER.smartDescription"):
         row = _row(key)
-        assert "Every card hit is one" in row, key
-        assert "a Skill's too" in row, key
-        assert "a potion's is not" in row, key
+        assert "Card hits count" in row, key
+        assert "Skills included" in row, key
+        assert "not potions" in row, key
 
 
 def test_the_live_line_keeps_the_amount_hole():

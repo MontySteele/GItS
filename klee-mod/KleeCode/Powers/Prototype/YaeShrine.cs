@@ -1646,6 +1646,25 @@ public static class YaeCards
         await CardPileCmd.Draw(choiceContext, FallenPetalsDraw(card.IsUpgraded), owner);
     }
 
+    /// <summary>
+    /// SAIGUU'S LESSON+ (upgrade census, 2026-10-23, [USER]): "[Apply 1 Weak
+    /// to ALL enemies.]" Played after the card's power is in, so the Weak
+    /// triggers the Lesson itself. Unupgraded it does nothing; read off
+    /// <c>IsUpgraded</c> (`yae_upgraded`). Sim twin: `weak_all_if_upgraded`.
+    /// </summary>
+    public static async Task WeakAllIfUpgraded(PlayerChoiceContext choiceContext,
+                                               CardModel card, CardPlay cardPlay)
+    {
+        if (!card.IsUpgraded) return;
+        var owner = card.Owner?.Creature;
+        if (owner?.CombatState == null) return;
+        foreach (var enemy in owner.CombatState.HittableEnemies.Where(e => e.IsAlive).ToList())
+        {
+            await PowerCmd.Apply<WeakPower>(choiceContext, enemy, 1,
+                                            applier: owner, cardSource: card);
+        }
+    }
+
     /// <summary>Second Printing (review r3, sec.3): "Put an Annotated card
     /// from your Discard Pile into your hand. [It costs 0 this turn.]"
     /// </summary>

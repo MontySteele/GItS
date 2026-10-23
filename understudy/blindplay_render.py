@@ -3554,7 +3554,7 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
     line. The rows print most turns left first, as her display draws them;
     the number on each is its badge's, 1 for the oldest."""
     rows = shrine["sakura"]
-    # Sakura Channeling (2026-10-14) raises the cap: 3, plus 2 per copy.
+    # Sakura Channeling (2026-10-14) raises the cap: 3, plus 2 [3] per copy.
     cap = shrine.get("cap", 3)
     out = [SHRINE_COUNT_LINE.format(n=len(rows), cap=cap) if rows
            else SHRINE_NONE_LINE]

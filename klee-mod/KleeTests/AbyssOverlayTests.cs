@@ -132,8 +132,8 @@ public class AbyssOverlayTests
 
         // Solo shows its result line too (co-op Abyss run, 2026-10-14: the
         // page never said which Shadow the enemies took).
-        Assert.Equal(AbyssOverlayFlow.ResultSeconds, flow.Resolve(1, "Moonlit Rest", "Riptide", coop: false, split: false));
-        Assert.Equal("You chose Moonlit Rest. The enemies took Riptide.", flow.ResultLine);
+        Assert.Equal(AbyssOverlayFlow.ResultSeconds, flow.Resolve(1, "Moonlit Rest", "Blood in the Water", coop: false, split: false));
+        Assert.Equal("You chose Moonlit Rest. The enemies took Blood in the Water.", flow.ResultLine);
         Assert.Equal(AbyssOverlayPhase.Resolving, flow.Phase);
         Assert.True(flow.HoldsDialogue);
         Assert.False(flow.Vote(0, 3));
@@ -170,12 +170,12 @@ public class AbyssOverlayTests
     [Fact]
     public void The_result_line_says_whether_the_vote_split()
     {
-        Assert.Equal("The party chose Moonlit Rest. The enemies took Riptide.",
-                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", "Riptide", coop: true, split: false));
-        Assert.Equal("The vote split; the draw gave Moonlit Rest. The enemies took Riptide.",
-                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", "Riptide", coop: true, split: true));
-        Assert.Equal("You chose Moonlit Rest. The enemies took Riptide.",
-                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", "Riptide", coop: false, split: false));
+        Assert.Equal("The party chose Moonlit Rest. The enemies took Blood in the Water.",
+                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", "Blood in the Water", coop: true, split: false));
+        Assert.Equal("The vote split; the draw gave Moonlit Rest. The enemies took Blood in the Water.",
+                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", "Blood in the Water", coop: true, split: true));
+        Assert.Equal("You chose Moonlit Rest. The enemies took Blood in the Water.",
+                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", "Blood in the Water", coop: false, split: false));
         // An offer with no Shadow to give names none.
         Assert.Equal("You chose Moonlit Rest.",
                      AbyssOverlayFlow.ResultLineFor("Moonlit Rest", null, coop: false, split: false));

@@ -97,9 +97,9 @@ def test_the_status_line_and_the_glossary_name_the_same_two_cases():
     glossary = blindplay_notes.BASE_KEYWORDS["Vulnerable"]
 
     assert "card hit" in src[src.index('["VULNERABLE_POWER.description"]'):]
-    assert "attack or card hit" in glossary
-    assert "Skill's" in glossary
-    assert "potion's does not" in glossary
+    assert "damage from cards" in glossary
+    assert "Skills included" in glossary
+    assert "not from potions" in glossary
 
 
 # ---- and the engine the words are read off --------------------------------

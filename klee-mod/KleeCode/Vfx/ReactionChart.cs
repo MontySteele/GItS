@@ -81,7 +81,8 @@ public static class ReactionChart
     /// modal popups are not expected while the chart is up.</summary>
     internal const int CanvasLayerIndex = 90;
 
-    internal const string ButtonTipBody = "Every element and what it reacts with.";
+    /// <summary>The button's hover body, a keyed row (`ReactionGuide`).</summary>
+    internal static string ButtonTipBody => ReactionGuide.Label(ReactionGuide.ButtonTipRow);
 
     private static readonly ReactionChartState State = new();
     private static CanvasLayer? _layer;
@@ -266,8 +267,8 @@ public static class ReactionChart
         column.AddThemeConstantOverride("separation", 12);
         panel.AddChild(column);
 
-        column.AddChild(Text("Elemental Reactions", 34, Gold, centered: true, width: 0));
-        column.AddChild(Text("Rows: the aura on the enemy. Columns: the element of the hit.",
+        column.AddChild(Text(ReactionGuide.Label(ReactionGuide.HeadingRow), 34, Gold, centered: true, width: 0));
+        column.AddChild(Text(ReactionGuide.Label(ReactionGuide.LegendRow),
                              20, Muted, centered: true, width: 0));
 
         var grid = new GridContainer
@@ -278,7 +279,7 @@ public static class ReactionChart
         grid.AddThemeConstantOverride("h_separation", 6);
         grid.AddThemeConstantOverride("v_separation", 6);
 
-        grid.AddChild(Text("Aura \\ Hit", 20, Muted, centered: true, width: 120));
+        grid.AddChild(Text(ReactionGuide.Label(ReactionGuide.CornerRow), 20, Muted, centered: true, width: 120));
         foreach (var hit in ReactionGuide.Elements) grid.AddChild(Header(hit));
 
         foreach (var aura in ReactionGuide.AuraElements)
@@ -292,7 +293,7 @@ public static class ReactionChart
         {
             column.AddChild(Text(note, 20, Ink, centered: false, width: 0));
         }
-        column.AddChild(Text("Click outside or press Esc to close.", 18, Muted, centered: true, width: 0));
+        column.AddChild(Text(ReactionGuide.Label(ReactionGuide.CloseRow), 18, Muted, centered: true, width: 0));
         return panel;
     }
 
@@ -307,7 +308,7 @@ public static class ReactionChart
         var gemRow = new CenterContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
         gemRow.AddChild(Gem(element, 34));
         box.AddChild(gemRow);
-        box.AddChild(Text(element.ToString(), 22, ElementColour(element), centered: true, width: 0));
+        box.AddChild(Text(ElementWords.Name(element), 22, ElementColour(element), centered: true, width: 0));
         return box;
     }
 

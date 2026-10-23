@@ -91,8 +91,10 @@ def test_the_preview_words_are_one_short_line():
            / "Powers" / "Prototype" / "FurinaStageBowPreview.cs").read_text(
                encoding="utf-8")
     # Paper 3 (2026-10-16): the floor first, "(Repay 0: gain 3 Block)".
-    assert '$"\\n(Repay {repays}: {what})"' in src
-    assert '$"gain {pays} {payout}"' in src
+    # The localization census (2026-10-23, step 2): a keyed row per payout.
+    assert r'"\n(Repay {Repays}: gain {Pays} Block)"' in src
+    assert r'"\n(Repay {Repays}: gain {Pays} Vigor)"' in src
+    assert r'"\n(Repay {Repays}: +{Pays} damage)"' in src
     for word in ('"Block"', '"Vigor"', '"damage"'):
         assert word in src
 
@@ -125,12 +127,13 @@ def test_the_players_own_drain_still_goes_past_the_line():
 
 
 def test_lyneys_badge_says_his_drain_stops_at_the_line():
-    src = (Path(__file__).resolve().parents[2] / "klee-mod" / "KleeCode"
-           / "Powers" / "Prototype" / "FurinaStageBadges.cs").read_text(
-               encoding="utf-8")
     # The card text pass (2026-10-12): the face's words first, and no
-    # parentheses.
-    assert ('"It never [gold]Drains[/gold] past your line."' in src)
+    # parentheses. The sentence is the badge's keyed act row since the
+    # localization census (2026-10-23), read rendered.
+    from tools import lint_text_conventions as ltc
+    act = ltc._guest_halves()["Lyney"][1]
+    assert act.endswith("It never [gold]Drains[/gold] past your line.")
+    assert "(" not in act
 
 
 # ---- 3. the curtain-call sentence --------------------------------------------

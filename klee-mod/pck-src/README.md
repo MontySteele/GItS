@@ -20,7 +20,10 @@ Rules:
 - NO scripts in scenes. Our assembly builds with plain Microsoft.NET.Sdk
   (no ScriptPath mapping), and the pipeline's standing rule is script-less
   packs: behavior attaches from C# (BaseLib scene conversion + Harmony
-  routing), never from `ext_resource type="Script"`.
+  routing), never from `ext_resource type="Script"`. One exception: the five
+  `<kit>/vfx/card_trail.tscn` (tools/gen_card_trails.py) reference the BASE
+  GAME's own `NCardTrailVfx.cs` and `NCardTrail.cs` by path, as the base
+  trail scenes do; `scene_deps.BASE_GAME_SCRIPTS` lists exactly those two.
 - Every shipped scene gets a `resource=` line in the contract list at the
   bottom of build_pck.ps1 — validate.ps1 S6c fails a deploy whose staged
   contract omits a source-referenced resource.

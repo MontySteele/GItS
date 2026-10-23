@@ -48,7 +48,7 @@
 - {id: proto_ko_chain_fuse, name: "Chain Fuse", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Each [gold]Bomb[/gold] and [gold]Mine[/gold] on the enemy grows by 9.",
+   description: "Each [gold]Bomb[/gold] on the enemy grows by 9.",
    upgrade: {grow: +3},
    effects: [{op: grow_bombs, target: enemy, amount: 9}]}
 
@@ -82,7 +82,7 @@
    authored_by: [claude],
    cost: 3, type: power, rarity: rare,
    upgrade: {power_amount: +1},
-   description: "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by 2.",
+   description: "Whenever you place a [gold]Bomb[/gold], your other [gold]Bombs[/gold] grow by 2.",
    effects: [{op: apply_power, power: ko_alices_recipe, amount: 2, target: self}]}
 
 # --- Spray, everything explodes now (packet sec.4) ---
@@ -101,7 +101,7 @@
    cost: 1, type: skill, rarity: common,
    # AoE trim, 2026-10-03 (review/active/aoe-trim-2026-10-03.md sec.2):
    # single target, was a Mine 4 on ALL enemies.
-   description: "Place a [gold]Mine[/gold] 11 on an enemy.",
+   description: "Place a [gold]Mine[/gold] 11.",
    upgrade: {bomb_size: +3},
    effects: [{op: plant_bomb, target: enemy, size: 11, mine: true}]}
 
@@ -147,13 +147,13 @@
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever one of your [gold]Bombs[/gold] goes off, your [gold]Bombs[/gold] still waiting grow 3.",
+   description: "Whenever one of your [gold]Bombs[/gold] goes off, your [gold]Bombs[/gold] still waiting grow by 3.",
    effects: [{op: apply_power, power: ko_chained_reactions, amount: 3, target: self}]}
 
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, your largest [gold]Bomb[/gold], on any enemy, deals its size in [gold]Pyro[/gold] damage without going off.",
+   description: "At the start of your turn, your largest [gold]Bomb[/gold] deals its size in [gold]Pyro[/gold] damage without going off.",
    upgrade: {innate: true},
    effects: [{op: apply_power, power: ko_bomb_echo, amount: 1, target: self}]}
 
@@ -162,7 +162,7 @@
 - {id: proto_ko_sizzle, name: "Sizzle", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
+   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] reacted this turn, deal {BranchDamage:diff()} additional damage.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 8},
              {op: conditional, if: bomb_reacted_this_turn,
@@ -171,7 +171,7 @@
 - {id: proto_ko_perfect_timing, name: "Perfect Timing", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again.",
+   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] reacted this turn, play this again.",
    effects: [{op: set_off, target: enemy, damage: 8},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: repeat_this, times: 1}]}]}
@@ -252,7 +252,7 @@
    upgrade: {bomb_size: +2},
    # AoE trim, 2026-10-03 (sec.2): one Bomb that grows by 3 after a
    # Companion, where it went to ALL enemies. `bonus_if:` is the rider.
-   description: "Place a [gold]Bomb[/gold] 10 on an enemy, 14 if you played a [gold]Companion[/gold] card this turn.",
+   description: "Place a [gold]Bomb[/gold] 10. If you played a [gold]Companion[/gold] this turn, it is 4 larger.",
    effects: [{op: plant_bomb, target: enemy, size: 10,
               bonus_if: {if: companion_played_this_turn, amount: 4}}]}
 
@@ -260,7 +260,7 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    upgrade: {power_amount: +2},
-   description: "Whenever you play a [gold]Companion[/gold] card, place a [gold]Bomb[/gold] 5 on a random enemy.",
+   description: "Whenever you play a [gold]Companion[/gold], place a [gold]Bomb[/gold] 5 on a random enemy.",
    effects: [{op: apply_power, power: ko_witches_circle, amount: 5, target: self}]}
 
 # 2026-10-03, Klee pre-Balance sweep: draws 2 after the mark.
@@ -268,7 +268,7 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare,
    upgrade: {retain: true},
-   description: "All cards in your [gold]Hand[/gold] count as [gold]Companion[/gold] cards this turn. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "All cards in your [gold]Hand[/gold] count as [gold]Companions[/gold] this turn. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: companion_mark_hand},
              {op: draw, amount: 2}]}
 
@@ -294,7 +294,7 @@
 - {id: proto_ko_stoke_the_fuse, name: "Stoke the Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] on the enemy grows by 5 per [gold]Spark[/gold] spent.",
+   description: "Spend all your [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] on the enemy grows by 5 for each [gold]Spark[/gold] spent.",
    upgrade: {grow: +2},
    effects: [{op: spend_spark, amount: all},
              {op: grow_largest_bomb, per_spark: 5, target: enemy}]}
@@ -336,7 +336,7 @@
    # AoE trim, 2026-10-03 (sec.2): a Skill now, Block keyed to the Bombs on
    # the board (the count is read after this Bomb lands).
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Bomb[/gold] 6 on an enemy. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold].",
+   description: "Place a [gold]Bomb[/gold] 6. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold].",
    upgrade: {bomb_size: +2},
    effects: [{op: plant_bomb, target: enemy, size: 6},
              {op: block, amount_formula: {base: 4, per: 2, count: enemies_with_bomb}}]}
@@ -347,7 +347,7 @@
 - {id: proto_ko_flash_point, name: "Flash Point", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy. Deal 9 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold], draw 1 card.",
+   description: "[gold]Set off[/gold] the enemy. Deal 9 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] reacted this turn, gain 1 [gold]Spark[/gold] and draw 1 card.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 9},
              {op: conditional, if: bomb_reacted_this_turn,
@@ -404,7 +404,7 @@
 - {id: proto_ko_sparkling_burst, name: "Sparkling Burst", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Gain {Energy:energyIcons()}. If a [gold]Bomb[/gold] went off this turn, gain an additional {energyPrefix:energyIcons(1)}.",
+   description: "Gain {Energy:energyIcons()}. If a [gold]Bomb[/gold] went off this turn, gain 1 additional {energyPrefix:energyIcons(1)}.",
    upgrade: {energy: +1},
    effects: [{op: spend_spark, amount: 1},
              {op: energy, amount: 1},
@@ -501,7 +501,7 @@
    cost: 1, type: attack, rarity: uncommon,
    # AoE trim, 2026-10-03 (sec.2): the Companion pays 6 more damage on the
    # aimed enemy instead of widening the Set off to ALL.
-   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage, 6 additional damage if you played a [gold]Companion[/gold] card this turn.{InCombat:\n(Deals {BonusHit:diff()} damage)|}",
+   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage. If you played a [gold]Companion[/gold] this turn, deal 6 additional damage.{InCombat:\n(Deals {BonusHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy},
              {op: damage, amount: 6, target: enemy,
@@ -514,7 +514,7 @@
 - {id: proto_ko_one_more_charge, name: "Witch's Homework", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Your largest [gold]Bomb[/gold], on any enemy, grows by 12. If it is now 20 or more, draw 1 card.",
+   description: "Your largest [gold]Bomb[/gold] grows by 12. If it is now 20 or more, draw 1 card.",
    upgrade: {grow: +3},
    effects: [{op: grow_largest, amount: 12, draw_if_at_least: 20, draw: 1}]}
 
@@ -535,7 +535,7 @@
 - {id: proto_ko_treasure_map, name: "Treasure Map", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Put a [gold]Set off[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by 3.",
+   description: "Put a [gold]Set off[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold] grows by 3.",
    upgrade: {grow: +3},
    effects: [{op: fetch_from_discard, filter: set_off},
              {op: grow_largest, amount: 3}]}
@@ -543,14 +543,14 @@
 - {id: proto_ko_tag_along, name: "Tag Along", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Choose 1 of 3 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. It costs 0 this turn.",
+   description: "Choose 1 of 3 [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It costs 0 this turn.",
    upgrade: {remove: exhaust},
    effects: [{op: choose_companion, amount: 1, options: 3}]}
 
 - {id: proto_ko_come_back_and_play, name: "Come Back and Play!", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Put a [gold]Companion[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
+   description: "Put a [gold]Companion[/gold] from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
    upgrade: {add: {op: draw, amount: 1}},
    effects: [{op: fetch_from_discard, filter: companion}]}
 
@@ -568,7 +568,7 @@
 - {id: proto_ko_wait_for_it, name: "Wait For It...", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, retain: true,
-   description: "The next time a [gold]Bomb[/gold] triggers an [gold]Elemental Reaction[/gold] this turn, draw 2 cards and gain {energyPrefix:energyIcons(1)}.",
+   description: "The next time a [gold]Bomb[/gold] reacts this turn, draw 2 cards and gain {energyPrefix:energyIcons(1)}.",
    upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_wait_for_it, amount: 2, target: self}]}
 
@@ -617,28 +617,28 @@
    # doubled again, and with The Big One and Boom Badge a Bomb 30 went off for
    # 480. One doubling per copy per combat.
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Your largest [gold]Bomb[/gold], on any enemy, doubles in size.",
+   description: "Your largest [gold]Bomb[/gold] doubles in size.",
    upgrade: {retain: true},
    effects: [{op: multiply_largest_bomb, factor: 2}]}
 
 - {id: proto_ko_favonius_escort, name: "Favonius Escort", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare,
-   description: "Remove your largest [gold]Bomb[/gold], on any enemy. Gain [gold]Block[/gold] equal to twice its size.",
+   description: "Remove your largest [gold]Bomb[/gold]. Gain [gold]Block[/gold] equal to twice its size.",
    upgrade: {retain: true},
    effects: [{op: remove_bomb_for_block, multiplier: 2}]}
 
 - {id: proto_ko_adventure_club, name: "Adventure Club", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose 2 of 4 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. They cost 0 this turn.",
+   description: "Choose 2 of 4 [gold]Companions[/gold] to add into your [gold]Hand[/gold]. They cost 0 this turn.",
    upgrade: {cost: -1},
    effects: [{op: choose_companion, amount: 2, options: 4}]}
 
 - {id: proto_ko_windblume_fireworks, name: "Windblume Fireworks", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] ALL enemies, deal 10 [gold]Pyro[/gold] damage to them, and place a [gold]Bomb[/gold] 8 on each.",
+   description: "[gold]Set off[/gold] ALL enemies. Deal 10 [gold]Pyro[/gold] damage and place a [gold]Bomb[/gold] 8 on ALL enemies.",
    upgrade: {damage: +4, bomb_size: +2},
    effects: [{op: set_off, target: all_enemies},
              {op: damage, amount: 10, target: all_enemies},
@@ -662,7 +662,7 @@
 - {id: proto_ko_aftershock, name: "Aftershock", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "The first time each turn a [gold]Bomb[/gold] of yours triggers an [gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that size on a random enemy.",
+   description: "The first time each turn one of your [gold]Bombs[/gold] reacts, place a [gold]Bomb[/gold] that size on a random enemy.",
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: ko_aftershock, amount: 1, target: self}]}
 
@@ -689,7 +689,7 @@
 - {id: proto_ko_alices_mine, name: "Alice's Mine", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: token, ethereal: true, exhaust: true,
-   description: "Place a [gold]Mine[/gold] 10 on an enemy.",
+   description: "Place a [gold]Mine[/gold] 10.",
    upgrade: {bomb_size: +5},
    effects: [{op: plant_bomb, target: enemy, size: 10, mine: true}]}
 
@@ -791,7 +791,7 @@
 - {id: proto_ko_kitchen_alchemy, name: "Kitchen Alchemy", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "ALL enemies lose 1 [gold]Strength[/gold]. Exhaust every Status in your [gold]Hand[/gold]; they lose 1 more for each.",
+   description: "Exhaust every Status in your [gold]Hand[/gold]. ALL enemies lose 1 [gold]Strength[/gold], plus 1 for each Status Exhausted.",
    upgrade: {retain: true},
    effects: [{op: lose_strength, amount: 1, target: all_enemies, per_status: 1}]}
 
@@ -802,7 +802,7 @@
 - {id: proto_ko_simmer, name: "Simmer", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Pyro[/gold] damage plus your largest [gold]Bomb[/gold]'s size, on any enemy, not setting it off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
+   description: "Deal 6 [gold]Pyro[/gold] damage plus the size of your largest [gold]Bomb[/gold]. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: damage_from_bombs, read: largest, amount: 6, target: enemy},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
@@ -810,7 +810,7 @@
 - {id: proto_ko_taste_test, name: "Taste Test", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon, exhaust: true,
-   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off.{InCombat:\n(Deals {BombHit:diff()} damage)|}",
+   description: "Deal [gold]Pyro[/gold] damage equal to twice the total size of your [gold]Bombs[/gold] on the enemy. They do not go off.{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {cost: -1},
    effects: [{op: damage_from_bombs, read: target_total_double, target: enemy}]}
 
@@ -1076,7 +1076,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: pyro,
    cost: 0, type: skill,
-   description: "Your next Attack card this turn deals 4 additional damage and is [gold]Pyro[/gold], not its own element. [gold]Electro[/gold] from Sara wins.",
+   description: "Your next Attack this turn deals 4 additional damage and is [gold]Pyro[/gold], not its own element.",
    effects: [{op: apply_power, power: mc_passion_overload, amount: 4, target: self}]}
 
 - {id: proto_mc_dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower", character: klee,
@@ -1155,7 +1155,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: pyro,
    cost: 1, type: skill,
-   description: "Enemy loses 3 [gold]Strength[/gold] this turn. The next time an enemy attacks you, deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
+   description: "The enemy loses 3 [gold]Strength[/gold] this turn. The next time an enemy attacks you, deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
    effects: [{op: lose_strength, amount: 3, target: enemy, this_turn: true},
              {op: apply_power, power: mc_baron_bunny, amount: 1, target: self,
               summon_damage: 8}]}
@@ -2346,7 +2346,7 @@
    cost: 1, type: skill, exhaust: true,
    # Plan: for 3 turns, 6 Block at the end of your turn instead of the
    # damage (wording pass 2026-10-15; provenance note).
-   description: "For 3 turns, deal 7 [gold]Geo[/gold] damage to a random enemy at the end of your turn. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.",
+   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.",
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}],
    plan: [{op: juuga_guard, amount: 3}],
    # Kokomi upgrade pass (2026-10-19): 4 turns on both sides (the default
@@ -2435,7 +2435,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
    cost: 0, type: skill,
-   description: "Your next Attack card this turn deals 4 additional damage and is [gold]Electro[/gold], not its own element.",
+   description: "Your next Attack this turn deals 4 additional damage and is [gold]Electro[/gold], not its own element.",
    effects: [{op: apply_power, power: mi_crowfeather, amount: 4, target: self}]}
 
 # Inazuma rework (2026-10-18): the base game's Trip with an Electro rider.
@@ -2483,7 +2483,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies and apply 1 [gold]Weak[/gold] to each.",
+   description: "Deal 5 [gold]Cryo[/gold] damage and apply 1 [gold]Weak[/gold] to ALL enemies.",
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: weak, amount: 1, target: all_enemies}],
    upgrade: {damage: 3}}
@@ -2593,7 +2593,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
    cost: 3, type: attack,
-   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each card in your [gold]Hand[/gold]. ALL enemies and you lose {StrengthLoss:diff()} [gold]Strength[/gold] this turn.{InCombat:
+   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each card in your [gold]Hand[/gold]. You and ALL enemies lose {StrengthLoss:diff()} [gold]Strength[/gold] this turn.{InCombat:
 (Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies, applies_element: true,
               amount_formula: {base: 16, per: 2, count: other_cards_in_hand}},
@@ -2914,7 +2914,7 @@
    authored_by: [claude],
    art_of: clorinde_impale_the_night,
    nation: fontaine, star: 5, rarity: rare, role_c: applier, element: electro, cost: 2, type: attack,
-   description: "Deal 20 [gold]Electro[/gold] damage. Your later Attacks against enemies holding an aura deal 6 additional damage.",
+   description: "Deal 20 [gold]Electro[/gold] damage. This combat, your Attacks against enemies with an aura deal 6 additional damage.",
    effects: [{op: damage, amount: 20, target: enemy, applies_element: true}, {op: apply_power, power: night_vigil, amount: 6, target: self, note: "your Attacks against enemies that have an aura deal +6"}]}
 
 - {id: proto_mf_neuvillette_ancient_sea_authority, name: "Neuvillette — Heir to the Ancient Sea's Authority", character: klee,
@@ -3043,7 +3043,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. For each, draw 1 card and your largest [gold]Bomb[/gold], on any enemy, grows by 6.",
+   description: "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. For each, draw 1 card and your largest [gold]Bomb[/gold] grows by 6.",
    upgrade: {grow: +2},
    effects: [{op: exhaust_statuses_grow_largest, amount: 6, draw_each: 1}]}
 
@@ -3070,7 +3070,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
-   description: "Whenever you play a [gold]Companion[/gold] card, deal 6 damage of that card's element to a random enemy.",
+   description: "Whenever you play a [gold]Companion[/gold], deal 6 damage of that card's element to a random enemy.",
    effects: [{op: apply_power, power: mc_ladder_of_ascent, amount: 6, target: self}]}
 
 # FURINA, THE SALON'S TAB (2026-10-05): furina-research-proposal sec.16 with
@@ -3956,7 +3956,7 @@
 - {id: proto_ko_hide_here, name: "Hide Here!", character: klee,
    authored_by: [claude], multiplayer: true,
    cost: 1, type: skill, rarity: uncommon,
-   description: "Another player gains [gold]Block[/gold] equal to your largest [gold]Bomb[/gold] on any enemy, up to 12.",
+   description: "Another player gains [gold]Block[/gold] equal to the size of your largest [gold]Bomb[/gold], up to 12.",
    upgrade: {cap: 4},
    effects: [{op: block_largest_bomb, cap: 12, target: ally}]}
 
@@ -4097,7 +4097,7 @@
    # makes it. Archaic Tooth: Dandelion Gale. Provenance notes, "Varka
    # review, 2026-10-12" and "Varka starter, Fang and Tooth, 2026-10-13".
    cost: 2, type: attack, rarity: basic, retain: true,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
    upgrade: {cost: -1}}
@@ -4187,7 +4187,7 @@
    # aura 3 [4] more; one Block gain (provenance note).
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain {VkBase:diff()} [gold]Block[/gold]. For each enemy with an aura, apply 1 [gold]Weak[/gold] and gain {VkPer:diff()} additional [gold]Block[/gold].",
+   description: "Gain {VkBase:diff()} [gold]Block[/gold]. Apply 1 [gold]Weak[/gold] to each enemy with an aura and gain {VkPer:diff()} additional [gold]Block[/gold] for each.",
    effects: [{op: varka, kind: frost_ward, target: all_enemies, base: 5, per: 3}],
    upgrade: {varka_base: 1, varka_per: 1}}
 
@@ -4244,7 +4244,7 @@
    # The AoE trim: one enemy. 6 [8], +3 (was 5 [7], +4; user 2026-10-13:
    # "9 damage with its rider effect is fine for a common"). Provenance, "Varka Electro
    # Knights, 2026-10-03". An Attack since the combo pass (2026-10-04).
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.",
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.",
    effects: [{op: varka, kind: awakening, target: enemy, base: 6, amount: 3}],
    upgrade: {varka_base: 2}}
 
@@ -4258,10 +4258,10 @@
              {op: apply_power, power: weak, amount: 2, target: enemy}],
    upgrade: {power_amount: 1}}
 
-- {id: proto_vk_jean_dandelion_breeze, name: "Jean — Wind Companion", character: varka,
+- {id: proto_vk_jean_dandelion_breeze, name: "Gale Guard", character: varka,
    authored_by: [claude],
-   # A Skill, not a Knight. The em dash, not the colon (the open-Oath
-   # round, 2026-10-01): the colon is the Knight's tell.
+   # A Skill, not a Knight: a plain name, no colon (the Knight's tell).
+   # Was "Jean — Wind Companion" until the Varka text audit, 2026-10-23.
    # Tried at 8 Block, reverted: provenance, "Varka weak cards, 2026-10-03".
    cost: 1, type: skill, rarity: common,
    description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] the enemy.",
@@ -4496,7 +4496,7 @@
    # Pick 4 (ruled): cost 2, 10 [14] and 10 [14], plus 2 per Oath.
    # Varka last pass (2026-10-12), pick 1: the second hit 8 [12].
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: avatar_hit, base: 8, per: 2}],
    upgrade: {damage: 4, varka_base: 4}}
@@ -4590,7 +4590,7 @@
    authored_by: [claude],
    # Varka payoff fix, 2026-10-08: every 3 [2] Cryo Oath, was 4 [3].
    cost: 1, type: skill, rarity: uncommon,
-   description: "Apply [gold]Cryo[/gold] to an enemy, and 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold], plus 1 of each for every {VkAmount:diff()} [gold]Cryo[/gold] [gold]Oath[/gold].",
+   description: "Apply [gold]Cryo[/gold], 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Apply 1 more of each for every {VkAmount:diff()} [gold]Cryo[/gold] [gold]Oath[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
              {op: varka, kind: glacial_edict, target: enemy, amount: 3}],
    upgrade: {varka_amount: -1}}
@@ -4829,7 +4829,7 @@
    # matched element pays twice. Was "Your Swirls pay both your current
    # element and the element they Swirl." (paid once when they matched).
    cost: 1, type: power, rarity: rare,
-   description: "Your [gold]Swirls[/gold] also pay the element they [gold]Swirl[/gold]. If it's your [gold]current element[/gold], it pays twice.",
+   description: "Your [gold]Swirls[/gold] also pay the element they [gold]Swirl[/gold]. If that is your [gold]current element[/gold], it pays twice.",
    effects: [{op: apply_power, power: vk_twin_gales, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -4957,7 +4957,7 @@
    # [USER] 2026-10-13, pick 3: "proofread by itself and having the upgrade
    # make the effect 0 cost, like a Defect starter."
    # 2026-10-14: Red Ink -> Reprint, "Let's bump it to 'Play it twice.'"
-   description: "[gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold].",
+   description: "[gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Reprint[/gold].",
    effects: [{op: yae, kind: edit, annotation: reprint, amount: 1}],
    upgrade: {cost: -1}}
 
@@ -5031,7 +5031,7 @@
    cost: 1, type: attack, rarity: common,
    # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-2026-10-17.md
    # sec.3): 7 [10] (was 5 [8]).
-   description: "Deal 7 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   description: "Deal 7 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Red Ink[/gold].",
    effects: [{op: damage, amount: 7, target: enemy},
              {op: yae, kind: edit, annotation: red_ink, amount: 1}],
    upgrade: {damage: 3}}
@@ -5041,7 +5041,7 @@
    cost: 1, type: attack, rarity: common,
    # Yae draft pass, 2026-10-17 (sec.3): "deal 5 more" (was "a Sakura strikes
    # it"). Weak is read before the hit, as Fox's Bargain's, so a kill counts.
-   description: "Deal 8 [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} more.",
+   description: "Deal 8 [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} additional damage.",
    effects: [{op: conditional, if: target_has_power_weak,
               then: [{op: damage, amount: 5, target: enemy}]},
              {op: damage, amount: 8, target: enemy}],
@@ -5113,7 +5113,7 @@
    # One hit, read when played: any Sakura of any kind at Level 3 or higher.
    # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-2026-10-17.md
    # sec.3): base 8 [10] (was 6 [8]); the bonus stays 6 [8].
-   description: "Deal 8 [gold]Electro[/gold] damage. If a [gold]Sakura[/gold] is Level 3 or higher, deal 6 more.",
+   description: "Deal 8 [gold]Electro[/gold] damage. If a [gold]Sakura[/gold] is Level 3 or higher, deal 6 additional damage.",
    effects: [{op: yae, kind: level_strike, base: 8, amount: 6, target: enemy}],
    upgrade: {yae_base: 2, yae_amount: 2}}
 
@@ -5142,7 +5142,7 @@
 - {id: proto_ym_foxs_shade, name: "Fox's Shade", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 8 [gold]Block[/gold]. If any enemy is [gold]Weak[/gold], gain {BranchBlock:diff()} more.",
+   description: "Gain 8 [gold]Block[/gold]. If any enemy is [gold]Weak[/gold], gain {BranchBlock:diff()} additional [gold]Block[/gold].",
    effects: [{op: block, amount: 8},
              {op: conditional, if: any_enemy_weak,
               then: [{op: block, amount: 4}]}],
@@ -5154,7 +5154,7 @@
    # It withers as every Sakura does (its Last Bloom still acts);
    # the 5 more is the card's own Block.
    # User ruling 2026-10-20 (turns-left targeting).
-   description: "Gain 7 [gold]Block[/gold]. Your [gold]Sakura[/gold] with the fewest turns left withers; if one did, gain {YmAmount:diff()} more.",
+   description: "Gain 7 [gold]Block[/gold]. Your [gold]Sakura[/gold] with the fewest turns left withers. If one did, gain {YmAmount:diff()} additional [gold]Block[/gold].",
    effects: [{op: block, amount: 7},
              {op: yae, kind: wither_fewest_turns_left_block, amount: 5}],
    upgrade: {block: 2}}
@@ -5165,7 +5165,7 @@
    # Yae pass 2026-10-16 (sec.1): draw 2, discard 1, then the Edit (was
    # discard up to 2, draw that many). Upgrade draw 3 (design session,
    # 2026-10-17, after the build).
-   description: "Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   description: "Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Red Ink[/gold].",
    effects: [{op: draw, amount: 2},
              {op: discard, amount: 1, select: chosen},
              {op: yae, kind: edit, annotation: red_ink, amount: 1}],
@@ -5182,17 +5182,18 @@
              {op: yae, kind: strike_most_turns_left}],
    upgrade: {yae_amount: 1}}
 
-# --- Uncommon (38) ---
+# --- Uncommon (39) ---
 
 - {id: proto_ym_kitsune_rite, name: "Kitsune Rite", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
    # Claude, 2026-10-14 (Yae review r1, no pick): "Tenko. Draw 1 card." With
    # no Sakura standing it still draws, and its face says "Tenko (no Sakura)".
-   description: "[gold]Tenko[/gold]. Draw 1 card.",
+   # Upgrade census (2026-10-23, [USER]): draw 1 [2] (was cost -1).
+   description: "[gold]Tenko[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: yae, kind: tenko},
              {op: draw, amount: 1}],
-   upgrade: {cost: -1}}
+   upgrade: {draw: 1}}
 
 - {id: proto_ym_thunderbolt_tithe, name: "Thunderbolt Tithe", character: yae,
    authored_by: [claude],
@@ -5200,7 +5201,7 @@
    # Design axes sec.4: 3 [4] plus 4 [6] per Sakura (was 4 [6] per Sakura).
    # Yae pass 2026-10-16 (sec.1): the upgrade is 4 plus 5 each (was 6 each,
    # 22 for 1 with a full shrine).
-   description: "Deal 3 [gold]Electro[/gold] damage, plus 4 for each [gold]Sakura[/gold] standing.",
+   description: "Deal 3 [gold]Electro[/gold] damage, plus 4 for each [gold]Sakura[/gold].",
    effects: [{op: yae, kind: damage_per_sakura, base: 3, per: 4, target: enemy}],
    upgrade: {yae_base: 1, yae_per: 1}}
 
@@ -5209,7 +5210,7 @@
    cost: 1, type: power, rarity: uncommon,
    # Design axes sec.4: 3 [5], and Weak counts, so it works solo. Yae pass
    # 2026-10-16 (sec.1): the upgrade is +4 (was +5, nearly triple a strike).
-   description: "Your [gold]Sakura[/gold] strikes deal 3 more to an enemy that is [gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura.",
+   description: "Your [gold]Sakura[/gold]'s strikes deal 3 additional damage to an enemy that is [gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura.",
    effects: [{op: apply_power, power: ym_edict_of_cleansing, amount: 3, target: self}],
    upgrade: {power_amount: 1}}
 
@@ -5230,7 +5231,7 @@
    # Yae review r4, pick 1 (a) (ruled 2026-10-15): up to 2 [3] cards (was
    # 1 [2]), one chooser of different cards. Yae review r5, item 7: the
    # Annotation says what it does, as Royalties does.
-   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Footnote[/gold] (when played, draw 1 card).",
+   description: "[gold]Edit[/gold] up to 2 cards in your [gold]Hand[/gold]: [gold]Footnote[/gold].",
    effects: [{op: yae, kind: edit, annotation: footnote, amount: 2}],
    upgrade: {yae_amount: 1}}
 
@@ -5240,7 +5241,7 @@
    # (ruled 2026-10-15): up to 2 [3] cards (was 1 [2]), and it Exhausts.
    # Yae review r5, item 7: the Annotation says what it does.
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Sakura Seal[/gold] (when played, plant a [gold]Sakura[/gold]).",
+   description: "[gold]Edit[/gold] up to 2 cards in your [gold]Hand[/gold]: [gold]Sakura Seal[/gold].",
    effects: [{op: yae, kind: edit, annotation: sakura_seal, amount: 2}],
    upgrade: {yae_amount: 1}}
 
@@ -5258,7 +5259,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Yae review r6 item 2: Edit a card in your hand: Red Ink (was each
    # Sakura lasts 1 more turn, review r3).
-   description: "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   description: "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Red Ink[/gold].",
    effects: [{op: draw, amount: 2},
              {op: yae, kind: edit, annotation: red_ink, amount: 1}],
    upgrade: {draw: 1}}
@@ -5291,7 +5292,7 @@
    # "never again" card in four records). Provenance, "Yae review r3".
    cost: 0, type: skill, rarity: uncommon,
    # User ruling 2026-10-20 (turns-left targeting).
-   description: "Your [gold]Sakura[/gold] with the fewest turns left withers (it acts once, its Last Bloom). If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}.",
+   description: "Your [gold]Sakura[/gold] with the fewest turns left withers and acts once. If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}.",
    effects: [{op: yae, kind: fallen_petals}],
    upgrade: {yae_upgraded: true}}
 
@@ -5312,7 +5313,7 @@
    # Yae review r4, pick 1 (a) (ruled 2026-10-15): 0 Energy (was 1 [0]),
    # Exhausts; the upgrade also Edits a card in your hand.
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Edit[/gold] every [gold]Sakura[/gold]{IfUpgraded:show: and a card in your hand|}: [gold]Red Ink[/gold].",
+   description: "[gold]Edit[/gold] every [gold]Sakura[/gold]{IfUpgraded:show: and a card in your [gold]Hand[/gold]|}: [gold]Red Ink[/gold].",
    effects: [{op: yae, kind: edit_sakura, which: every, annotation: red_ink, amount: 1,
               hand_if_upgraded: true}],
    upgrade: {yae_upgraded: true}}
@@ -5331,7 +5332,7 @@
    # Never copies an Author's Copy: GPT found a +1 Energy loop through
    # Royalties, and LAW forbids energy-positive copy loops.
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Add a copy of an [gold]Annotated[/gold] card in your [gold]Hand[/gold] (not an Author's Copy) to your [gold]Hand[/gold]. It keeps its Annotations.",
+   description: "Add a copy of an [gold]Annotated[/gold] card in your [gold]Hand[/gold] to your [gold]Hand[/gold], other than an Author's Copy. It keeps its Annotations.",
    effects: [{op: yae, kind: authors_copy}],
    upgrade: {cost: -1}}
 
@@ -5359,7 +5360,7 @@
    cost: 2, type: attack, rarity: uncommon,
    # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-2026-10-17.md
    # sec.3): 14 [18] (was 11 [15]).
-   description: "Deal 14 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold].",
+   description: "Deal 14 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Reprint[/gold].",
    effects: [{op: damage, amount: 14, target: enemy},
              {op: yae, kind: edit, annotation: reprint, amount: 1}],
    upgrade: {damage: 4}}
@@ -5485,7 +5486,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # One draw in each arm (3 [4] with 3 Sakura, else 2 [3]): the upgrade
    # moves every draw op, so "1 more" stays 1.
-   description: "Draw {DrawElse:diff()} cards. If you have 3 [gold]Sakura[/gold], draw 1 more.",
+   description: "Draw {DrawElse:diff()} cards. If you have 3 or more [gold]Sakura[/gold], draw 1 more.",
    effects: [{op: conditional, if: three_sakura,
               then: [{op: draw, amount: 3}],
               else: [{op: draw, amount: 2}]}],
@@ -5495,19 +5496,21 @@
    authored_by: [claude],
    # Pool sweep 2026-10-18 (review/active/pool-sweep-2026-10-18.md): draw 1 -> 2 per wither.
    cost: 1, type: power, rarity: uncommon,
+   # Upgrade census (2026-10-23, [USER]): draw 2 [3] (was Innate).
    description: "Whenever a [gold]Sakura[/gold] withers, draw 2 cards.",
    effects: [{op: apply_power, power: ym_enlightened_blessing, amount: 2, target: self}],
-   upgrade: {innate: true}}
+   upgrade: {power_amount: 1}}
 
 - {id: proto_ym_saiguus_lesson, name: "Saiguu's Lesson", character: yae,
    authored_by: [claude],
-   # Ruled 2026-10-15: the upgrade gains Innate (not a cost cut).
-   # Yae round 8 (2026-10-17, lane 3): "a striking Sakura", Narukami
-   # Judgment's words; the code never asks a Kitsune Sakura (hygiene).
+   # Yae round 8 (2026-10-17): "a striking Sakura". Upgrade census
+   # (2026-10-23, [USER]): the upgrade applies 1 Weak to ALL enemies after
+   # the power is in, so it triggers itself (was Innate).
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you apply [gold]Weak[/gold] to an enemy, a striking [gold]Sakura[/gold] strikes it.",
-   effects: [{op: apply_power, power: ym_saiguus_lesson, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   description: "Whenever you apply [gold]Weak[/gold] to an enemy, a striking [gold]Sakura[/gold] strikes it.{IfUpgraded:show: Apply 1 [gold]Weak[/gold] to ALL enemies.|}",
+   effects: [{op: apply_power, power: ym_saiguus_lesson, amount: 1, target: self},
+             {op: yae, kind: weak_all_if_upgraded}],
+   upgrade: {yae_upgraded: true}}
 
 - {id: proto_ym_shrines_sacred_shade, name: "The Shrine's Sacred Shade", character: yae,
    authored_by: [claude],
@@ -5556,7 +5559,17 @@
    effects: [{op: yae, kind: bless_highest, amount: 3, lasts: 2}],
    upgrade: {yae_amount: 1}}
 
-# --- Rare (20) ---
+- {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   # Amount 2 [3] per copy adds to the cap (YaeShrine.MaxSakura). Upgrade
+   # census (2026-10-23, [USER]): Uncommon, 1, 2 [3], as Defect's Capacitor
+   # (was Rare, 2 [1]). Why: provenance note, "Yae Miko, shrine r2".
+   description: "You can have 2 more [gold]Sakura[/gold].",
+   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 2, target: self}],
+   upgrade: {power_amount: 1}}
+
+# --- Rare (19) ---
 
 - {id: proto_ym_tenko_kenshin, name: "Great Secret Art: Tenko Kenshin", character: yae,
    authored_by: [claude],
@@ -5579,21 +5592,11 @@
    # 2026-10-15 ([USER]: "it looks obviously OP"): was a 1 [0] Skill. The kill
    # is Hand of Greed's Fatal check (no Minions). Yae draft pass, 2026-10-17:
    # costs 1 (was 2). Provenance, "Yae: The Seven Glamours on a kill".
-   description: "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand.",
+   description: "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your [gold]Hand[/gold].",
    effects: [{op: damage, amount: 12, target: enemy},
              {op: conditional, if: killed_target_fatal,
               then: [{op: yae, kind: publish}]}],
    upgrade: {damage: 4}}
-
-- {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
-   authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   # The Rare that bends the 3-Sakura limit (2026-10-14). Amount 2 per copy
-   # adds to the cap this combat (YaeShrine.MaxSakura); the full-shrine plant
-   # fires at the new cap. Why: provenance note, "Yae Miko, shrine r2".
-   description: "You can have 2 more [gold]Sakura[/gold].",
-   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 2, target: self}],
-   upgrade: {cost: -1}}
 
 - {id: proto_ym_editorial_priority, name: "Editorial Priority", character: yae,
    authored_by: [claude],
@@ -5608,7 +5611,7 @@
 - {id: proto_ym_reborn_as_guuji_yae, name: "Reborn as Guuji Yae", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose an Annotation. [gold]Edit[/gold] every other card in your hand with it.",
+   description: "Choose an Annotation. [gold]Edit[/gold] every other card in your [gold]Hand[/gold] with it.",
    effects: [{op: yae, kind: edit_all, annotation: sakura_seal}],
    upgrade: {cost: -1}}
 
@@ -5625,9 +5628,10 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
    # Yae review r4, pick 1 (a) (ruled 2026-10-15): up to 2 cards (was 1).
-   description: "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Royalties[/gold] (when played, gain {energyPrefix:energyIcons(1)}).",
+   description: "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your [gold]Hand[/gold]: [gold]Royalties[/gold].",
+   # Upgrade census (2026-10-23, [USER]): up to 2 [3] cards (was cost -1).
    effects: [{op: yae, kind: edit, annotation: royalties, amount: 2}],
-   upgrade: {cost: -1}}
+   upgrade: {yae_amount: 1}}
 
 # Review r3, sec.3 (ruled 2026-10-14): the signature Rare.
 
@@ -5644,11 +5648,12 @@
 - {id: proto_ym_sakura_grove, name: "Sakura Grove", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   # Shrine r2: each Sakura. The pool to 78, sec.3: a Rare (was Uncommon),
-   # swapped with Fox's Mooncall. Provenance note, "Yae: the pool to 78".
+   # Shrine r2. Pool to 78 sec.3 (provenance note): Rare (was Uncommon), swapped with Fox's Mooncall.
+   # Yae deck read 2026-10-23 (review/records/yae-suite-2026-10-23.md,
+   # "Deck commonalities"): upgrade cost 0, was Innate.
    description: "At the start of your turn, each [gold]Sakura[/gold] gains a Level.",
    effects: [{op: apply_power, power: ym_sakura_grove, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   upgrade: {cost: -1}}
 
 - {id: proto_ym_forbidden_art_daisesshou, name: "Forbidden Art: Daisesshou", character: yae,
    authored_by: [claude],
@@ -5679,13 +5684,15 @@
 
 - {id: proto_ym_sacred_thunderbolt, name: "Sacred Thunderbolt", character: yae,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: rare,
+   cost: 1, type: attack, rarity: rare,
    # "If it triggers" is this card's own hit reacting (Brine Spray's read).
-   description: "Deal 13 [gold]Electro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {BranchDamage:diff()} more.",
-   effects: [{op: damage, amount: 13, target: enemy},
+   # Rare audit (2026-10-23): cost 1, the reaction Levels each Sakura (was
+   # 2: 13 [17], plus 13 [17] more on a reaction).
+   description: "Deal {Damage:diff()} [gold]Electro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], each [gold]Sakura[/gold] gains a Level.",
+   effects: [{op: damage, amount: 9, target: enemy},
              {op: conditional, if: reaction_triggered_by_this,
-              then: [{op: damage, amount: 13, target: enemy}]}],
-   upgrade: {damage: 4, conditional_then_damage: 4}}
+              then: [{op: yae, kind: level_up, amount: 1}]}],
+   upgrade: {damage: 3}}
 
 - {id: proto_ym_offertory_box, name: "Offertory Box", character: yae,
    authored_by: [claude],

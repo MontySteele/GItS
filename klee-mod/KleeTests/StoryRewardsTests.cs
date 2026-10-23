@@ -71,8 +71,6 @@ public class StoryRewardsTests
         // The line is the base templates': "Lose 10 HP. Choose 1 of 3 random
         // upgraded Rare cards to add to your deck."
         var line = offer.Offer!.Text(3);
-        // The Other Commander keeps its ruled line ("... random Rare cards.").
-        if (key == "CONCEDE") line = line.Replace(" to add to your deck.", ".");
         Assert.Contains(line, o.Description);
         if (hp > 0) Assert.StartsWith($"Lose {hp} HP. ", o.Description);
     }
@@ -88,8 +86,7 @@ public class StoryRewardsTests
         {
             var e = OfferOf(o);
             Assert.NotNull(e.Offer);
-            // The Other Commander keeps its ruled line ("Choose 1 of 3 random Rare cards.").
-            Assert.Contains(e.Offer!.Text(e.Amount).Replace(" to add to your deck.", ""), o.Description);
+            Assert.Contains(e.Offer!.Text(e.Amount), o.Description);
         }
     }
 
@@ -195,7 +192,7 @@ public class StoryRewardsTests
     public void A_relic_takes_a_curse_that_stays()
     {
         var o = O(typeof(FurinaEmptyHouse), "TAKE_A_COSTUME");
-        Assert.Equal("Gain a random relic. Add [gold]Doubt[/gold].", o.Description);
+        Assert.Equal("Gain a random relic. Add [gold]Doubt[/gold] to your deck.", o.Description);
         Assert.Equal(StoryEffectKind.GainRandomRelic, o.Effect.Kind);
         Assert.Equal(typeof(Doubt), o.Then.Single().Card);
     }
@@ -248,7 +245,7 @@ public class StoryRewardsTests
             s => s.Kind == StoryEffectKind.RemoveEvery && s.Card == typeof(OverdueReports));
         // Pick 3 (a): Cast the sequel keeps 3 random Guest Stars.
         var sequel = O(typeof(FurinaSteambirdClipping), "CAST_THE_SEQUEL");
-        Assert.Equal("Choose 1 of 3 random Guest Stars.", sequel.Description);
+        Assert.Equal("Choose 1 of 3 random Guest Stars to add to your deck.", sequel.Description);
         Steps(typeof(FurinaSteambirdClipping), "CAST_THE_SEQUEL", (StoryEffectKind.ChooseFromPoolToDeck, 3));
     }
 }

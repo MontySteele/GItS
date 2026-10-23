@@ -224,7 +224,7 @@ def test_the_live_law_reads_and_falls_back():
     assert blindplay_shape.opening_spark(obs) == 3
     assert blindplay_shape.bomb_growth({}) == blindplay_shape.BOMB_GROWTH
     assert blindplay_shape.live_klee_law({"run": {"klee_law": "x"}}) == {}
-    assert "Grows 2 at the start" in \
+    assert "Grows by 2 at the start" in \
         blindplay_notes.glossary_definition("Bomb", 2)[1]
 
 

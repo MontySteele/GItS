@@ -51,7 +51,7 @@ public sealed class ProtoYmTheSevenGlamours : CustomCardModel, IElementalCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Seven Glamours"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

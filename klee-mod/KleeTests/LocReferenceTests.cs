@@ -183,7 +183,7 @@ public class LocReferenceTests
             var entry = RuntimeEntry(type);
             foreach (var (key, value) in rows)
             {
-                Add(table, entry + "." + key, BaseLib.Patches.Localization.SimpleLoc.TrySimplify(value));
+                Add(table, entry + "." + key, EnglishLoc.ModelRowText(model, key, value));
             }
         }
         return reference;

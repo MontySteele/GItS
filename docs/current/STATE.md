@@ -240,8 +240,8 @@ for Balance." That run sent no data (0.3.12 shipped without the uploader).
     for the seat page.
 - **Starter:** Four Winds' Ascension and one of four starter Knights, rolled
   per run; Windbound Execution is retired. Boreas's Fang: "At the start of
-  each combat, your starting Knight's element becomes current. Your Swirls
-  also pay your current element." Wolf's Gravestone (Orobas upgrade) adds an
+  each combat, your starting Knight's element becomes your current element.
+  Your Swirls also pay it." Wolf's Gravestone (Orobas upgrade) adds an
   upgraded Ascension, free that turn, on his first Oath gain each combat.
 - **Pool:** 78 (20 / 36 / 22), thirteen pool Knights. Ancients: All Four
   Winds (Tome); Dandelion Gale (Tooth, replacing Four Winds' Ascension): 10
@@ -263,8 +263,8 @@ Stellar-Conduct nod is parked). Code: `proto_ym_` rows,
 `tier0/engine/yae_shrine.py`, harness `tools/yae_expansion_sim.py`.
 - **Shrine:** cards plant Sakura, cap 3 (Sakura Channeling: "You can have 2
   more Sakura"). Each acts at turn end, on Last Bloom (a withering Sakura
-  strikes once more) and on Tenko ("Every Sakura acts now. Refresh them to at
-  least 3 turns."): Sakura (Thunder) strikes for 1 + 2 per Level, Foxfire
+  strikes once more) and on Tenko ("Every Sakura acts now and goes back to at
+  least 3 turns left."): Sakura (Thunder) strikes for 1 + 2 per Level, Foxfire
   Sakura to ALL, Kitsune Sakura is the Block decoy. An aimed strike is one
   hit.
 - **Levels** (`review/active/yae-sakura-levels-2026-10-17.md`): a plant
@@ -278,7 +278,7 @@ Stellar-Conduct nod is parked). Code: `proto_ym_` rows,
   Published cards. The Masterpiece is one enchantment: a permanent Published
   stack plus one temporary slot. Starter relic: "After an elite or boss
   fight, you may Publish an Annotation" (a combat reward row).
-- **Pool:** 78 (20 / 38 / 20), official art. Relic offer: Meditations, her
+- **Pool:** 78 (20 / 39 / 19; Sakura Channeling went Uncommon 2026-10-23), official art. Relic offer: Meditations, her
   seven and Enlightened Blessing. Ancients: Yakan Evocation (Tooth; a Sesshou
   Sakura that keeps the starter's Annotations and strikes as it lands), Yae
   Publishing House (Tome) (`review/active/yae-ancients-relics-2026-10-16.md`).

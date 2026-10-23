@@ -449,7 +449,7 @@ public class AbyssPoolsTwoTests
 
         // Act 1's This act pair has dropped off; act 2's Riptide is shown.
         Assert.Equal(new[] { "Resonance" }, content.BlessingsTaken.Select(e => e.Name));
-        Assert.Equal(new[] { "Riptide" }, content.ShadowsInForce.Select(e => e.Name));
+        Assert.Equal(new[] { "Blood in the Water" }, content.ShadowsInForce.Select(e => e.Name));
         Assert.True(content.ShadowsInForce[0].ThisAct);
         Assert.EndsWith("[gold]This act[/gold]", content.ShadowsInForce[0].HoverText);
         Assert.EndsWith("[gold]Whole run[/gold]", content.BlessingsTaken[0].HoverText);

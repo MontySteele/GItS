@@ -73,12 +73,12 @@ def _hp(st):
 
 # --- the pool ----------------------------------------------------------------
 
-def test_the_pool_is_78_at_20_38_20():
+def test_the_pool_is_78_at_20_39_19():
     rows = [c for c in loader.prototype_cards()
             if c.id.startswith(Y.ID_PREFIX) and c.rarity != "basic"]
     assert len(rows) == 78
-    assert Counter(c.rarity for c in rows) == {"common": 20, "uncommon": 38,
-                                               "rare": 20}
+    assert Counter(c.rarity for c in rows) == {"common": 20, "uncommon": 39,
+                                               "rare": 19}
     # The dedupe and the refill (2026-10-16): 4 Attacks and 7 Skills cut,
     # 5 Attacks, 5 Skills and a Power added.
     assert Counter(c.type for c in rows) == {"attack": 29, "skill": 34,

@@ -60,7 +60,7 @@ public class FurinaSpendOutletTests
 
         var tips = File.ReadAllText(Path.Combine(
             Round17Tests.Repo(), "klee-mod", "KleeCode", "Cards", "Prototype",
-            "ArmKeywordTips.cs"));
+            "PlayerTips.cs"));
         // The Furina wave (2026-10-13): it opens with where Fanfare comes
         // from (`FurinaWaveTests`).
         Assert.Contains("\"Whenever you lose HP, gain that much "

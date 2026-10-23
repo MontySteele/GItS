@@ -812,7 +812,7 @@ public sealed class PassionOverloadPower : NextAttackRiderPower, ILocalizationPr
     {
         ("title", "Passion Overload"),
         ("description",
-            "Your next Attack card this turn deals [blue]{Amount}[/blue] "
+            "Your next Attack this turn deals [blue]{Amount}[/blue] "
           + "additional damage and is [gold]Pyro[/gold], not its own element. "
           + "[gold]Electro[/gold] from Sara wins."),
     };
@@ -999,7 +999,7 @@ public sealed class LightningFangPower : PowerModel, ILocalizationProvider
     {
         ("title", "Lightning Fang"),
         ("description",
-            "Your Attacks apply [gold]Electro[/gold] INSTEAD of the element "
+            "Your Attacks apply [gold]Electro[/gold] instead of the element "
           + "they print, and deal "
           + $"[blue]{CompanionOverhaulLaw.LightningFangDamage}[/blue] additional damage. "
           + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
@@ -1348,7 +1348,7 @@ public sealed class LightfallSwordPower : PowerModel, ILocalizationProvider
             "Falls in [blue]{Amount}[/blue] {Amount:plural:turn|turns} for "
           + $"[blue]{CompanionOverhaulLaw.LightfallBase}[/blue] damage, plus "
           + $"[blue]{CompanionOverhaulLaw.LightfallPerAttack}[/blue] "
-          + "additional damage for each Attack you play first."),
+          + "additional damage for each Attack you play before then."),
     };
 
     public override PowerType Type => PowerType.Debuff;

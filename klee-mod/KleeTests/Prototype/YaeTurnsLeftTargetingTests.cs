@@ -145,7 +145,7 @@ public class YaeTurnsLeftTargetingTests
     [Fact]
     public void The_faces_name_turns_left_not_planting_order()
     {
-        Assert.Contains("Your [gold]Sakura[/gold] with the fewest turns left withers; if one did",
+        Assert.Contains("Your [gold]Sakura[/gold] with the fewest turns left withers. If one did",
                         Face(new ProtoYmHideBehindTheShrine()));
         Assert.StartsWith("Your [gold]Sakura[/gold] with the fewest turns left withers. Plant one",
                           Face(new ProtoYmReplanting()));
