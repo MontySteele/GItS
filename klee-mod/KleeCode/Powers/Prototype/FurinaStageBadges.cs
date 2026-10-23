@@ -133,7 +133,7 @@ public abstract class StagePerformerBadge : PowerModel
         StagePerformer.Clorinde =>
             "Act: deal {Act} [gold]Electro[/gold] damage to a random enemy.",
         StagePerformer.Lyney =>
-            "Act: [gold]Drain[/gold] {ActDrain}, deal {Act} [gold]Pyro[/gold] "
+            "Act: [gold]Drain[/gold] {ActDrain} and deal {Act} [gold]Pyro[/gold] "
           + "damage to ALL enemies. It never [gold]Drains[/gold] past your line.",
         StagePerformer.Sigewinne => "Act: [gold]Repay[/gold] {Act}.",
         StagePerformer.Chevreuse => "Act: deal {Act} damage to a random enemy.",
