@@ -309,7 +309,11 @@ MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
                  "proto_fs_bis", "ExtendedRunPower.description",
                  # Kurage Vanguard (Kokomi boss ramp, 2026-10-21): "It deals
                  # 2 more each turn", its hit growing, Crescendo's shape.
-                 "proto_kk_kurage_vanguard", "KurageVanguardPower.description"}
+                 "proto_kk_kurage_vanguard", "KurageVanguardPower.description",
+                 # Glacial Edict (the Varka text audit, 2026-10-23): "Apply
+                 # 1 more of each for every 3 Cryo Oath", a status count
+                 # growing with Oath, not a bonus on a hit.
+                 "proto_vk_glacial_edict"}
 
 #: Card faces only: "your largest Bomb" alone is board-wide, and the faces that
 #: read one enemy say "on the enemy" (Stoke the Fuse, Pocket Match). The Klee

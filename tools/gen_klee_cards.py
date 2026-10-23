@@ -4557,11 +4557,11 @@ APPLY_POWERS = {
     "vk_unwavering_banner": ("UnwaveringBannerPower", None,
         "Only [gold]Knights[/gold] change your [gold]current "
         "element[/gold]. Whenever another card would, gain 1 "
-        "[gold]Oath[/gold] of it instead."),
+        "[gold]Oath[/gold] of your [gold]current element[/gold] instead."),
     "vk_unwavering_banner_plus": ("UnwaveringBannerPower", None,
         "Only [gold]Knights[/gold] change your [gold]current "
         "element[/gold]. Whenever another card would, gain 2 "
-        "[gold]Oath[/gold] of it instead."),
+        "[gold]Oath[/gold] of your [gold]current element[/gold] instead."),
     "vk_cycle_of_seasons": ("CycleOfSeasonsPower", None,
         "Whenever your [gold]current element[/gold] changes, deal {X} damage "
         "to ALL enemies."),
@@ -4667,7 +4667,7 @@ APPLY_POWERS = {
         "it lives."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] also pay the element they "
-        "[gold]Swirl[/gold]. If it's your [gold]current element[/gold], it "
+        "[gold]Swirl[/gold]. If that is your [gold]current element[/gold], it "
         "pays twice."),
     "vk_eye_of_stormterror": ("EyeOfStormterrorPower", None,
         "The first 3 times you [gold]Swirl[/gold] each turn, draw {X} card."),

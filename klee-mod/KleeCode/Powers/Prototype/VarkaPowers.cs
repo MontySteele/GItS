@@ -598,15 +598,15 @@ public sealed class UnwaveringBannerPower : UpgradeTwinPower, ILocalizationProvi
     {
         ("title", "Unwavering Banner"),
         ("description",
-            "Only [gold]Knights[/gold] can change your [gold]current "
+            "Only [gold]Knights[/gold] change your [gold]current "
           + "element[/gold]. Whenever another card would, gain 1 "
           + "[gold]Oath[/gold] of your [gold]current "
           + "element[/gold] instead."),
         ("smartDescription",
-            "Only [gold]Knights[/gold] can change your [gold]current "
-          + "element[/gold]. When another card would, gain "
+            "Only [gold]Knights[/gold] change your [gold]current "
+          + "element[/gold]. Whenever another card would, gain "
           + "[blue]{Amount}[/blue]{Upgraded:cond:>0? plus [blue]{}[/blue]|} "
-          + "[gold]Oath[/gold] of it."),
+          + "[gold]Oath[/gold] of it instead."),
     };
 
     /// <summary>The Oath a held switch pays: 1 per plain copy, 2 per
@@ -1082,7 +1082,7 @@ public sealed class TwinGalesPower : PowerModel, ILocalizationProvider
         ("title", "Twin Gales"),
         ("description",
             "Your [gold]Swirls[/gold] also pay the element they "
-          + "[gold]Swirl[/gold]. If it's your [gold]current element[/gold], "
+          + "[gold]Swirl[/gold]. If that is your [gold]current element[/gold], "
           + "it pays twice."),
     };
 

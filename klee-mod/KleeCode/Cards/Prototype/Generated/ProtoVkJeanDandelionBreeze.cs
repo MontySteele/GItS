@@ -49,7 +49,7 @@ public sealed class ProtoVkJeanDandelionBreeze : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Jean — Wind Companion"),
+        ("title", "Dandelion Breeze"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] the enemy.{InCombat:{VarkaSwirl}|}"),
     };
 

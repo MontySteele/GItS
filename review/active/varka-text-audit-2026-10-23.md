@@ -90,3 +90,22 @@ and Tag Along say "to add to your Hand". Built here, after Klee's PR lands.
 3. **Jean's card.** (a, default) renamed "Dandelion Breeze", a plain card
    name like Favonius Cut; the Knights keep the colon. (b) keep "Jean — Wind
    Companion".
+
+## Ruling, 2026-10-23
+
+[USER]: "Agreed on all Varka, Furina, Yae and Shared fixes - these makes
+sense to me!"
+
+1. (a) Built: section 2's fixes on every face, badge and tip that printed
+   them (`text-conventions.md`'s current-element row says "for each"), and
+   section 5: Adventure Club and Tag Along say "to add into your Hand".
+   Unwavering Banner's badges drop "can" and say "Whenever"; the numbered
+   badge keeps "Oath of it instead", since the card's full words put it at
+   142 of 125. Fix 6 is built on Knight's Commission only: Boreas's Fang
+   reads 132 of the relic ceiling's 120 with "becomes your current
+   element", so the Fang and Wolf's Gravestone keep "becomes current"
+   until the main session words a shorter face.
+2. (a) Built: All Four Winds "Your cards read your total Oath." and Elixir
+   of the Four Winds "This turn, your cards read your total Oath."
+3. (a) Built: `proto_vk_jean_dandelion_breeze` is titled "Dandelion
+   Breeze", id unchanged, still a non-Knight Skill; its art is keyed by id.

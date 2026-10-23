@@ -53,7 +53,7 @@ public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Four Winds' Ascension"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwirl}|}"),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwirl}|}"),
     };
 
     /// <summary>This card's in-combat Oath and Swirl lines
