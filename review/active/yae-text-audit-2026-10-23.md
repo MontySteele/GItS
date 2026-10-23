@@ -116,7 +116,9 @@ sense to me!"
    up to 2 [3] cards in your Hand: <Annotation>."; each already hovered its
    Annotation's tip, and codegen now owes Sakura Seal the Sakura tip the
    parenthesis used to carry.
-3. **Pick 3 (a), built for Foxfire and Kitsune.** The Sakura tip keeps
-   "1 + 2 per Level": in words it is 109 characters, over the 100-character
-   player hover cap (`lint_hover_tips.py`, held for this tip by
-   `YaePrototypeTests`), so its wording is open.
+3. **Pick 3 (a), built.** Foxfire and Kitsune as the paper gives them. The
+   Sakura tip in the paper's words was 109 characters, over the
+   100-character player hover cap, so it reads "At the end of your turn,
+   deals 1 damage plus 2 for each Level. Lasts 3 turns, then strikes again."
+   (the main session's wording). `lint_hover_tips.py` now measures the
+   `@YaeSakuraTip` placeholder by its text, so the cap is held in the lint.

@@ -645,8 +645,8 @@ public static class ArmKeywordTips
     /// 2026-10-17): 1 + 2 per Level; "once more" became "again" to stay
     /// under the cap.</summary>
     public static readonly string YaeSakuraTip =
-        $"At the end of your turn, strikes an enemy for {Powers.YaeLaw.SakuraBase} "
-      + $"+ {Powers.YaeLaw.SakuraPerLevel} per Level. Lasts "
+        $"At the end of your turn, deals {Powers.YaeLaw.SakuraBase} damage plus "
+      + $"{Powers.YaeLaw.SakuraPerLevel} for each Level. Lasts "
       + $"{Powers.YaeLaw.SakuraTurns} turns, then strikes again.";
 
     /// <summary>Yae review r6, item 5: which enemy a Sakura strikes

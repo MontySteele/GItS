@@ -6631,8 +6631,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Shrine r2 (2026-10-14): no Rite, the full-shrine plant, the kinds.
         # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
         # The Sakura Levels paper (2026-10-17): 1 + 2 per Level.
-        "Sakura": ["At the end of your turn, strikes an enemy for ",
-                   " per Level. Lasts ",
+        "Sakura": ["At the end of your turn, deals ",
+                   " for each Level. Lasts ",
                    " turns, then strikes again.",
                    "A Sakura strikes Kitsune Pounce's target when Pounce "
                    "makes it strike, ",

@@ -346,7 +346,11 @@ def findings(cards: list[dict]) -> list[str]:
                 continue
             if body.startswith("@"):
                 used_long.add(body[1:])
-                continue
+                if body[1:] in LONG_OK:
+                    continue
+                # The Yae text audit (2026-10-23): a placeholder is measured
+                # by the static it names, so the cap holds there too.
+                body = visible(arm_statics()[body[1:]])
             if len(body) > CAP_CHARS:
                 bad.append(f"{card['cls']}: {label} is {len(body)} "
                            f"characters (cap {CAP_CHARS}): {body!r}")

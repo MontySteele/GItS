@@ -808,7 +808,8 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void Her_sakura_tip_is_her_shrines_and_the_companions_stays_its_own()
     {
-        Assert.Equal("At the end of your turn, strikes an enemy for 1 + 2 per "
+        // The Yae text audit (2026-10-23), pick 3 (a): in words.
+        Assert.Equal("At the end of your turn, deals 1 damage plus 2 for each "
                      + "Level. Lasts 3 turns, then strikes again.",
                      ArmKeywordTips.YaeSakuraTip);
         Assert.True(ArmKeywordTips.YaeSakuraTip.Length <= 100);

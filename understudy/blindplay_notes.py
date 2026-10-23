@@ -1783,7 +1783,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # (`ArmKeywordTips.YaeFullShrineTip`); an Edit fills the temporary slot.
     # Yae review r6, item 5: which enemy it strikes (`YaeShrine.Aim`).
     # The Sakura Levels paper (2026-10-17, pick 1 (a)): 1 + 2 per Level.
-    "Sakura": ("At the end of your turn, strikes an enemy for 1 + 2 per "
+    # The Yae text audit (2026-10-23, pick 3 (a)): the tip in words.
+    "Sakura": ("At the end of your turn, deals 1 damage plus 2 for each "
                "Level. Lasts 3 turns, then strikes again. "
                + SAKURA_TARGET_RULE),
     "Tenko": ("Every Sakura acts now and goes back to at least 3 turns "
