@@ -72,3 +72,18 @@ Deal 7 [9] Hydro damage for every 3 spent." and so on, 13 characters each.
    named ones.
 2. **", all you can".** (a, default) it goes from the five; the tip carries
    it. (b) keep it, since "up to" alone might read as a choice of amount.
+
+## Ruling, 2026-10-23
+
+[USER]: "Agreed on all Varka, Furina, Yae and Shared fixes - these makes
+sense to me!"
+
+1. **Pick 1 (a): built.** All eleven fixes as written. Chevreuse's face is
+   "Summon Chevreuse. Whenever you Spend, apply 1 Vulnerable [and 1 Weak] to
+   a random enemy." (`FurinaStageLaw.ChevreuseLineVulnerable`, and
+   `ChevreuseLineWeakUpgraded` on the upgrade); Verdict targets an enemy
+   (`TargetType.AnyEnemy`), so "the enemy" stands. Trial by Water's badge
+   and the seat glossary's Flip, Repay and oldest-guest rows follow.
+2. **Pick 2 (a): built.** ", all you can" is gone from Bravura, Soloist's
+   Solicitation, Hold the Stage, Tidal Flourish and Full House, faces and
+   the Full House badge.

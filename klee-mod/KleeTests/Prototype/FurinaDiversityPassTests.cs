@@ -195,7 +195,7 @@ public class FurinaDiversityPassTests : IDisposable
         var bow = Generated("ProtoFsFinalBow");
         Assert.True(bow.IndexOf("CardPileCmd.Draw", StringComparison.Ordinal)
                     < bow.IndexOf("FurinaCards.FinalBow", StringComparison.Ordinal));
-        Assert.Contains("If you can't, draw {FsAmount:diff()} cards.",
+        Assert.Contains("If you cannot, draw {FsAmount:diff()} cards.",
                         Face(new ProtoFsCastingCall()));
         Assert.Equal(2, new ProtoFsCastingCall().DynamicVars["FsAmount"].IntValue);
         Assert.Contains("CardPileCmd.Draw",

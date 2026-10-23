@@ -301,7 +301,7 @@ public sealed class TrialByWaterPower : PowerModel, ILocalizationProvider
     {
         ("title", "Trial by Water"),
         ("description",
-            "Until end of turn, whenever this enemy takes damage, Furina "
+            "This turn, whenever this enemy takes damage, Furina "
           + "gains [blue]{Amount}[/blue] [gold]Fanfare[/gold]."),
     };
 

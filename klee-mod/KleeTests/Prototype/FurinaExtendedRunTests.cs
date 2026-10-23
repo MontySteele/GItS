@@ -129,7 +129,7 @@ public class FurinaExtendedRunTests : IDisposable
         Assert.Equal(9m, Upgraded(new ProtoFsBravura())
             .DynamicVars.Damage.BaseValue);
         Assert.StartsWith(
-            "[gold]Spend[/gold] up to 18, all you can. Deal {Damage:diff()} "
+            "[gold]Spend[/gold] up to 18. Deal {Damage:diff()} "
             + "[gold]Hydro[/gold] damage for every 3 spent.",
             Face(new ProtoFsBravura()));
     }

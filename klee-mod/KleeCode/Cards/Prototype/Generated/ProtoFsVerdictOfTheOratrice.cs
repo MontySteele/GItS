@@ -48,7 +48,7 @@ public sealed class ProtoFsVerdictOfTheOratrice : CustomCardModel, ICharacterCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Verdict of the Oratrice"),
-        ("description", "Choose an enemy. If its HP is no higher than your [gold]Fanfare[/gold], it dies. Otherwise, deal damage equal to your [gold]Fanfare[/gold]."),
+        ("description", "If the enemy's HP is no higher than your [gold]Fanfare[/gold], it dies. Otherwise, deal damage equal to your [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

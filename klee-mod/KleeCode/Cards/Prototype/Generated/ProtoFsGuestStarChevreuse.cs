@@ -42,15 +42,15 @@ public sealed class ProtoFsGuestStarChevreuse : CustomCardModel, ICharacterCard
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         TipAudience.Seat
-            ? BaseKeywordTips.ForWeak(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this)
-            : BaseKeywordTips.ForWeak(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
+            ? BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForSpend(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this), this), this)
+            : ArmKeywordTips.ForSpend(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_chevreuse");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Chevreuse"),
-        ("description", "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.{IfUpgraded:show: Also applies [gold]Weak[/gold].|}{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}. Whenever you [gold]Spend[/gold], apply 1 [gold]Vulnerable[/gold]{IfUpgraded:show: and 1 [gold]Weak[/gold]|} to a random enemy.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
