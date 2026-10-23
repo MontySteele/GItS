@@ -1456,6 +1456,11 @@ def arm_keyword_tip_calls(description: str,
     owed = set()
     if spark_priced:
         owed.add("Spark")
+    # The Yae text audit (2026-10-23, pick 2 (a)): the Sakura Seal Annotation
+    # plants a Sakura, and its face no longer prints the word in parentheses,
+    # so the Annotation owes the Sakura tip the word used to carry.
+    if "Sakura Seal" in golded_tokens(description):
+        owed.add("Sakura")
     if any(k.word == "Bomb" for k in printed):
         if REACT_VERB.search(GOLD_SPAN.sub("", description)):
             owed.add("Elemental Reaction")
@@ -2106,7 +2111,7 @@ PREDICATE_TEXT = {
     "hp_lost_last_turn": "If you lost HP last turn",
     "first_turn_of_combat": "On your first turn",
     "shrine_full": "If your shrine is full",
-    "three_sakura": "If you have 3 [gold]Sakura[/gold]",
+    "three_sakura": "If you have 3 or more [gold]Sakura[/gold]",
     "any_enemy_weak": "If any enemy is [gold]Weak[/gold]",
     "crystallize_triggered_by_this":
         "If this triggers [gold]Crystallize[/gold]",

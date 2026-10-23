@@ -262,7 +262,7 @@ public sealed class SakuraGrovePower : PowerModel, ILocalizationProvider
         ("title", "Sakura Grove"),
         ("description",
             "At the start of your turn, each [gold]Sakura[/gold] gains "
-          + "[blue]{Amount}[/blue] Level."),
+          + "[blue]{Amount}[/blue] Level{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -281,7 +281,7 @@ public sealed class EdictOfCleansingPower : PowerModel, ILocalizationProvider
     {
         ("title", "Edict of Cleansing"),
         ("description",
-            "Your [gold]Sakura[/gold] strikes deal [blue]{Amount}[/blue] "
+            "Your [gold]Sakura[/gold]'s strikes deal [blue]{Amount}[/blue] "
           + "additional damage to an enemy that is [gold]Weak[/gold] or has a "
           + "[gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura."),
     };
@@ -333,8 +333,8 @@ public sealed class FoxsMooncallPower : PowerModel, ILocalizationProvider
     {
         ("title", "Fox's Mooncall"),
         ("description",
-            "Your [gold]Sakura[/gold] are planted [blue]{Amount}[/blue] Level "
-          + "higher."),
+            "Your [gold]Sakura[/gold] are planted [blue]{Amount}[/blue] "
+          + "Level{Amount:plural:|s} higher."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -392,7 +392,7 @@ public sealed class SerialNovelPower : PowerModel, ILocalizationProvider
         ("title", "Serial Novel"),
         ("description",
             "At the start of your turn, put [blue]{Amount}[/blue] random "
-          + "[gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] "
+          + "[gold]Annotated[/gold] card{Amount:plural:|s} from your [gold]Discard Pile[/gold] "
           + "into your [gold]Hand[/gold]."),
     };
 

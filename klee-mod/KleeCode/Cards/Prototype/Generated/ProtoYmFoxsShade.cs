@@ -45,7 +45,7 @@ public sealed class ProtoYmFoxsShade : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fox's Shade"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If any enemy is [gold]Weak[/gold], gain {BranchBlock:diff()} more."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If any enemy is [gold]Weak[/gold], gain {BranchBlock:diff()} additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

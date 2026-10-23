@@ -59,8 +59,8 @@ public static class YaeAnnotationText
     public static string Rule(YaeAnnotation annotation) => annotation switch
     {
         YaeAnnotation.RedInk =>
-            $"This card deals {YaeLaw.RedInkAmount} more damage and gives "
-          + $"{YaeLaw.RedInkAmount} more [gold]Block[/gold].",
+            $"This card deals {YaeLaw.RedInkAmount} additional damage and gives "
+          + $"{YaeLaw.RedInkAmount} additional [gold]Block[/gold].",
         YaeAnnotation.Footnote => "When this card is played, draw 1 card.",
         YaeAnnotation.DeadlineExtension => "This card has [gold]Retain[/gold].",
         YaeAnnotation.FoxFire =>
@@ -722,7 +722,7 @@ public static class YaeEditing
     /// <summary>Second Printing's prompt (review r3).</summary>
     public const string RecallPromptKey = "KLEEMOD-YAE_RECALL.selectionScreenPrompt";
 
-    public const string RecallPromptText = "Choose an Annotated card to put into your hand.";
+    public const string RecallPromptText = "Choose an Annotated card to put into your Hand.";
 
     /// <summary>Author's Copy's prompt (review r3).</summary>
     public const string CopyPromptKey = "KLEEMOD-YAE_COPY.selectionScreenPrompt";

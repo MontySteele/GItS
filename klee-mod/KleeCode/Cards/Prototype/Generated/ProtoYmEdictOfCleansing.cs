@@ -45,7 +45,7 @@ public sealed class ProtoYmEdictOfCleansing : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Edict of Cleansing"),
-        ("description", "Your [gold]Sakura[/gold] strikes deal {PowerAmount:diff()} more to an enemy that is [gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura."),
+        ("description", "Your [gold]Sakura[/gold]'s strikes deal {PowerAmount:diff()} additional damage to an enemy that is [gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

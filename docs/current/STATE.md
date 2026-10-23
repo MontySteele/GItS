@@ -263,8 +263,8 @@ Stellar-Conduct nod is parked). Code: `proto_ym_` rows,
 `tier0/engine/yae_shrine.py`, harness `tools/yae_expansion_sim.py`.
 - **Shrine:** cards plant Sakura, cap 3 (Sakura Channeling: "You can have 2
   more Sakura"). Each acts at turn end, on Last Bloom (a withering Sakura
-  strikes once more) and on Tenko ("Every Sakura acts now. Refresh them to at
-  least 3 turns."): Sakura (Thunder) strikes for 1 + 2 per Level, Foxfire
+  strikes once more) and on Tenko ("Every Sakura acts now and goes back to at
+  least 3 turns left."): Sakura (Thunder) strikes for 1 + 2 per Level, Foxfire
   Sakura to ALL, Kitsune Sakura is the Block decoy. An aimed strike is one
   hit.
 - **Levels** (`review/active/yae-sakura-levels-2026-10-17.md`): a plant

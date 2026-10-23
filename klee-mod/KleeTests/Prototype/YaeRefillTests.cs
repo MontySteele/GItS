@@ -312,6 +312,6 @@ public class YaeRefillTests : IDisposable
         Assert.Equal((11, 4), (Var(card, "Block"), Var(card, "BranchBlock")));
         Assert.Contains(OnPlay<ProtoYmFoxsShade>(), c => c.Contains(nameof(YaeShrine.WeakEnemies)));
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. If any enemy is [gold]Weak[/gold], "
-                     + "gain {BranchBlock:diff()} more.", Face(card));
+                     + "gain {BranchBlock:diff()} additional [gold]Block[/gold].", Face(card));
     }
 }

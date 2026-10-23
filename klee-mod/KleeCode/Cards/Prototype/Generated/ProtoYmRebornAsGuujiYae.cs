@@ -48,7 +48,7 @@ public sealed class ProtoYmRebornAsGuujiYae : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Reborn as Guuji Yae"),
-        ("description", "Choose an Annotation. [gold]Edit[/gold] every other card in your hand with it."),
+        ("description", "Choose an Annotation. [gold]Edit[/gold] every other card in your [gold]Hand[/gold] with it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

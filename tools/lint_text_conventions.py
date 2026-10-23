@@ -78,6 +78,14 @@ MAX_SENTENCES = 4         # the base's longest card is four sentences
 #: joined; the retired Furina reframe (`fr`) has no rows left.
 IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|mf|fs|vk)_")
 
+#: The Yae text audit (2026-10-23, `review/active/yae-text-audit-2026-10-23.md`,
+#: fix 1): her faces are outside `IN_SCOPE` until her Balance pass, so
+#: "in your hand:" printed on ten of them and nothing read it. Her faces are
+#: held to the pile spellings and the no-parentheses rule the audit applied;
+#: the rest of the spellings and the ceilings wait for her full pass.
+YAE_SCOPE = re.compile(r"^proto_ym_")
+YAE_SPELLINGS = ("hand-plain", "bare-hand", "pile-plain", "parenthesis")
+
 #: THE DEFERRED ROWS (text pass 2026-10-08): spellings held for named rows by
 #: (row id, spelling name). ROT SEMANTICS, like `EXCEPTIONS`: an entry whose
 #: spelling no longer fires fails, so the list can only shrink. EMPTY since the
@@ -984,6 +992,14 @@ def prototype_rows() -> list[Row]:
             + loc_rows(list(ANCIENT_CARD_FILES), "card", "proto"))
 
 
+def yae_face_findings() -> list[str]:
+    """Yae's card faces against `YAE_SPELLINGS` only (the Yae text audit,
+    2026-10-23)."""
+    rows = card_rows(MOD / "Cards" / "Prototype" / "Generated", YAE_SCOPE)
+    return [f for f in findings_for(rows, {}, gate=False)
+            if any(f": {name}: " in f for name in YAE_SPELLINGS)]
+
+
 def report_rows() -> list[Row]:
     """`--report`: the surfaces the gate does not read yet, top-level power
     badges and the relics. It was `--shipped` until the text pass of
@@ -1160,6 +1176,7 @@ def self_test() -> list[str]:
         Row("card", "fx_largest", "Your largest [gold]Bomb[/gold], on any enemy, grows by 3.", "fixture"),
         Row("card", "fx_hand", "Add a [gold]Sting[/gold] to your hand.", "fixture"),
         Row("card", "fx_bare_hand", "Add a [gold]Sting[/gold] to your Hand.", "fixture"),
+        Row("card", "fx_hand_colon", "[gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold].", "fixture"),
         Row("card", "fx_status", "Whenever you draw a status, draw 1 card.", "fixture"),
         Row("card", "fx_once", "Once a turn, when you play a Skill, draw 1 card.", "fixture"),
         Row("card", "fx_first", "The first time you [gold]Spend[/gold] each turn, draw 1 card.", "fixture"),
@@ -1179,6 +1196,7 @@ def self_test() -> list[str]:
                 "fx_dash": ("dash",), "fx_upgrade": ("upgrade clause",),
                 "fx_tip": ("> 135",), "fx_largest": ("largest-bomb-any",),
                 "fx_hand": ("hand-plain",), "fx_bare_hand": ("bare-hand",),
+                "fx_hand_colon": ("hand-plain",),
                 "fx_status": ("status-lowercase",), "fx_once": ("first-time-order",),
                 "fx_first": ("first-time-order",), "fx_cause": ("reaction-verb",),
                 "fx_grey": ("british",), "fx_next": ("next-turn",),
@@ -1230,7 +1248,7 @@ def main(argv: list[str]) -> int:
         bad = self_test()
         for line in bad:
             print(line)
-        print("self-test: 25 bad + 8 clean case(s) + the EB-777 semicolon "
+        print("self-test: 26 bad + 8 clean case(s) + the EB-777 semicolon "
               f"face, {len(bad)} failure(s)")
         return 1 if bad else 0
     if "--report" in argv:
@@ -1251,7 +1269,8 @@ def main(argv: list[str]) -> int:
     if "--census" in argv:
         census(rows)
         return 0
-    found = loc_audit_findings() + findings_for(rows, EXCEPTIONS)
+    found = (loc_audit_findings() + findings_for(rows, EXCEPTIONS)
+             + yae_face_findings())
     for line in found:
         print(line)
     exceptions = [f"  {k}: {v}" for k, v in EXCEPTIONS.items()]
