@@ -938,6 +938,17 @@ def render_lane_rows(rows: list[dict]) -> str:
 
 # -------------------------------------------------------------------- CLI --
 
+def unarmed_patches(log_path: Path) -> list[str]:
+    """The mod's patch classes this game's log says did not arm."""
+    try:
+        text = log_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    return [line.split("FAILED", 1)[1].strip()[:160]
+            for line in text.splitlines()
+            if "[klee]" in line and "  FAILED  " in line]
+
+
 def main(argv: list[str] | None = None) -> int:
     report.console_safe()
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -1155,6 +1166,11 @@ def main(argv: list[str] | None = None) -> int:
         lane_arg = f" --lane {label[len('lane'):]}"
         print(f"lane:      {label}  port {blob.get('port')}  "
               f"appdata {blob.get('appdata')}")
+    log_path = instance.log_path() if instance is not None else None
+    for line in unarmed_patches(log_path) if log_path else []:
+        # A patch class that did not arm fails quietly in game: the 2026-10-23
+        # element-token patch never armed and every token face printed raw.
+        print(f"NOT ARMED: {line}")
     print()
     print("The game is UP and the run is OPEN. Nothing has been torn down.")
     if lane_arg:
