@@ -92,3 +92,10 @@ Built, upgraded values in []:
 Saiguu's Lesson+ applies its Weak after the power is in, so the Weak
 triggers the Lesson itself. After this pass the pool has 8 cost-only and 4
 Innate-only upgrades.
+
+Sakura Channeling becomes an Uncommon Power, cost 1: "You can have 2 [3]
+more Sakura." (was Rare, cost 2 [1]). This matches Defect's Capacitor
+(Uncommon, 1, 2 [3] more orb slots). Built as its own commit so it can be
+reverted alone. Her pool is now 20 / 39 / 19, and 7 cost-only upgrades
+remain. Two upgraded copies reach nine Sakura, the last one with a status
+badge; a tenth still stands and strikes without one.

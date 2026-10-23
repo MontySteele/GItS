@@ -5174,7 +5174,7 @@
              {op: yae, kind: strike_most_turns_left}],
    upgrade: {yae_amount: 1}}
 
-# --- Uncommon (38) ---
+# --- Uncommon (39) ---
 
 - {id: proto_ym_kitsune_rite, name: "Kitsune Rite", character: yae,
    authored_by: [claude],
@@ -5551,7 +5551,17 @@
    effects: [{op: yae, kind: bless_highest, amount: 3, lasts: 2}],
    upgrade: {yae_amount: 1}}
 
-# --- Rare (20) ---
+- {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   # Amount 2 [3] per copy adds to the cap (YaeShrine.MaxSakura). Upgrade
+   # census (2026-10-23, [USER]): Uncommon, 1, 2 [3], as Defect's Capacitor
+   # (was Rare, 2 [1]). Why: provenance note, "Yae Miko, shrine r2".
+   description: "You can have 2 more [gold]Sakura[/gold].",
+   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 2, target: self}],
+   upgrade: {power_amount: 1}}
+
+# --- Rare (19) ---
 
 - {id: proto_ym_tenko_kenshin, name: "Great Secret Art: Tenko Kenshin", character: yae,
    authored_by: [claude],
@@ -5579,16 +5589,6 @@
              {op: conditional, if: killed_target_fatal,
               then: [{op: yae, kind: publish}]}],
    upgrade: {damage: 4}}
-
-- {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
-   authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   # The Rare that bends the 3-Sakura limit (2026-10-14). Amount 2 per copy
-   # adds to the cap this combat (YaeShrine.MaxSakura); the full-shrine plant
-   # fires at the new cap. Why: provenance note, "Yae Miko, shrine r2".
-   description: "You can have 2 more [gold]Sakura[/gold].",
-   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 2, target: self}],
-   upgrade: {cost: -1}}
 
 - {id: proto_ym_editorial_priority, name: "Editorial Priority", character: yae,
    authored_by: [claude],

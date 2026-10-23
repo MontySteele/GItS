@@ -1025,7 +1025,7 @@ YAE_SAKURA_ANNOTATIONS = ("Red Ink", "Deadline Extension", "Fox Fire")
 _SAKURA_TURNS = re.compile(r"(?:Strikes|Turns) left: (\d+)")
 _LURE_NAME = "Foxfire Lure"
 #: How many Sakura may stand: 3, plus Sakura Channeling's stacks ("You can
-#: have 2 more Sakura", 2 per copy; `YaeShrine.MaxSakura`, 2026-10-14).
+#: have 2 [3] more Sakura", per copy; `YaeShrine.MaxSakura`, 2026-10-14).
 YAE_SAKURA_CAP = 3
 _CHANNELING_NAME = "Sakura Channeling"
 #: Yae round 10 (2026-10-17, lane 1): Fox Ofuda, "You can have 1 more

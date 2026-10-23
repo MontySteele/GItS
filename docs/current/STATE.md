@@ -278,7 +278,7 @@ Stellar-Conduct nod is parked). Code: `proto_ym_` rows,
   Published cards. The Masterpiece is one enchantment: a permanent Published
   stack plus one temporary slot. Starter relic: "After an elite or boss
   fight, you may Publish an Annotation" (a combat reward row).
-- **Pool:** 78 (20 / 38 / 20), official art. Relic offer: Meditations, her
+- **Pool:** 78 (20 / 39 / 19; Sakura Channeling went Uncommon 2026-10-23), official art. Relic offer: Meditations, her
   seven and Enlightened Blessing. Ancients: Yakan Evocation (Tooth; a Sesshou
   Sakura that keeps the starter's Annotations and strikes as it lands), Yae
   Publishing House (Tome) (`review/active/yae-ancients-relics-2026-10-16.md`).

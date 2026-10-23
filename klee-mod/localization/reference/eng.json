@@ -1386,7 +1386,7 @@
     "KLEEMOD-PROTO_YM_SAIGUUS_LESSON.title": "Saiguu's Lesson",
     "KLEEMOD-PROTO_YM_SAKURA_CANOPY.description": "Gain {Block:diff()} [gold]Block[/gold]. Plant {YmAmount:diff()} [gold]Kitsune Sakura[/gold].",
     "KLEEMOD-PROTO_YM_SAKURA_CANOPY.title": "Sakura Canopy",
-    "KLEEMOD-PROTO_YM_SAKURA_CHANNELING.description": "You can have 2 more [gold]Sakura[/gold].",
+    "KLEEMOD-PROTO_YM_SAKURA_CHANNELING.description": "You can have {PowerAmount:diff()} more [gold]Sakura[/gold].",
     "KLEEMOD-PROTO_YM_SAKURA_CHANNELING.title": "Sakura Channeling",
     "KLEEMOD-PROTO_YM_SAKURA_GROVE.description": "At the start of your turn, each [gold]Sakura[/gold] gains a Level.",
     "KLEEMOD-PROTO_YM_SAKURA_GROVE.title": "Sakura Grove",

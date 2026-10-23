@@ -2850,7 +2850,7 @@
       "block": 3
     },
     "proto_ym_sakura_channeling": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_ym_sakura_grove": {
       "innate": true
