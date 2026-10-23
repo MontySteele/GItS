@@ -29,7 +29,7 @@ reward line, the mechanical text under each choice.
      Guest Stars." → "...Guest Stars to add to your deck."
 2. **"Remove every Overdue Reports"** (Varka, The Second Satchel, *Sign
    them by lamplight*) reads wrong because the card's name is plural. →
-   "Remove all [Overdue Reports]."
+   "Remove all [Overdue Reports] from your deck."
 3. **Title case:** "A Room with No One In It" → "A Room with No One in It".
 
 ## Picks
@@ -99,3 +99,23 @@ reward line, the mechanical text under each choice.
 - **The Ancients' lines and the run lines for the four Balance kits** (Neow,
   Pael, Tanx, Orobas, Vakuu, Darv, Nonupeipe, Tezcatara; boss entry, low HP,
   the pair exchanges, run won or lost) read in character and need nothing.
+
+## Ruling, 2026-10-23
+
+[USER]: "Agreed on all of the above!" All four picks are taken at their
+defaults and built, with the three small fixes and the Elemental Mark fix:
+
+1. (a) Every named-card reward line in the four chains says "Add [X] to
+   your deck." (fourteen lines).
+2. (a) The three "reads it twice" lines are varied as written above; Klee's
+   *Read it twice* and Furina's *Read it aloud, twice* keep theirs.
+3. (a) Yae's story writing waits for her Balance. Nothing to build.
+4. (a) Yae's character-select text is "The Guuji of the Grand Narukami
+   Shrine." then "She runs the shrine, a publishing house and most of
+   Inazuma's gossip. A tower full of strangers sounded like an excellent
+   story."
+
+[USER] also noted: "I think the writing surfaces for character dialogue /
+new events still needs a human inspection before translation." So a human
+read of the character dialogue and story events is required before the
+translation starts (`docs/current/QUEUE.md`, Eyes-on looks).

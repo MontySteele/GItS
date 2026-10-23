@@ -232,7 +232,7 @@ public static class KleeStory
                         Then = new[] { new StoryEffect(StoryEffectKind.RemoveCard) },
                     },
                     new StoryOption("WAIT_HERE", "Wait here in case Dodoco comes back.",
-                        "Heal 15 HP. Add [gold]Doubt[/gold].",
+                        "Heal 15 HP. Add [gold]Doubt[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.Heal, 15),
                         "Klee waits and waits. Dodoco doesn't come back. She worries all the way up.")
                     {
@@ -374,7 +374,7 @@ public static class KleeStory
                     new StoryOption("READ_IT_OUT_LOUD", "Read it out loud to Dodoco.",
                         "Heal 20 HP.",
                         new StoryEffect(StoryEffectKind.Heal, 20),
-                        "\"...and I'll see you in Mondstadt. Love, Mom.\" Klee reads it twice."),
+                        "\"...and I'll see you in Mondstadt. Love, Mom.\" Dodoco listens to the whole thing again."),
                     new StoryOption("TRY_THE_TRICK", "Try the trick on the back.",
                         "Lose 10 HP. Choose 1 of 3 random upgraded Rare cards to add to your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 10),

@@ -71,7 +71,7 @@ price; Doubt and Max HP are heavy ones and are used sparingly.
 
 | Option | Effect | Result |
 |---|---|---|
-| Blast the pond! | Gain 75 Gold. Add **Confinement**. | KABOOM! Fish everywhere. Klee hopes the Spire doesn't tell Jean. |
+| Blast the pond! | Gain 75 Gold. Add **Confinement** to your deck. | KABOOM! Fish everywhere. Klee hopes the Spire doesn't tell Jean. |
 | Just one little bomb. | Choose 1 of 3 random Common Attacks to add to your deck. | Just a little one. Klee keeps the biggest fish for Dodoco. |
 | Leave them be. | Remove a card. | Klee puts the fuse away and watches the fish swim past. |
 
@@ -84,7 +84,7 @@ toy; something in the Spire took it.
 |---|---|---|
 | Chase it right now! | Lose 10 HP. Gain a random relic. | Klee trips twice and lands on somebody's lost treasure. The thief gets away, but Klee knows which way it went. |
 | Leave Mora out as bait. | Lose 50 Gold. Remove a card. | By morning the Mora is gone, and so is a bit of junk from her bag. The sticky footprints go up. |
-| Wait here in case Dodoco comes back. | Heal 15 HP. Add **Doubt**. | Klee waits and waits. Dodoco doesn't come back. She worries all the way up. |
+| Wait here in case Dodoco comes back. | Heal 15 HP. Add **Doubt** to your deck. | Klee waits and waits. Dodoco doesn't come back. She worries all the way up. |
 
 **Found You!** (act 2, a price with free ways out). Every option ends with
 Dodoco back, and removes Doubt if Klee has it.
@@ -152,7 +152,7 @@ Opening line by act-2 choice: *opened* "You opened it, didn't you? Of course you
 
 | Option | Effect | Result |
 |---|---|---|
-| Read it out loud to Dodoco. | Heal 20 HP. | "...and I'll see you in Mondstadt. Love, Mom." Klee reads it twice. |
+| Read it out loud to Dodoco. | Heal 20 HP. | "...and I'll see you in Mondstadt. Love, Mom." Dodoco listens to the whole thing again. |
 | Try the trick on the back. | Lose 10 HP. Choose 1 of 3 random upgraded Rare cards to add to your deck. | On the fifth try, it works. "I did it, Dodoco! Let's do it again!" |
 | *Saved the cache:* Open the chest at last. | Gain a random Rare relic. | Klee sets the chest down and opens it at arm's length, just like Mom said. |
 | *Otherwise:* Fold the note into a fuse. | Upgrade 3 random cards that place a Bomb. | The ink burns blue. Klee saves a scrap for later. |
@@ -196,9 +196,9 @@ Opening line by act-1 choice: *signed* "You signed the last lot so fast, sir, sh
 
 | Option | Effect | Result |
 |---|---|---|
-| Sign them by lamplight. | Lose 8 HP. Upgrade 2 random cards. Remove every **Overdue Reports**. | He signs the last page at dawn, then goes back and reads the casualty lists twice. |
+| Sign them by lamplight. | Lose 8 HP. Upgrade 2 random cards. Remove all **Overdue Reports** from your deck. | He signs the last page at dawn, then goes back and reads the casualty lists twice. |
 | Hand them to the courier. | Lose 75 Gold. Remove a card. | "Consider it a promotion. And a raise." |
-| Lose them on the stairs. | Gain 2 random potions. Add **Overdue Reports**. | He keeps the satchel. It had snacks in it. |
+| Lose them on the stairs. | Gain 2 random potions. Add **Overdue Reports** to your deck. | He keeps the satchel. It had snacks in it. |
 
 **The Acting Grand Master** (act 3, a price with free ways out). Jean has a
 reason to be here, unlike Alice: she came to collect her late Grand Master.
@@ -209,7 +209,7 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 |---|---|---|
 | Let her lead the last stretch. | Lose 10 HP. Choose 1 of 3 random upgraded Rare Companions to add to your deck. | "Lead on, Acting Grand Master." "Then keep up, Grand Master." |
 | Promise a full report at Angel's Share. | Remove every Curse. Lose 50 Gold for each. Locked with no Curse, or with less Gold than the price. | "Every word. I'm buying." |
-| Carry her ledger the rest of the way. | Upgrade 3 random cards. Add **Overdue Reports**. | He reads it on the way. It's mostly complaints about him. |
+| Carry her ledger the rest of the way. | Upgrade 3 random cards. Add **Overdue Reports** to your deck. | He reads it on the way. It's mostly complaints about him. |
 
 **The Rearguard** (act 1, every option priced):
 
@@ -219,7 +219,7 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 |---|---|---|
 | Take the rear yourself. | Lose 10 HP. Choose 1 of 3 random Rare cards to add to your deck. | "You lot walk in front. I'll keep the stairs behind us." |
 | Leave them your supplies. | Lose 75 Gold. Remove a card. | He leaves his own pack and travels light. "Eat. That's an order." |
-| Send them down with a message. | Gain 2 random potions. Add **Overdue Reports**. | "Tell Jean we're fine." They press their potions on him, and their paperwork. |
+| Send them down with a message. | Gain 2 random potions. Add **Overdue Reports** to your deck. | "Tell Jean we're fine." They press their potions on him, and their paperwork. |
 
 **The Wolf of the North** keeps its options and effects, with result lines:
 
@@ -255,7 +255,7 @@ happens now, in the Spire, and the memory is what it stirs up.
 
 | Option | Effect | Result |
 |---|---|---|
-| Knock them all down again. | Lose 8 HP. Add an upgraded **Four Winds' Ascension**. *(a jackpot)* | Every dummy down in one pass. Nobody here to reject him. |
+| Knock them all down again. | Lose 8 HP. Add an upgraded **Four Winds' Ascension** to your deck. *(a jackpot)* | Every dummy down in one pass. Nobody here to reject him. |
 | Do it properly this time. | Upgrade 2 random cards. | One at a time, by the book. Valentine would laugh at him. |
 | Walk past. | Heal 15 HP. | He pats the nearest dummy on the way by. |
 

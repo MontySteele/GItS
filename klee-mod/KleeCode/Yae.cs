@@ -32,9 +32,9 @@ public sealed class Yae : CustomCharacterModel, IYaeCharacter
     {
         ("title", "Yae Miko"),
         ("description",
-            "Guuji of the Grand Narukami Shrine and editor-in-chief of the "
-          + "Yae Publishing House. Her Sakura strike at the end of every "
-          + "turn, and her edits make good cards better."),
+            "The Guuji of the Grand Narukami Shrine.\n"
+          + "She runs the shrine, a publishing house and most of Inazuma's "
+          + "gossip. A tower full of strangers sounded like an excellent story."),
         ("titleObject", "Yae Miko"),
         ("pronounSubject", "she"),
         ("pronounObject", "her"),

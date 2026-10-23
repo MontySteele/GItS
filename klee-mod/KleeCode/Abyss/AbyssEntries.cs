@@ -306,7 +306,7 @@ public static class AbyssText
         AbyssShadow.SheerCold => $"If you end your turn with no Block, lose {AbyssNumbers.SheerColdHpLoss(act)} HP.",
         // 2026-10-18: once per turn, so a multi-hit attack adds one Burn.
         AbyssShadow.ElementalMark =>
-            "The first time each turn an enemy attack deals you unblocked damage, add a Burn into "
+            "The first time each turn an enemy's attack deals you unblocked damage, add a Burn into "
           + "your Discard Pile.",
         AbyssShadow.Herald => $"Enemies have {(int)(AbyssNumbers.HeraldHpBonus * 100)}% more HP.",
         AbyssShadow.Rally => $"Whenever an enemy dies, every other enemy gains {AbyssNumbers.RallyStrength(act)} Strength.",

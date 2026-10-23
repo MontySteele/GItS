@@ -162,7 +162,7 @@ public static class KokomiStory
             new StoryEvent(
                 ActIndex: 0,
                 EventType: typeof(KokomiEmptyRoom),
-                Title: "A Room with No One In It",
+                Title: "A Room with No One in It",
                 Body:
                     "Behind a door with nothing written on it is a small room: one cushion, one lamp, a "
                   + "stack of unread books. Kokomi closes the door behind her. For the first time since "
@@ -211,7 +211,7 @@ public static class KokomiStory
                         "It agrees only once she offers it a piece to keep. It cannot leave a piece on "
                       + "the table."),
                     new StoryOption("CONCEDE", "Concede and study its opening.",
-                        "Add [gold]Doubt[/gold]. Choose 1 of 3 random Rare cards.",
+                        "Add [gold]Doubt[/gold] to your deck. Choose 1 of 3 random Rare cards to add to your deck.",
                         new StoryEffect(StoryEffectKind.AddCard, 0, typeof(Doubt)),
                         "She plays its first ten moves against herself until she sees it: it takes every "
                       + "piece left in reach.")
@@ -257,7 +257,7 @@ public static class KokomiStory
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic) },
                     },
                     new StoryOption("GATHER_THE_OFFERINGS", "Gather the offerings at its foot.",
-                        "Gain 100 Gold. Add [gold]Doubt[/gold].",
+                        "Gain 100 Gold. Add [gold]Doubt[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.GainGold, 100),
                         "Someone has been leaving Mora here for a very long time. She takes it home for "
                       + "the shrine's poor box. The bone whispers to her all the way up.")
@@ -265,7 +265,7 @@ public static class KokomiStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(Doubt)) },
                     },
                     new StoryOption("PROMISE_A_RITE", "Promise him a rite at home.",
-                        "Remove a card. Add [gold]Public Address[/gold].",
+                        "Remove a card. Add [gold]Public Address[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.RemoveCard),
                         "A proper one, on Watatsumi, with the whole shrine there. She means every word, "
                       + "and she is already dreading the speech.")
@@ -328,7 +328,7 @@ public static class KokomiStory
                 {
                     new StoryOpening("RESTED",
                         new StoryCondition(typeof(KokomiEmptyRoom)),
-                        "Rested, she reads it twice."),
+                        "Rested, she reads it properly this time."),
                 },
             },
 
@@ -447,7 +447,7 @@ public sealed class KokomiSandTable : StoryEventModel { }
 /// <summary>Act 1, Kokomi only: Coral Light (Watatsumi's thread, a memory).</summary>
 public sealed class KokomiCoralLight : StoryEventModel { }
 
-/// <summary>Act 1, Kokomi only: A Room with No One In It (her friends' thread).</summary>
+/// <summary>Act 1, Kokomi only: A Room with No One in It (her friends' thread).</summary>
 public sealed class KokomiEmptyRoom : StoryEventModel { }
 
 /// <summary>Act 2, Kokomi only: The Other Commander.</summary>
