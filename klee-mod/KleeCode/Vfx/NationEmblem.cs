@@ -45,6 +45,15 @@ public static class NationEmblem
 
     internal const string LabelName = "Initial";
 
+    /// <summary>
+    /// The game's own Kreon Bold, the slab serif its card titles are set in
+    /// ([USER], 2026-10-22: "The 'I' on Inazuma cards looks kind of like an
+    /// l"). The theme font is a sans whose capital I is a bare stroke; Kreon's
+    /// I carries a slab top and bottom, and M, L and F stay the same family.
+    /// A missing resource falls back to the theme font, as before.
+    /// </summary>
+    public const string FontPath = "res://themes/kreon_bold_shared.tres";
+
     /// <summary>Slightly smaller than the 48px element gem: the gem is a
     /// rules affordance, the pip is a tag.</summary>
     internal const float Side = 40f;
@@ -150,6 +159,9 @@ public static class NationEmblem
         pip.Visible = true;
     }
 
+    private static Font? LoadFont() =>
+        ResourceLoader.Exists(FontPath) ? ResourceLoader.Load<Font>(FontPath) : null;
+
     private static StyleBoxFlat Disc(Color fill)
     {
         var box = new StyleBoxFlat
@@ -188,7 +200,11 @@ public static class NationEmblem
             VerticalAlignment = VerticalAlignment.Center,
         };
         label.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        label.AddThemeFontSizeOverride("font_size", 24);
+        if (LoadFont() is { } font)
+        {
+            label.AddThemeFontOverride("font", font);
+        }
+        label.AddThemeFontSizeOverride("font_size", 26);
         label.AddThemeColorOverride("font_color", Colors.White);
         label.AddThemeColorOverride("font_outline_color", new Color(0.1f, 0.08f, 0.07f));
         label.AddThemeConstantOverride("outline_size", 6);

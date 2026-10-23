@@ -3419,6 +3419,9 @@ power_klee_party_poppers	ImageGen/images/powers/party_poppers.png	256	256	contai
 power_klee_witches_circle	ImageGen/images/powers/witches_circle.png	256	256	contain	center	shortlist	1	png	Item Dodoco's Enchanted Candy.png		icon	
 # power_klee_alices_masterpiece <- Alice's book of Freedom
 power_klee_alices_masterpiece	ImageGen/images/powers/alices_masterpiece.png	256	256	contain	center	shortlist	1	png	Item Philosophies of Freedom.png		icon	
+# power_klee_alices_detonator <- the Krash-Kaboom Mine itself: the power hands Klee Alice's Mine each turn
+# ([USER], 2026-10-22: "'Alice's Detonator' has Durin for a power image icon." It had borrowed Witch's Flame)
+power_klee_alices_detonator	ImageGen/images/powers/alices_detonator.png	256	256	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png		icon	
 # power_klee_introduction_magic <- Alice's primer of Freedom
 power_klee_introduction_magic	ImageGen/images/powers/introduction_magic.png	256	256	contain	center	shortlist	1	png	Item Teachings of Freedom.png		icon	
 # power_klee_pass_the_match <- co-op: the spark passed along

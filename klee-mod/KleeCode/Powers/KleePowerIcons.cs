@@ -100,8 +100,12 @@ internal static class KleePowerIcons
         AbyssShadowPower shadow => KleePck.Path(shadow.IconFile),
         SparkKnightPower =>
             KleePck.Path("klee/powers/spark_threshold_down.png"),
+        // [USER], 2026-10-22: "'Alice's Detonator' has Durin for a power
+        // image icon." It wears the Krash-Kaboom Mine now, the Alice's Mine it
+        // hands over each turn; Witch's Flame stays the older pck's fallback.
         AlicesDetonatorPower =>
-            KleePck.Path("klee/powers/witchs_flame.png"),
+            KleePck.Path("klee/powers/alices_detonator.png")
+            ?? KleePck.Path("klee/powers/witchs_flame.png"),
         // THE STATUS PACKAGE (2026-10-01): Finders Keepers and Damage Report
         // wear their own badges since the art gaps pass (2026-10-18, art/plan.tsv
         // power_klee_*), Klee's talent icons; the borrowed badge stays the
