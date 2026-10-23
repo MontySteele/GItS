@@ -1908,10 +1908,10 @@ proto_ko_look_out	ImageGen/images/cards/klee/proto_ko_look_out.png	500	380	cover
 proto_ko_mine_all_mine	ImageGen/images/cards/klee/proto_ko_mine_all_mine.png	500	380	cover	x0.50,y0.35@1.25	shortlist	1	png	Klee Birthday 2024.png		splash	klee_birthday_2024
 # proto_ko_one_more_charge <- no_holding_back: Klee's arm up for one more throw
 proto_ko_one_more_charge	ImageGen/images/cards/klee/proto_ko_one_more_charge.png	500	380	cover	y0.30	shortlist	1	png	Klee Multi Wish.png		splash	
+# proto_ko_witchs_homework_next <- Witch's Homework II: Klee springing out of a pop-up book -- homework with a surprise inside
+proto_ko_witchs_homework_next	ImageGen/images/cards/klee/proto_ko_witchs_homework_next.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Klee Blossoming Starlight Full Wish.png		splash	
 # proto_ko_playdate <- smoke_and_sparks: a beach day with balloons and a slime
 proto_ko_playdate	ImageGen/images/cards/klee/proto_ko_playdate.png	500	380	cover	x0.45,y0.50@1.2	shortlist	1	png	Klee Shorts 2023-06-12.png		splash	
-# proto_ko_second_surprise <- NEW: Klee springing out of a pop-up book -- the surprise inside the surprise
-proto_ko_second_surprise	ImageGen/images/cards/klee/proto_ko_second_surprise.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Klee Blossoming Starlight Full Wish.png		splash	
 # proto_ko_secret_base <- cant_catch_me: Klee in her den of letters, crabs and Dodocos
 proto_ko_secret_base	ImageGen/images/cards/klee/proto_ko_secret_base.png	500	380	cover	x0.40,y0.45@1.3	shortlist	1	png	Klee Birthday 2021.png		splash	
 # proto_ko_sit_tight <- dodge_roll: Klee sitting out the rain under her own little cloud
