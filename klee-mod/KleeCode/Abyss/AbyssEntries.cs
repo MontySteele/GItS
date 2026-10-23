@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using KleeMod.Elements;
 
 namespace KleeMod.Abyss;
@@ -83,7 +84,8 @@ public static class AbyssDurations
     };
 
     /// <summary>The card tag and the strip's label.</summary>
-    public static string Tag(AbyssDuration d) => d == AbyssDuration.ThisAct ? "This act" : "Whole run";
+    public static string Tag(AbyssDuration d) =>
+        CodeText.Format(d == AbyssDuration.ThisAct ? AbyssOverlayText.ThisAct : AbyssOverlayText.WholeRun);
 
     /// <summary>Is an entry taken in act <paramref name="takenInAct"/> in
     /// force in act <paramref name="currentAct"/>? Whole run: from its act on.
@@ -171,10 +173,24 @@ public static class AbyssNumbers
     public const int WitheringWeak = 1;
 }
 
-/// <summary>The player-facing names and texts, word for word the paper's.</summary>
+//// <summary>The player-facing names and texts, word for word the paper's.
+///
+/// KEYED (the localization census, 2026-10-23, step 3). Each name is a row in
+/// the <c>events</c> table keyed by its ENUM, not its display name
+/// (<c>KLEE_SPIRAL_ABYSS.strip.RIPTIDE.title</c>), so a rename keeps its
+/// translation; the strip's hover titles read the same row. Each text is a
+/// whole-sentence row (<c>KLEE_SPIRAL_ABYSS.blessings.LEYLINE.description</c>,
+/// with no act known <c>.description_no_act</c>), the act's numbers and the
+/// element's name its vars. <see cref="Text(AbyssBlessing, int, int?)"/> reads
+/// the row as the player does; <see cref="English(AbyssBlessing, int, int?)"/>
+/// is the English, for a row that is itself English (the event page's
+/// options, a badge's description).</summary>
 public static class AbyssText
 {
-    public static string Name(AbyssBlessing b) => b switch
+    private const string Table = "events";
+    private const string Prefix = "KLEE_SPIRAL_ABYSS.";
+
+    private static string NameTemplate(AbyssBlessing b) => b switch
     {
         AbyssBlessing.LeyLine => "The Ley Line",
         AbyssBlessing.AbyssalMoon => "Abyssal Moon",
@@ -196,79 +212,7 @@ public static class AbyssText
         _ => throw new ArgumentOutOfRangeException(nameof(b)),
     };
 
-    /// <summary>The act index a text is read for when no act is known (the
-    /// compendium, a relic before its run sets it): the numbers take act 1's
-    /// row (<see cref="AbyssNumbers.Row"/>) and "this act's element" lists
-    /// all three.</summary>
-    public const int NoAct = -1;
-
-    /// <summary>
-    /// THE ELEMENT, NAMED ([USER], 2026-10-22: "For the Spiral Abyss Blessing
-    /// 'The Ley Line' - what's this act's element?"). The element of act
-    /// <paramref name="elementAct"/> (<see cref="AbyssElements.ForAct"/>),
-    /// golded; with no act known, the three acts' elements in one line.
-    /// </summary>
-    public static string ActElement(int elementAct) =>
-        elementAct < 0
-            ? "this act's element"
-            : $"[gold]{AbyssElements.ForAct(elementAct)}[/gold]";
-
-    /// <summary>"[gold]Hydro[/gold] in act 1, [gold]Pyro[/gold] in act 2,
-    /// [gold]Electro[/gold] in act 3." from <see cref="AbyssElements.Table"/>.</summary>
-    public static string ElementsByAct()
-    {
-        var parts = new List<string>();
-        for (var i = 0; i < AbyssElements.Table.Count; i++)
-        {
-            parts.Add($"[gold]{AbyssElements.Table[i]}[/gold] in act {i + 1}");
-        }
-        return string.Join(", ", parts) + ".";
-    }
-
-    /// <summary>A Blessing's text for one act: the numbers are the ones for
-    /// <paramref name="act"/>, the act it is offered or was taken in
-    /// (<see cref="AbyssNumbers"/>), so the text prints one number.
-    /// <paramref name="elementAct"/> is the act whose element The Ley Line
-    /// names: the act being played, which for a Blessing held since an
-    /// earlier act is not the act it was taken in (its effect reads
-    /// <c>SpiralAbyss.CurrentAct</c>). Left out, it is <paramref name="act"/>;
-    /// <see cref="NoAct"/> names all three.</summary>
-    public static string Text(AbyssBlessing b, int act, int? elementAct = null) => b switch
-    {
-        AbyssBlessing.LeyLine => (elementAct ?? act) < 0
-            ? "Each enemy turn, every enemy without an aura takes this act's element. "
-              + $"An enemy wearing an aura deals {AbyssNumbers.LeyLineDamageReduction} less damage. "
-              + "The element is " + ElementsByAct()
-            : $"Each enemy turn, every enemy without an aura takes {ActElement(elementAct ?? act)}. "
-              + $"An enemy wearing an aura deals {AbyssNumbers.LeyLineDamageReduction} less damage.",
-        AbyssBlessing.AbyssalMoon =>
-            $"Every third card you play in a turn deals {AbyssNumbers.AbyssalMoonDamage(act)} damage to ALL enemies.",
-        AbyssBlessing.MoonlitRest => $"Heal {AbyssNumbers.MoonlitRestHeal(act)} HP at the end of each combat.",
-        AbyssBlessing.FirstStrike => "Your first Attack each combat is played twice.",
-        AbyssBlessing.ElementalBurst =>
-            $"Whenever you play a Power, deal {AbyssNumbers.ElementalBurstDamage(act)} damage to ALL enemies.",
-        AbyssBlessing.Resonance =>
-            $"On turn {AbyssNumbers.ResonanceTurn} of each combat, gain {AbyssNumbers.ResonanceEnergy} Energy and draw {AbyssNumbers.ResonanceDraw} card.",
-        AbyssBlessing.Crystallize => $"Start each combat with {AbyssNumbers.CrystallizeBlock(act)} Block.",
-        AbyssBlessing.FatefulFortune => $"Gain {AbyssNumbers.FatefulFortuneMaxHp(act)} Max HP.",
-        AbyssBlessing.Overflow => "This act, Elemental Reactions deal double damage.",
-        AbyssBlessing.VigorOfTheAbyss =>
-            $"This act, while you are above half HP, your Attacks deal {AbyssNumbers.VigorDamage(act)} additional damage.",
-        AbyssBlessing.MoonlitSpring =>
-            $"This act, heal {AbyssNumbers.MoonlitSpringHeal(act)} HP at the end of each combat.",
-        AbyssBlessing.BattleRhythm =>
-            $"This act, start each combat with {AbyssNumbers.BattleRhythmStrength(act)} Strength and {AbyssNumbers.BattleRhythmDexterity(act)} Dexterity.",
-        AbyssBlessing.WaveringMoon =>
-            $"Whenever you trigger an Elemental Reaction, deal {AbyssNumbers.WaveringMoonDamage(act)} damage to ALL enemies.",
-        AbyssBlessing.StarfellDraft =>
-            // A word, not a tunable: "1 additional card" is the Blessing.
-            // (Kept off AbyssNumbers so the prose lint does not pair every
-            // card's "1 card" with it.)
-            "Card rewards show 1 additional card.",
-        _ => throw new ArgumentOutOfRangeException(nameof(b)),
-    };
-
-    public static string Name(AbyssShadow s) => s switch
+    private static string NameTemplate(AbyssShadow s) => s switch
     {
         AbyssShadow.Clock => "The Clock",
         AbyssShadow.MageShield => "Abyss Mage Shield",
@@ -285,50 +229,259 @@ public static class AbyssText
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 
-    /// <summary>A Shadow's text for one act, on <see cref="Text(AbyssBlessing, int, int?)"/>'s
-    /// terms: <paramref name="elementAct"/> is the act whose element Abyss
-    /// Mage Shield names.</summary>
-    public static string Text(AbyssShadow s, int act, int? elementAct = null) => s switch
+    /// <summary>The name's row key, from the enum: the strip's hover title
+    /// (<c>AbyssChoicePage.StripTitleKey</c>).</summary>
+    public static string NameKey(AbyssBlessing b) => $"{Prefix}strip.{b.ToString().ToUpperInvariant()}.title";
+
+    public static string NameKey(AbyssShadow s) => $"{Prefix}strip.{s.ToString().ToUpperInvariant()}.title";
+
+    private static CodeRow NameRow(AbyssBlessing b) => new(Table, NameKey(b), NameTemplate(b));
+    private static CodeRow NameRow(AbyssShadow s) => new(Table, NameKey(s), NameTemplate(s));
+
+    public static string Name(AbyssBlessing b) => CodeText.Format(NameRow(b));
+
+    public static string Name(AbyssShadow s) => CodeText.Format(NameRow(s));
+
+    /// <summary>The name in English, for a row that is itself English.</summary>
+    public static string NameEnglish(AbyssBlessing b) => NameTemplate(b);
+
+    public static string NameEnglish(AbyssShadow s) => NameTemplate(s);
+
+    /// <summary>The act index a text is read for when no act is known (the
+    /// compendium, a relic before its run sets it): the numbers take act 1's
+    /// row (<see cref="AbyssNumbers.Row"/>) and "this act's element" lists
+    /// all three.</summary>
+    public const int NoAct = -1;
+
+    private static CodeRow R(string key, string english) => new(Table, Prefix + key, english);
+
+    private static readonly CodeRow ThisActElementRow = R("this_act_element", "this act's element");
+    private static readonly CodeRow ActElementRow = R("act_element", "[gold]{Element}[/gold]");
+
+    /// <summary>"[gold]Hydro[/gold] in act 1, [gold]Pyro[/gold] in act 2,
+    /// [gold]Electro[/gold] in act 3." (<see cref="AbyssElements.Table"/>,
+    /// three acts.)</summary>
+    private static readonly CodeRow ElementsByActRow = R("elements_by_act",
+        "[gold]{Act1}[/gold] in act 1, [gold]{Act2}[/gold] in act 2, [gold]{Act3}[/gold] in act 3.");
+
+    private static string Read(CodeRow row, IReadOnlyDictionary<string, object>? vars, bool english) =>
+        english ? CodeText.English(row, vars) : CodeText.Format(row, vars);
+
+    private static string ElementName(Element e, bool english) =>
+        english ? CodeText.English(ElementWords.RowOf(e)) : ElementWords.Name(e);
+
+    private static string ActElement(int elementAct, bool english) =>
+        elementAct < 0
+            ? Read(ThisActElementRow, null, english)
+            : Read(ActElementRow, CodeText.Vars(("Element", ElementName(AbyssElements.ForAct(elementAct), english))), english);
+
+    private static string ElementsByAct(bool english) =>
+        Read(ElementsByActRow, CodeText.Vars(
+            ("Act1", ElementName(AbyssElements.Table[0], english)),
+            ("Act2", ElementName(AbyssElements.Table[1], english)),
+            ("Act3", ElementName(AbyssElements.Table[2], english))), english);
+
+    /// <summary>
+    /// THE ELEMENT, NAMED ([USER], 2026-10-22: "For the Spiral Abyss Blessing
+    /// 'The Ley Line' - what's this act's element?"). The element of act
+    /// <paramref name="elementAct"/> (<see cref="AbyssElements.ForAct"/>),
+    /// golded; with no act known, the words "this act's element".
+    /// </summary>
+    public static string ActElement(int elementAct) => ActElement(elementAct, false);
+
+    /// <summary>"[gold]Hydro[/gold] in act 1, [gold]Pyro[/gold] in act 2,
+    /// [gold]Electro[/gold] in act 3." from <see cref="AbyssElements.Table"/>.</summary>
+    public static string ElementsByAct() => ElementsByAct(false);
+
+    /// <summary>The numbers a text quotes for act <paramref name="act"/>,
+    /// read off <see cref="AbyssNumbers"/>.</summary>
+    private static IReadOnlyDictionary<string, object> Numbers(int act) => CodeText.Vars(
+        ("LeyLineDamageReduction", AbyssNumbers.LeyLineDamageReduction),
+        ("AbyssalMoonDamage", AbyssNumbers.AbyssalMoonDamage(act)),
+        ("MoonlitRestHeal", AbyssNumbers.MoonlitRestHeal(act)),
+        ("ElementalBurstDamage", AbyssNumbers.ElementalBurstDamage(act)),
+        ("ResonanceTurn", AbyssNumbers.ResonanceTurn),
+        ("ResonanceEnergy", AbyssNumbers.ResonanceEnergy),
+        ("ResonanceDraw", AbyssNumbers.ResonanceDraw),
+        ("CrystallizeBlock", AbyssNumbers.CrystallizeBlock(act)),
+        ("FatefulFortuneMaxHp", AbyssNumbers.FatefulFortuneMaxHp(act)),
+        ("VigorDamage", AbyssNumbers.VigorDamage(act)),
+        ("MoonlitSpringHeal", AbyssNumbers.MoonlitSpringHeal(act)),
+        ("BattleRhythmStrength", AbyssNumbers.BattleRhythmStrength(act)),
+        ("BattleRhythmDexterity", AbyssNumbers.BattleRhythmDexterity(act)),
+        ("WaveringMoonDamage", AbyssNumbers.WaveringMoonDamage(act)),
+        ("ClockFromRound", AbyssNumbers.ClockFromRound),
+        ("ClockStrength", AbyssNumbers.ClockStrength(act)),
+        ("MageShieldHits", AbyssNumbers.MageShieldHits),
+        ("MageShieldPerHit", AbyssNumbers.MageShieldPerHit),
+        ("MageShieldPerReaction", AbyssNumbers.MageShieldPerReaction),
+        ("SheerColdHpLoss", AbyssNumbers.SheerColdHpLoss(act)),
+        ("HeraldHpPercent", (int)(AbyssNumbers.HeraldHpBonus * 100)),
+        ("RallyStrength", AbyssNumbers.RallyStrength(act)),
+        ("RiptideStrength", AbyssNumbers.RiptideStrength),
+        ("RiptideCap", AbyssNumbers.RiptideCap(act)),
+        ("FatuiPlating", AbyssNumbers.FatuiPlating(act)),
+        ("ThornyGroundThorns", AbyssNumbers.ThornyGroundThorns(act)),
+        ("BulwarkBlock", AbyssNumbers.BulwarkBlock(act)),
+        ("FrenzyStrength", AbyssNumbers.FrenzyStrength(act)),
+        ("WitheringWeak", AbyssNumbers.WitheringWeak));
+
+    private static string TextTemplate(AbyssBlessing b) => b switch
+    {
+        AbyssBlessing.LeyLine =>
+            "Each enemy turn, every enemy without an aura takes {Element}. "
+          + "An enemy wearing an aura deals {LeyLineDamageReduction} less damage.",
+        AbyssBlessing.AbyssalMoon =>
+            "Every third card you play in a turn deals {AbyssalMoonDamage} damage to ALL enemies.",
+        AbyssBlessing.MoonlitRest => "Heal {MoonlitRestHeal} HP at the end of each combat.",
+        AbyssBlessing.FirstStrike => "Your first Attack each combat is played twice.",
+        AbyssBlessing.ElementalBurst =>
+            "Whenever you play a Power, deal {ElementalBurstDamage} damage to ALL enemies.",
+        AbyssBlessing.Resonance =>
+            "On turn {ResonanceTurn} of each combat, gain {ResonanceEnergy} Energy and draw {ResonanceDraw} card.",
+        AbyssBlessing.Crystallize => "Start each combat with {CrystallizeBlock} Block.",
+        AbyssBlessing.FatefulFortune => "Gain {FatefulFortuneMaxHp} Max HP.",
+        AbyssBlessing.Overflow => "This act, Elemental Reactions deal double damage.",
+        AbyssBlessing.VigorOfTheAbyss =>
+            "This act, while you are above half HP, your Attacks deal {VigorDamage} additional damage.",
+        AbyssBlessing.MoonlitSpring =>
+            "This act, heal {MoonlitSpringHeal} HP at the end of each combat.",
+        AbyssBlessing.BattleRhythm =>
+            "This act, start each combat with {BattleRhythmStrength} Strength and {BattleRhythmDexterity} Dexterity.",
+        AbyssBlessing.WaveringMoon =>
+            "Whenever you trigger an Elemental Reaction, deal {WaveringMoonDamage} damage to ALL enemies.",
+        AbyssBlessing.StarfellDraft =>
+            // A word, not a tunable: "1 additional card" is the Blessing.
+            // (Kept off AbyssNumbers so the prose lint does not pair every
+            // card's "1 card" with it.)
+            "Card rewards show 1 additional card.",
+        _ => throw new ArgumentOutOfRangeException(nameof(b)),
+    };
+
+    /// <summary>The Ley Line with no act known: "this act's element", then
+    /// the three acts' elements.</summary>
+    private const string LeyLineNoAct =
+        "Each enemy turn, every enemy without an aura takes this act's element. "
+      + "An enemy wearing an aura deals {LeyLineDamageReduction} less damage. "
+      + "The element is {ElementsByAct}";
+
+    private static string TextTemplate(AbyssShadow s) => s switch
     {
         AbyssShadow.Clock =>
-            $"From turn {AbyssNumbers.ClockFromRound}, every enemy gains {AbyssNumbers.ClockStrength(act)} Strength at the start of its turn.",
+            "From turn {ClockFromRound}, every enemy gains {ClockStrength} Strength at the start of its turn.",
         // 2026-10-18 (review/active/abyss-act-scaling-2026-10-18.md): 6 hits,
         // and the counter element removes 3 rather than breaking it.
-        AbyssShadow.MageShield => (elementAct ?? act) < 0
-            ? $"Elites enter combat with a shield of this act's element, {AbyssNumbers.MageShieldHits} hits deep, "
-              + $"that stops all damage. A hit removes {AbyssNumbers.MageShieldPerHit}. "
-              + $"A reaction or a counter-element hit removes {AbyssNumbers.MageShieldPerReaction}. "
-              + "Shields are " + ElementsByAct()
-            : $"Elites enter combat with a shield of {ActElement(elementAct ?? act)}, {AbyssNumbers.MageShieldHits} hits deep, "
-              + $"that stops all damage. A hit removes {AbyssNumbers.MageShieldPerHit}. "
-              + $"A reaction or a [gold]{AbyssElements.CounterOf(AbyssElements.ForAct(elementAct ?? act))}[/gold] hit "
-              + $"removes {AbyssNumbers.MageShieldPerReaction}.",
-        AbyssShadow.SheerCold => $"If you end your turn with no Block, lose {AbyssNumbers.SheerColdHpLoss(act)} HP.",
+        AbyssShadow.MageShield =>
+            "Elites enter combat with a shield of {Element}, {MageShieldHits} hits deep, "
+          + "that stops all damage. A hit removes {MageShieldPerHit}. "
+          + "A reaction or a [gold]{Counter}[/gold] hit removes {MageShieldPerReaction}.",
+        AbyssShadow.SheerCold => "If you end your turn with no Block, lose {SheerColdHpLoss} HP.",
         // 2026-10-18: once per turn, so a multi-hit attack adds one Burn.
         AbyssShadow.ElementalMark =>
             "The first time each turn an enemy's attack deals you unblocked damage, add a Burn into "
           + "your Discard Pile.",
-        AbyssShadow.Herald => $"Enemies have {(int)(AbyssNumbers.HeraldHpBonus * 100)}% more HP.",
-        AbyssShadow.Rally => $"Whenever an enemy dies, every other enemy gains {AbyssNumbers.RallyStrength(act)} Strength.",
+        AbyssShadow.Herald => "Enemies have {HeraldHpPercent}% more HP.",
+        AbyssShadow.Rally => "Whenever an enemy dies, every other enemy gains {RallyStrength} Strength.",
         // This act from round 2 (pick 1 (a)), so its text says so. Bounded
         // 2026-10-18: once per turn per enemy, and a cap per combat.
         AbyssShadow.Riptide =>
             "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains "
-          + $"{AbyssNumbers.RiptideStrength} Strength, up to {AbyssNumbers.RiptideCap(act)} times each combat.",
+          + "{RiptideStrength} Strength, up to {RiptideCap} times each combat.",
         // 2026-10-18 ([USER]: pick (a)): base Plating scales in co-op (x3 for two
         // players, PlatingPower.GetScaledAmountForMultiplayer), so the text says so.
         AbyssShadow.FatuiSkirmishers =>
-            $"Elites and bosses enter combat with {AbyssNumbers.FatuiPlating(act)} Plated Armor, more in co-op.",
+            "Elites and bosses enter combat with {FatuiPlating} Plated Armor, more in co-op.",
         AbyssShadow.ThornyGround =>
-            $"This act, enemies start each combat with {AbyssNumbers.ThornyGroundThorns(act)} Thorns.",
+            "This act, enemies start each combat with {ThornyGroundThorns} Thorns.",
         AbyssShadow.Bulwark =>
-            $"This act, at the start of your turn, each enemy gains {AbyssNumbers.BulwarkBlock(act)} Block.",
+            "This act, at the start of your turn, each enemy gains {BulwarkBlock} Block.",
         // [USER], 2026-10-12: "Why the extra words? Just give enemies 2 Strength."
         AbyssShadow.Frenzy =>
-            $"This act, enemies start each combat with {AbyssNumbers.FrenzyStrength(act)} Strength.",
-        AbyssShadow.Withering => $"You start each combat with {AbyssNumbers.WitheringWeak} Weak.",
+            "This act, enemies start each combat with {FrenzyStrength} Strength.",
+        AbyssShadow.Withering => "You start each combat with {WitheringWeak} Weak.",
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
+
+    /// <summary>Abyss Mage Shield with no act known.</summary>
+    private const string MageShieldNoAct =
+        "Elites enter combat with a shield of this act's element, {MageShieldHits} hits deep, "
+      + "that stops all damage. A hit removes {MageShieldPerHit}. "
+      + "A reaction or a counter-element hit removes {MageShieldPerReaction}. "
+      + "Shields are {ElementsByAct}";
+
+    private static string Leaf(AbyssBlessing b) => "blessings." + b.ToString().ToUpperInvariant();
+    private static string Leaf(AbyssShadow s) => "shadows." + s.ToString().ToUpperInvariant();
+
+    private static CodeRow TextRow(AbyssBlessing b) => R(Leaf(b) + ".description", TextTemplate(b));
+    private static CodeRow TextRow(AbyssShadow s) => R(Leaf(s) + ".description", TextTemplate(s));
+    private static readonly CodeRow LeyLineNoActRow = R(Leaf(AbyssBlessing.LeyLine) + ".description_no_act", LeyLineNoAct);
+    private static readonly CodeRow MageShieldNoActRow = R(Leaf(AbyssShadow.MageShield) + ".description_no_act", MageShieldNoAct);
+
+    /// <summary>The Blessings and Shadows in the save's order.</summary>
+    private static IEnumerable<AbyssBlessing> Blessings =>
+        Enum.GetValues<AbyssBlessing>().Where(b => b != AbyssBlessing.None);
+
+    private static IEnumerable<AbyssShadow> Shadows =>
+        Enum.GetValues<AbyssShadow>().Where(s => s != AbyssShadow.None);
+
+    public static IEnumerable<CodeRow> Rows() =>
+        Blessings.Select(NameRow)
+            .Concat(Shadows.Select(NameRow))
+            .Concat(Blessings.Select(TextRow))
+            .Concat(Shadows.Select(TextRow))
+            .Concat(new[] { LeyLineNoActRow, MageShieldNoActRow, ThisActElementRow, ActElementRow, ElementsByActRow });
+
+    private static string Render(AbyssBlessing b, int act, int? elementAct, bool english)
+    {
+        var vars = Numbers(act);
+        var at = elementAct ?? act;
+        if (b == AbyssBlessing.LeyLine)
+        {
+            return at < 0
+                ? Read(LeyLineNoActRow, CodeText.With(vars, ("ElementsByAct", ElementsByAct(english))), english)
+                : Read(TextRow(b), CodeText.With(vars, ("Element", ActElement(at, english))), english);
+        }
+        return Read(TextRow(b), vars, english);
+    }
+
+    private static string Render(AbyssShadow s, int act, int? elementAct, bool english)
+    {
+        var vars = Numbers(act);
+        var at = elementAct ?? act;
+        if (s == AbyssShadow.MageShield)
+        {
+            return at < 0
+                ? Read(MageShieldNoActRow, CodeText.With(vars, ("ElementsByAct", ElementsByAct(english))), english)
+                : Read(TextRow(s), CodeText.With(vars,
+                    ("Element", ActElement(at, english)),
+                    ("Counter", ElementName(AbyssElements.CounterOf(AbyssElements.ForAct(at)), english))), english);
+        }
+        return Read(TextRow(s), vars, english);
+    }
+
+    /// <summary>A Blessing's text for one act: the numbers are the ones for
+    /// <paramref name="act"/>, the act it is offered or was taken in
+    /// (<see cref="AbyssNumbers"/>), so the text prints one number.
+    /// <paramref name="elementAct"/> is the act whose element The Ley Line
+    /// names: the act being played, which for a Blessing held since an
+    /// earlier act is not the act it was taken in (its effect reads
+    /// <c>SpiralAbyss.CurrentAct</c>). Left out, it is <paramref name="act"/>;
+    /// <see cref="NoAct"/> names all three.</summary>
+    public static string Text(AbyssBlessing b, int act, int? elementAct = null) =>
+        Render(b, act, elementAct, english: false);
+
+    /// <summary>A Shadow's text for one act, on <see cref="Text(AbyssBlessing, int, int?)"/>'s
+    /// terms: <paramref name="elementAct"/> is the act whose element Abyss
+    /// Mage Shield names.</summary>
+    public static string Text(AbyssShadow s, int act, int? elementAct = null) =>
+        Render(s, act, elementAct, english: false);
+
+    /// <summary>The text in English, for a row that is itself English.</summary>
+    public static string English(AbyssBlessing b, int act, int? elementAct = null) =>
+        Render(b, act, elementAct, english: true);
+
+    public static string English(AbyssShadow s, int act, int? elementAct = null) =>
+        Render(s, act, elementAct, english: true);
 }
 
 /// <summary>

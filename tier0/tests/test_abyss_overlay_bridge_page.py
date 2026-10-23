@@ -148,13 +148,16 @@ def test_the_render_rig_prints_the_models_words():
     model = (ABYSS / "AbyssOverlayModel.cs").read_text(encoding="utf-8")
 
     def whisper(text: str) -> str:
-        m = re.search(r'Whisper =\s*"([^"]+)"\s*\+\s*"([^"]+)";', text)
+        # The rig's const, or the model's keyed row (`AbyssOverlayText`,
+        # the localization census, 2026-10-23).
+        m = re.search(r'Whisper =\s*"([^"]+)"\s*\+\s*"([^"]+)";', text) \
+            or re.search(r'R\("whisper",\s*"([^"]+)"\s*\+\s*"([^"]+)"\);', text)
         return m.group(1) + m.group(2)
 
     assert whisper(rig) == whisper(model) == WHISPER
     # The band label (owner, 2026-10-12: "IF PASSED" renamed "SHADOW").
     assert 'ShadowBandLabel = "Shadow"' in rig
-    assert 'ShadowBandLabel = "Shadow"' in model
+    assert 'R("shadow_band", "Shadow")' in model
     for path in re.findall(r'"(abyss/(?:relics|powers)/[a-z_]+\.png)"', model):
         assert f'"{path}"' in rig
 

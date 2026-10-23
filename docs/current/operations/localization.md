@@ -34,6 +34,13 @@ The hashes live outside the pck, `klee-mod/localization/hashes/<lang>/<table>.js
 (key to the first 16 hex digits of sha256 of the English), so the shipped file
 stays flat.
 
+**The Teyvat frame's rows are not translated while the frame is off.** The
+reference's build turns the frame arm on, so it lists the nation events,
+nation Ancients and acts too; the same test writes
+`klee-mod/localization/reference/teyvat_frame_rows.json` (`{table: [key]}`,
+the rows a frame-off build does not merge), and the lint fails a translated
+row among them and counts the rows left to translate without them.
+
 ### Code-built text
 
 English that C# builds (a tip body, a chart label, a guest's sentence) is a
@@ -55,6 +62,16 @@ SmartFormat extensions, so a test reads the text a player would.
   A card face's in-combat line is keyed by its token
   (`KLEEMOD-FACE_STAGE_REPAY.repays`), and its leading line break or space
   is the row's, so a translation places it.
+  The Spiral Abyss's rows live in `events` beside
+  its page (`KLEE_SPIRAL_ABYSS.blessings.LEYLINE.description`), a name keyed
+  by its enum, never its display name (`KLEE_SPIRAL_ABYSS.strip.RIPTIDE.title`).
+- **A row that is itself English reads the English.** Where code composes a
+  row another merge writes into the English table (an event option, a
+  badge's description, an Edit prompt), it reads `CodeText.English` (or the
+  surface's `NameEnglish` / `RuleEnglish`), so the English table never holds a
+  translated fragment.
+- **A list is SmartFormat's** (`{Items:list:{}|, }`), so a translation sets
+  its own separator.
 - **Adding a row.** Add the template to the surface's rows (a tip body to
   `PlayerTips.Bodies`, or a `CodeRow` the surface lists), read it with
   `CodeText.Format`, rewrite the English reference, and pin the rendered

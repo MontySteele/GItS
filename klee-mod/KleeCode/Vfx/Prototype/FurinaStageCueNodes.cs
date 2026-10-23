@@ -50,6 +50,12 @@ public static class FurinaStageCueNodes
     private const string HoverWiredMeta = "kleemod_cue_hover_wired";
     private const string HoverKeyMeta = "kleemod_cue_key";
 
+    /// <summary>The "ALL" over an all-enemies cue, keyed (the localization
+    /// census, 2026-10-23, step 3).</summary>
+    private static readonly CodeRow AllRow = new("card_keywords", "KLEEMOD-FURINA_STAGE_CUE.all", "ALL");
+
+    internal static IEnumerable<CodeRow> Rows() => new[] { AllRow };
+
     /// <summary>The card: 44 x 50, the icon inside, centred over the head.
     /// </summary>
     private static readonly Vector2 CardSize = new(44f, 50f);
@@ -266,7 +272,7 @@ public static class FurinaStageCueNodes
         var all = Text("All", font, 12, 4, outlineColour, new Color(1f, 1f, 1f),
                        new Vector2(0f, -2f), new Vector2(CardSize.X - 3f, 14f),
                        HorizontalAlignment.Right);
-        all.Text = "ALL";
+        all.Text = CodeText.Format(AllRow);
         holder.AddChild(all);
         holder.AddChild(Text("Price", font, 16, 5, new Color(0.2f, 0.12f, 0f),
                              PriceGold, new Vector2(0f, CardSize.Y + 1f),

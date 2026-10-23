@@ -156,7 +156,7 @@ public sealed class YaeShrineLedger
         {
             ["slot"] = i + 1,
             ["annotations"] = s.Annotations
-                .Select(a => (object?)YaeAnnotationText.Name(a)).ToList(),
+                .Select(a => (object?)YaeAnnotationText.NameEnglish(a)).ToList(),
         }).ToList();
 
     /// <summary>The planting clock.</summary>
@@ -1247,6 +1247,21 @@ public static class YaeShrineFace
     /// read as the card's own damage.</summary>
     public const string TenkoPrefix = "Sakura: ";
 
+    // KEYED (the localization census, 2026-10-23, step 3): the clause and
+    // each kind's amount are rows beside the Tenko tip's
+    // (`KLEEMOD-ARM_YAE_TENKO.live*`, `card_keywords`); the parts are a
+    // SmartFormat list, so a translation sets its own separator. The two
+    // consts above are the English, and the sim twin's.
+    private const string Table = "card_keywords";
+    private const string Tenko = "KLEEMOD-ARM_YAE_TENKO.";
+    private static readonly CodeRow NoSakuraRow = new(Table, Tenko + "live_none", NoSakura);
+    private static readonly CodeRow LiveRow = new(Table, Tenko + "live", " (" + TenkoPrefix + "{Parts:list:{}|, })");
+    private static readonly CodeRow DamageRow = new(Table, Tenko + "live_damage", "{n} damage");
+    private static readonly CodeRow ToEachRow = new(Table, Tenko + "live_to_each", "{n} to each enemy");
+    private static readonly CodeRow BlockRow = new(Table, Tenko + "live_block", "{n} Block");
+
+    public static IEnumerable<CodeRow> Rows() => new[] { NoSakuraRow, LiveRow, DamageRow, ToEachRow, BlockRow };
+
     /// <summary>A Tenko card's live clause.</summary>
     public static string TenkoLine(CardModel? card) =>
         Owner(card) is { } yae
@@ -1280,7 +1295,9 @@ public static class YaeShrineFace
         if (damage > 0) parts.Add(Amount(YaeSakuraKind.Thunder, N(damage)));
         if (toEach > 0) parts.Add(Amount(YaeSakuraKind.Foxfire, N(toEach)));
         if (block > 0) parts.Add(Amount(YaeSakuraKind.Kitsune, N(block)));
-        return parts.Count == 0 ? NoSakura : $" ({TenkoPrefix}{string.Join(", ", parts)})";
+        return parts.Count == 0
+            ? CodeText.Format(NoSakuraRow)
+            : CodeText.Format(LiveRow, CodeText.Vars(("Parts", parts)));
     }
 
     private static string N(int n) =>
@@ -1289,12 +1306,12 @@ public static class YaeShrineFace
     /// <summary>What a kind's action does, for a number written as
     /// <paramref name="n"/>: "5 damage", "5 to each enemy", "5 Block". PURE.
     /// </summary>
-    public static string Amount(YaeSakuraKind kind, string n) => kind switch
+    public static string Amount(YaeSakuraKind kind, string n) => CodeText.Format(kind switch
     {
-        YaeSakuraKind.Kitsune => $"{n} Block",
-        YaeSakuraKind.Foxfire => $"{n} to each enemy",
-        _ => $"{n} damage",
-    };
+        YaeSakuraKind.Kitsune => BlockRow,
+        YaeSakuraKind.Foxfire => ToEachRow,
+        _ => DamageRow,
+    }, CodeText.Vars(("n", n)));
 
     private static Creature? Owner(CardModel? card)
     {

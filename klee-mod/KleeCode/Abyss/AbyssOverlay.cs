@@ -349,7 +349,11 @@ public static class AbyssOverlay
     }
 
     private static AbyssOverlayViewData.StripIcon Strip(AbyssOverlayStripEntry e) =>
-        new() { Name = e.Name, Text = e.HoverText, Icon = Icon(e.IconFile), Caption = e.ThisAct ? e.Duration : "" };
+        new()
+        {
+            Name = e.Name, TitleKey = e.TitleKey, Text = e.HoverText, Icon = Icon(e.IconFile),
+            Caption = e.ThisAct ? e.Duration : "",
+        };
 
     private static Texture2D? Icon(string file)
     {
@@ -378,7 +382,7 @@ public static class AbyssOverlay
     {
         foreach (var (node, data) in session.View.StripIcons)
         {
-            var tip = new HoverTip(new LocString(AbyssChoicePage.LocTable, AbyssChoicePage.StripTitleKey(data.Name)),
+            var tip = new HoverTip(new LocString(AbyssChoicePage.LocTable, data.TitleKey),
                                    data.Text, data.Icon);
             node.MouseEntered += () =>
             {
