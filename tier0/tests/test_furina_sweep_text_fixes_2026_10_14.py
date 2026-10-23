@@ -25,7 +25,7 @@ def test_the_bridge_names_the_face_played_not_the_face_after():
 
 
 def test_neuvilletes_act_text_says_drains_count():
-    src = (ROOT / "klee-mod/KleeCode/Powers/Prototype/"
-           "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    assert ("equal to HP you lost or [gold]Drained[/gold] since your last "
-            "turn.") in src
+    # The badge's keyed act row since the localization census (2026-10-23).
+    from tools import lint_text_conventions as ltc
+    assert ltc._guest_halves()["Neuvillette"][1].endswith(
+        "equal to HP you lost or [gold]Drained[/gold] since your last turn.")

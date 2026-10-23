@@ -22,8 +22,7 @@ public class FurinaWaveTests
     private static T Run<T>(System.Threading.Tasks.Task<T> task) =>
         StageKit.Run(task);
 
-    private static string BankDamageBody => (string)typeof(ArmKeywordTips)
-        .GetField("BankDamageBody", HeadlessGame.All)!.GetRawConstantValue()!;
+    private static string BankDamageBody => TipText.Named("BankDamageBody");
 
     // ---- 1. one Drain number -------------------------------------------------
 

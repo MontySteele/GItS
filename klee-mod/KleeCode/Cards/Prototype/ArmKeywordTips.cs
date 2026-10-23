@@ -49,6 +49,13 @@ namespace KleeMod.Cards;
 /// THE NUMERALS ARE INTERPOLATED FROM THE CONSTANTS THEY QUOTE (`EB-89`), so a
 /// retune of `KleeOverhaulLaw.BombGrowth` cannot leave one of these
 /// sentences telling a player a retired number.
+///
+/// THE WORDS A PLAYER READS ARE KEYED ROWS (the localization census,
+/// 2026-10-23): <see cref="PlayerTips"/> holds every body a player sees, as a
+/// row a translation can replace, its numbers as vars. What stays here as an
+/// English literal is the seat's: the long forms a blind seat reads in place
+/// of the player's row (<c>With(inherited, key, seatBody)</c>) and the riders
+/// only a seat's chain raises.
 /// </summary>
 public static class ArmKeywordTips
 {
@@ -246,7 +253,7 @@ public static class ArmKeywordTips
     /// (<see cref="KleeOpensWithASpark"/>).</summary>
     public static IEnumerable<IHoverTip> ForSpark(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, SparkKey, TipAudience.Seat
+        WithText(inherited, SparkKey, TipAudience.Seat
             ? SparkBody(KleeOpensWithASpark(card))
             : PlayerTips.SparkBody(KleeOpensWithASpark(card)));
 
@@ -447,9 +454,7 @@ public static class ArmKeywordTips
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlanElement(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, PlanElementKey,
-            "The [gold]Bake-Kurage[/gold] carries out this [gold]Plan[/gold] "
-          + "as a [gold]Hydro[/gold] hit: it applies [gold]Hydro[/gold].");
+        With(inherited, PlanElementKey);
 
     /// <summary>
     /// `EB-709`: HOW MANY PLANS A DOUBLED CARRY-OUT IS, on the card that
@@ -503,9 +508,7 @@ public static class ArmKeywordTips
     /// </summary>
     public static IEnumerable<IHoverTip> ForMend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, MendKey,
-            "[gold]Mend N[/gold]: heal N HP, but never above the HP you had "
-          + "at the start of this combat.");
+        With(inherited, MendKey);
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.
@@ -544,11 +547,9 @@ public static class ArmKeywordTips
     {
         if (!FieldIsEmptyFor(card)) return inherited;
         return ownLine
-            ? With(inherited, EmptyFieldKey,
-                "No [gold]Bomb[/gold] on the field: this card is only its own "
-              + "line.")
-            : With(inherited, EmptyFieldKey,
-                "No [gold]Bomb[/gold] on the field: this card does nothing.");
+            ? WithText(inherited, EmptyFieldKey,
+                PlayerTips.Variant(EmptyFieldKey, PlayerTips.OwnLine))
+            : With(inherited, EmptyFieldKey);
     }
 
     /// <summary>
@@ -626,11 +627,10 @@ public static class ArmKeywordTips
     /// into separate tips" (<see cref="ForTenko"/>).
     public static IEnumerable<IHoverTip> ForSakura(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, SakuraKey,
-            card is ICharacterCard { CharacterId: Powers.YaePrototype.CharacterId }
-                ? (TipAudience.Seat ? YaeSakuraTip + " " + YaeSakuraTargetRule : YaeSakuraTip)
-                : "A totem that stays at your side all combat. At most 3 fire "
-                + "each turn.");
+        card is ICharacterCard { CharacterId: Powers.YaePrototype.CharacterId }
+            ? WithText(inherited, SakuraKey,
+                TipAudience.Seat ? YaeSakuraTip + " " + YaeSakuraTargetRule : YaeSakuraTip)
+            : With(inherited, SakuraKey);
 
     /// <summary>Yae's Sakura: the strike, the timer, the cap and the
     /// full-shrine plant (paper sec.2, shrine r2; the numbers are
@@ -644,10 +644,8 @@ public static class ArmKeywordTips
     /// (<c>review/active/yae-sakura-levels-2026-10-17.md</c>, pick 1 (a),
     /// 2026-10-17): 1 + 2 per Level; "once more" became "again" to stay
     /// under the cap.</summary>
-    public static readonly string YaeSakuraTip =
-        $"At the end of your turn, deals {Powers.YaeLaw.SakuraBase} damage plus "
-      + $"{Powers.YaeLaw.SakuraPerLevel} for each Level. Lasts "
-      + $"{Powers.YaeLaw.SakuraTurns} turns, then strikes again.";
+    public static string YaeSakuraTip =>
+        PlayerTips.Variant(SakuraKey, PlayerTips.Yae);
 
     /// <summary>Yae review r6, item 5: which enemy a Sakura strikes
     /// (<c>YaeShrine.Aim</c>: the aim Kitsune Pounce passes, else the Lure,
@@ -672,11 +670,9 @@ public static class ArmKeywordTips
     /// </summary>
     public static IEnumerable<IHoverTip> ForEdit(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, EditKey, YaeEditTip);
+        With(inherited, EditKey);
 
-    public static readonly string YaeEditTip =
-        "Give a card an Annotation for this combat, replacing its last. "
-      + "Published ones stay and add up.";
+    public static string YaeEditTip => PlayerTips.Text(EditKey);
 
     /// <summary>One Annotation's tip key, titled by its name.</summary>
     public static string KeyOf(Powers.YaeAnnotation annotation) =>
@@ -701,31 +697,25 @@ public static class ArmKeywordTips
     /// </summary>
     public static IEnumerable<IHoverTip> ForTenko(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, TenkoKey, YaeTenkoTip);
+        With(inherited, TenkoKey);
 
-    public static readonly string YaeTenkoTip =
-        "Every [gold]Sakura[/gold] acts now and goes back to at least "
-      + $"{Powers.YaeLaw.SakuraTurns} turns left.";
+    public static string YaeTenkoTip => PlayerTips.Text(TenkoKey);
 
     /// <summary>Review r3: a Foxfire Sakura, named on the card that plants
     /// one (Foxfire Sweep).</summary>
     public static IEnumerable<IHoverTip> ForFoxfireSakura(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, FoxfireSakuraKey, YaeFoxfireSakuraTip);
+        With(inherited, FoxfireSakuraKey);
 
-    public static readonly string YaeFoxfireSakuraTip =
-        "A [gold]Sakura[/gold] that deals damage equal to "
-      + $"{Powers.YaeLaw.FoxfireBase} plus its Level to ALL enemies when it acts.";
+    public static string YaeFoxfireSakuraTip => PlayerTips.Text(FoxfireSakuraKey);
 
     /// <summary>Review r3: the decoy ("Yae does not shield. A fox illusion
     /// draws the blow."), named on Shrine Maiden's Guard.</summary>
     public static IEnumerable<IHoverTip> ForKitsuneSakura(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, KitsuneSakuraKey, YaeKitsuneSakuraTip);
+        With(inherited, KitsuneSakuraKey);
 
-    public static readonly string YaeKitsuneSakuraTip =
-        "A fox decoy [gold]Sakura[/gold]. When it acts, you gain [gold]Block[/gold] "
-      + $"equal to {Powers.YaeLaw.KitsuneBase} plus its Level.";
+    public static string YaeKitsuneSakuraTip => PlayerTips.Text(KitsuneSakuraKey);
 
     /// <summary>
     /// Review r3 (amended after GPT's review): the full-shrine plant by
@@ -736,25 +726,20 @@ public static class ArmKeywordTips
     /// </summary>
     public static IEnumerable<IHoverTip> ForFullShrine(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, FullShrineKey, YaeFullShrineTip);
+        With(inherited, FullShrineKey);
 
     /// <summary>Yae review r5, item 5: four of five seats could not read
     /// the short form until it bit them. The title says "Full shrine".
     /// The Sakura Levels paper (pick 1 (a), 2026-10-17): Levels carry over
     /// on a replace, so the new one starts at the higher of the two Levels.
     /// </summary>
-    public static readonly string YaeFullShrineTip =
-        "Planting makes the Sakura closest to withering act. Same kind: it "
-      + "refreshes and gains a Level. Other kind: it withers, and the new "
-      + "one takes its Level if higher.";
+    public static string YaeFullShrineTip => PlayerTips.Text(FullShrineKey);
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>
     public static IEnumerable<IHoverTip> ForLightfallSword(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, LightfallSwordKey,
-            "A blade hung over an enemy. Its badge counts down the turns "
-          + "until it falls.");
+        With(inherited, LightfallSwordKey);
 
     /// <summary>
     /// 2026-09-25, the afternoon Klee seat round. The Opus seat: "Companion is
@@ -766,9 +751,7 @@ public static class ArmKeywordTips
     /// </summary>
     public static IEnumerable<IHoverTip> ForCompanion(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, CompanionKey,
-            "A card titled with a character's name, a dash, then its "
-          + "own.");
+        With(inherited, CompanionKey);
 
     // ---------------------------------------------------- Varka -----------
 
@@ -780,9 +763,7 @@ public static class ArmKeywordTips
     /// </summary>
     public static IEnumerable<IHoverTip> ForAscensionReturn(
         IEnumerable<IHoverTip> inherited) =>
-        With(inherited, AscensionReturnKey,
-            "When played, it goes to your [gold]Discard Pile[/gold] and comes "
-          + "back after a reshuffle.");
+        With(inherited, AscensionReturnKey);
 
     /// <summary>
     /// Design-session call (2026-10-13): Four Winds' Ascension's element hit
@@ -854,7 +835,7 @@ public static class ArmKeywordTips
 
     public static IEnumerable<IHoverTip> ForAscensionNoOath(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, AscensionNoOathKey, "This hit does not gain Oath.");
+        With(inherited, AscensionNoOathKey);
 
     /// <summary>
     /// WHAT HIS CARDS CHARGE (the Oath rework, sec.3): one count per element.
@@ -896,8 +877,8 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card, Element element)
     {
         if (!VarkaOath.WouldSwitchTo(card, element)) return inherited;
-        return With(inherited, ElementSwitchKey,
-            "Switches your [gold]current element[/gold] to " + element + ".");
+        return WithText(inherited, ElementSwitchKey,
+            PlayerTips.Text(ElementSwitchKey, ("Element", ElementWords.Name(element))));
     }
 
     /// <summary>His personal Companions (sec.6), named on Knightly Guard,
@@ -948,11 +929,22 @@ public static class ArmKeywordTips
     /// words for the key where it has some; a blind seat
     /// (<see cref="TipAudience.Seat"/>) reads <paramref name="body"/>.
     private static IEnumerable<IHoverTip> With(
+        IEnumerable<IHoverTip> inherited, string key, string body) =>
+        WithText(inherited, key, PlayerTips.For(key, body));
+
+    /// <summary>The key's keyed row (<see cref="PlayerTips.Bodies"/>), read
+    /// by both readers: the player's words and the seat's are the same.</summary>
+    private static IEnumerable<IHoverTip> With(
+        IEnumerable<IHoverTip> inherited, string key) =>
+        WithText(inherited, key, PlayerTips.Text(key));
+
+    /// <summary>A body already resolved for this reader (a variant row, a
+    /// guest's half, a reader-dependent pair).</summary>
+    private static IEnumerable<IHoverTip> WithText(
         IEnumerable<IHoverTip> inherited, string key, string body)
     {
         foreach (var tip in inherited) yield return tip;
-        yield return new HoverTip(new LocString(Table, key + ".title"),
-                                  PlayerTips.For(key, body));
+        yield return new HoverTip(new LocString(Table, key + ".title"), body);
     }
 
     /// <summary>
@@ -1071,24 +1063,21 @@ public static class ArmKeywordTips
     /// tip says it resets.
     /// The 2026-10-11 playtest: "the tooltips for Fanfare and Drain are
     /// rather verbose (Drain moreso)".</summary>
-    internal const string FanfareBody =
-        "Gain 1 for each HP you lose, [gold]Drain[/gold] included, or [gold]Repay[/gold]. "
-      + "[gold]Spend[/gold] uses it. Resets after each combat.";
+    internal static string FanfareBody => PlayerTips.Text(FanfareKey);
 
     /// <summary>Furina's sweep (2026-10-14): Ousia / Pneuma's "Flip", one
     /// sentence in the base game's style (`FurinaFlip`).</summary>
-    internal const string FlipBody =
-        "Turn this card to its other face; it starts each combat on Ousia.";
+    internal static string FlipBody => PlayerTips.Text(FlipKey);
 
     /// <summary>Ousia / Pneuma: what "Flip" does.</summary>
     public static IEnumerable<IHoverTip> ForFlip(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, FlipKey, FlipBody);
+        With(inherited, FlipKey);
 
     /// <summary>Rule 3: Fanfare is one number on Furina.</summary>
     public static IEnumerable<IHoverTip> ForFanfare(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, FanfareKey, FanfareBody);
+        With(inherited, FanfareKey);
 
     /// <summary>Rule 1 and the curtain call, shared by the keyword tip and
     /// the Drained counter's hover (<c>Vfx.DrainedCounter</c>). The Drain
@@ -1138,13 +1127,10 @@ public static class ArmKeywordTips
     /// worse Defend", and nothing said lost HP becomes Fanfare.</summary>
     public static IEnumerable<IHoverTip> ForBankDamage(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, BankDamageKey, BankDamageBody);
+        With(inherited, BankDamageKey);
 
     /// <summary><see cref="ForBankDamage"/>'s words.</summary>
-    internal const string BankDamageBody =
-        "Whenever you lose HP, gain that much [gold]Fanfare[/gold]. Its "
-      + "damage is the [gold]Fanfare[/gold] you hold: play it when "
-      + "the bank is worth it.";
+    internal static string BankDamageBody => PlayerTips.Text(BankDamageKey);
 
     /// <summary>Rule 5 (the pool to 75, sec.3): where a guest goes. Since
     /// 2026-10-11 the guest a full stage pushes out acts once as it leaves
@@ -1176,56 +1162,45 @@ public static class ArmKeywordTips
 
     public static IEnumerable<IHoverTip> ForCharlotte(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, CharlotteKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Charlotte, card.IsUpgraded)));
+        WithText(inherited, CharlotteKey, PlayerTips.Guest(card, StagePerformer.Charlotte));
 
     public static IEnumerable<IHoverTip> ForWriothesley(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, WriothesleyKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Wriothesley, card.IsUpgraded)));
+        WithText(inherited, WriothesleyKey, PlayerTips.Guest(card, StagePerformer.Wriothesley));
 
     public static IEnumerable<IHoverTip> ForLynette(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, LynetteKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Lynette, card.IsUpgraded)));
+        WithText(inherited, LynetteKey, PlayerTips.Guest(card, StagePerformer.Lynette));
 
     public static IEnumerable<IHoverTip> ForClorinde(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, ClorindeKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Clorinde, card.IsUpgraded)));
+        WithText(inherited, ClorindeKey, PlayerTips.Guest(card, StagePerformer.Clorinde));
 
     public static IEnumerable<IHoverTip> ForLyney(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, LyneyKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Lyney, card.IsUpgraded)));
+        WithText(inherited, LyneyKey, PlayerTips.Guest(card, StagePerformer.Lyney));
 
     public static IEnumerable<IHoverTip> ForSigewinne(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, SigewinneKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Sigewinne, card.IsUpgraded)));
+        WithText(inherited, SigewinneKey, PlayerTips.Guest(card, StagePerformer.Sigewinne));
 
     public static IEnumerable<IHoverTip> ForChevreuse(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, ChevreuseKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Chevreuse, card.IsUpgraded)));
+        WithText(inherited, ChevreuseKey, PlayerTips.Guest(card, StagePerformer.Chevreuse));
 
     public static IEnumerable<IHoverTip> ForFreminet(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, FreminetKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Freminet, card.IsUpgraded)));
+        WithText(inherited, FreminetKey, PlayerTips.Guest(card, StagePerformer.Freminet));
 
     public static IEnumerable<IHoverTip> ForNavia(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, NaviaKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Navia, card.IsUpgraded)));
+        WithText(inherited, NaviaKey, PlayerTips.Guest(card, StagePerformer.Navia));
 
     public static IEnumerable<IHoverTip> ForNeuvillette(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, NeuvilletteKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Neuvillette, card.IsUpgraded)));
+        WithText(inherited, NeuvilletteKey, PlayerTips.Guest(card, StagePerformer.Neuvillette));
 
     public static IEnumerable<IHoverTip> ForEscoffier(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, EscoffierKey,
-             PlayerTips.Guest(card, StagePerformerBadge.ActText(StagePerformer.Escoffier, card.IsUpgraded)));
+        WithText(inherited, EscoffierKey, PlayerTips.Guest(card, StagePerformer.Escoffier));
 }

@@ -46,8 +46,17 @@ public class ArmKeywordTipTests
     /// <summary>The literal text one attach method prints. Adjacent string
     /// constants are folded by the compiler, so each sentence below is a
     /// single `ldstr` and reading them needs no ordering.</summary>
-    private static string Printed(string method) => string.Concat(
-        Il.Strings(Tips.GetMethod(method, HeadlessGame.All)!));
+    private static string Printed(string method)
+    {
+        // A method whose words are the keyed row both readers share prints
+        // no English of its own (the localization census, 2026-10-23): its
+        // words are its key's rows.
+        var strings = Il.Strings(Tips.GetMethod(method, HeadlessGame.All)!);
+        if (strings.Any(s => s.Contains(' '))) return string.Concat(strings);
+        return string.Concat(strings) + string.Concat(strings
+            .Where(s => s.StartsWith("KLEEMOD-", System.StringComparison.Ordinal))
+            .Select(TipText.RowsOf));
+    }
 
     /// <summary>The Spark tip as a Klee reads it (the opening bank is hers;
     /// `KleeOffCharacterSweepTests` holds the other reader).</summary>
@@ -493,8 +502,11 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForEmptyField");
         Assert.DoesNotContain(attaches, m => m.Name == "ForMergeRiders");
         Assert.All(attaches, m => Assert.Contains(
-            Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
-                                         System.StringComparison.Ordinal)));
+            Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With", System.StringComparison.Ordinal)
+                              // `WithText` is the same builder for a body
+                              // already resolved for its reader (a variant
+                              // row, a guest's half).
+                              || c.EndsWith("ArmKeywordTips.WithText", System.StringComparison.Ordinal)));
     }
 
     // --- `EB-573`: THE RIDER A PILE CARRIES -----------------------------

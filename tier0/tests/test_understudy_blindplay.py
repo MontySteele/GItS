@@ -6459,6 +6459,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     `ArmKeywordTips.cs` and not here goes red on the anchor it dropped."""
     tips_src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
                 / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    # A body both readers share is its keyed row (the localization census,
+    # 2026-10-23), so the player's rows are the tips' other half.
+    tips_src += (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+                 / "PlayerTips.cs").read_text(encoding="utf-8")
     # The re-founding (2026-10-04): a performer's tip IS its badge's
     # sentence, so the badges file is the other half of the mod's text.
     src = tips_src + (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
@@ -6606,12 +6610,14 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # interpolated numeral.
         "Guest Star": ["Exhausts. Acts at the end of your turn. When it "
                        "leaves, this ", "card goes to your "],
+        # The localization census (2026-10-23): the line and the act are two
+        # keyed rows, so " card. Act: " straddles them; "Act: " opens the act.
         "Charlotte": ["The first time each turn one of your cards ",
-                      ", draw ", " card. Act: "],
+                      ", draw ", "Act: "],
         "Wriothesley": ["Whenever you ", ", deal that much ",
-                        "damage to a random enemy. Act: deal "],
+                        "damage to a random enemy.", "Act: deal "],
         "Lynette": ["The first time each turn you lose HP to an enemy, "
-                    "gain that much ", " again. Act: deal ",
+                    "gain that much ", " again.", "Act: deal ",
                     " damage to an enemy, aura first."],
         "Clorinde": ["Whenever you ", ", deal twice that much ",
                      " damage to a random enemy."],

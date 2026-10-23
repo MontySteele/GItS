@@ -461,8 +461,11 @@ def test_the_companion_tip_and_the_page_open_with_one_sentence():
     sys.path.insert(0, str(REPO))
     from tools import lint_text_conventions as ltc
     from understudy import blindplay_notes
-    tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
-    tip = tips["CompanionKey"]
+    # The body is a keyed row both readers share since the localization
+    # census (2026-10-23): `PlayerTips.Bodies`.
+    tips = {row.ident: ltc.render(row.raw)
+            for row in ltc.tip_rows() + ltc.player_tip_rows()}
+    tip = tips["CompanionKey.player"]
     assert tip == blindplay_notes.COMPANION_DEFINITION
     assert blindplay_notes.ARM_KEYWORDS["Companion"] == (
         tip + " " + blindplay_notes.COMPANION_SLOT_SENTENCE)
@@ -479,8 +482,11 @@ def test_the_companion_tip_and_the_page_open_with_one_sentence():
 
 def test_the_ruled_sentences_are_the_ones_that_ship():
     """The wording pin. Every clause below is quoted from the ruled slice
-    packets; `Mend`'s bound is the one `EB-272` names outright."""
-    tips = TIPS_CS.read_text(encoding="utf-8")
+    packets; `Mend`'s bound is the one `EB-272` names outright. A body both
+    readers share is its keyed row in `PlayerTips.cs` (the localization
+    census, 2026-10-23)."""
+    tips = (TIPS_CS.read_text(encoding="utf-8")
+            + TIPS_CS.with_name("PlayerTips.cs").read_text(encoding="utf-8"))
     for clause in (
             # Klee, klee-overhaul-slice-1-2026-09-01.md sec.2 rules 1/2/4/6,
             # in the shape docs/current/text-conventions.md sets (one clause
@@ -569,8 +575,9 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
 def test_the_mend_tip_carries_the_entry_hp_bound():
     """THE ROW'S SECOND HALF. The Casket read as broken at full HP because
     nothing on screen said there was a ceiling; the sentence is
-    `KokomiRules.Mend`'s own."""
-    tips = TIPS_CS.read_text(encoding="utf-8")
+    `KokomiRules.Mend`'s own. Its keyed row since the localization census
+    (2026-10-23)."""
+    tips = TIPS_CS.with_name("PlayerTips.cs").read_text(encoding="utf-8")
     assert "never above the HP you had " in tips
     assert "at the start of this combat." in tips
 
@@ -1286,17 +1293,17 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             '"acts once and leaves; its card goes to your [gold]Discard "',
             '"Exhausts. Acts at the end of your turn. When it leaves, this "',
             '"card goes to your [gold]Discard Pile[/gold]."',
-            "ActText(StagePerformer.Charlotte, card.IsUpgraded)));",
-            "ActText(StagePerformer.Wriothesley, card.IsUpgraded)));",
-            "ActText(StagePerformer.Lynette, card.IsUpgraded)));",
-            "ActText(StagePerformer.Clorinde, card.IsUpgraded)));",
-            "ActText(StagePerformer.Lyney, card.IsUpgraded)));",
-            "ActText(StagePerformer.Sigewinne, card.IsUpgraded)));",
-            "ActText(StagePerformer.Chevreuse, card.IsUpgraded)));",
-            "ActText(StagePerformer.Freminet, card.IsUpgraded)));",
-            "ActText(StagePerformer.Navia, card.IsUpgraded)));",
-            "ActText(StagePerformer.Neuvillette, card.IsUpgraded)));",
-            "ActText(StagePerformer.Escoffier, card.IsUpgraded)));"):
+            "PlayerTips.Guest(card, StagePerformer.Charlotte));",
+            "PlayerTips.Guest(card, StagePerformer.Wriothesley));",
+            "PlayerTips.Guest(card, StagePerformer.Lynette));",
+            "PlayerTips.Guest(card, StagePerformer.Clorinde));",
+            "PlayerTips.Guest(card, StagePerformer.Lyney));",
+            "PlayerTips.Guest(card, StagePerformer.Sigewinne));",
+            "PlayerTips.Guest(card, StagePerformer.Chevreuse));",
+            "PlayerTips.Guest(card, StagePerformer.Freminet));",
+            "PlayerTips.Guest(card, StagePerformer.Navia));",
+            "PlayerTips.Guest(card, StagePerformer.Neuvillette));",
+            "PlayerTips.Guest(card, StagePerformer.Escoffier));"):
         assert clause in tips, clause
     for gone in ("StagePerformer.Usher", "StagePerformer.Chevalmarin",
                  "StagePerformer.Crabaletta", "[gold]Bow[/gold]"):

@@ -810,8 +810,7 @@ public class FurinaTideTests
     [Fact]
     public void The_drain_and_repay_tips_say_the_rule()
     {
-        string Body(string name) => (string)typeof(ArmKeywordTips)
-            .GetField(name, HeadlessGame.All)!.GetRawConstantValue()!;
+        string Body(string name) => TipText.Named(name);
         Assert.Equal(
             "Lose N HP. Each combat, the first 1/4 of your Max HP drained "
             + "returns after combat. That is your line: past it, only "

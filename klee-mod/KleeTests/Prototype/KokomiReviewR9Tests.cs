@@ -113,18 +113,28 @@ public class KokomiReviewR9Tests
     [Fact]
     public void An_overridden_element_is_written_into_the_card_text()
     {
+        // The localization census (2026-10-23, group 3): the hit-element
+        // words are tokens in the row, filled with the element applied now.
+        static string Face(string row, Element printed, Element applied) =>
+            CodeText.FormatEnglish(OverriddenElementFace.Templatize(row),
+                                   OverriddenElementFace.Tokens(printed, applied));
+        Assert.Equal("Deal {Damage} [gold]{Hydro}[/gold] damage.",
+            OverriddenElementFace.Templatize("Deal {Damage} [gold]Hydro[/gold] damage."));
         Assert.Equal("Deal 13 [gold]Electro[/gold] damage.",
-            OverriddenElementFace.Rewrite("Deal 13 [gold]Hydro[/gold] damage.",
-                                          Element.Hydro, Element.Electro));
+            Face("Deal 13 [gold]Hydro[/gold] damage.", Element.Hydro, Element.Electro));
         Assert.Equal("Apply [gold]Pyro[/gold] to it.",
-            OverriddenElementFace.Rewrite("Apply [gold]Hydro[/gold] to it.",
-                                          Element.Hydro, Element.Pyro));
-        // Not overridden, or nothing printed: untouched.
+            Face("Apply [gold]Hydro[/gold] to it.", Element.Hydro, Element.Pyro));
+        // Not overridden, or nothing printed: the English as written.
         const string same = "Deal 13 [gold]Hydro[/gold] damage.";
-        Assert.Equal(same, OverriddenElementFace.Rewrite(
-            same, Element.Hydro, Element.Hydro));
-        Assert.Equal(same, OverriddenElementFace.Rewrite(
-            same, Element.None, Element.Electro));
+        Assert.Equal(same, Face(same, Element.Hydro, Element.Hydro));
+        Assert.Equal(same, Face(same, Element.None, Element.Electro));
+        // Another element on the same face keeps its own name.
+        Assert.Equal("Deal 13 [gold]Electro[/gold] damage. Apply [gold]Cryo[/gold].",
+            Face("Deal 13 [gold]Hydro[/gold] damage. Apply [gold]Cryo[/gold].",
+                 Element.Hydro, Element.Electro));
+        // An element named in any other sense is not a token.
+        Assert.Equal("If it has [gold]Hydro[/gold], draw 1.",
+            OverriddenElementFace.Templatize("If it has [gold]Hydro[/gold], draw 1."));
     }
 
     // ---- item 6 ---------------------------------------------------------------
