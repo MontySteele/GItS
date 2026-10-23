@@ -69,5 +69,30 @@ reflavoured Bring the House Down has no evidence either way yet.
    Ensemble Cast, Bring the House Down and Rainfall Overture need a round
    where they are drafted; the next Furina round briefs one seat toward a
    guest deck.
-2. **Act 3 HP** (2.28 of base) is the open question for her promotion; not
-   a card-pass item. Watch it in suite 6 before a paper.
+2. **Act 3 HP:** the 2.28 was mostly her own Drain (below). Not a card-pass
+   item; the bar's reading is a pick (`QUEUE.md`, "Yae and Furina reads").
+
+## Correction: the HP column counts Drain (read 2026-10-23)
+
+[USER]: "Is her block too low? Is her block not scaling to act 3? Did the
+seats draft all offense?" None of the three. The table's "HP lost" is
+`hp_lost`, taken before the curtain call returns drained HP, so it counts
+the HP Furina Drains herself on purpose. Fight rows since 2026-10-23T02:30
+against the base five since 2026-10-05, normal fights, rows that carry
+`hp_after_return` (median / mean, % of max HP):
+
+| Act | HP lost as printed | Minus the Drain returned | Base five |
+|---|---|---|---|
+| 1 | 10.3 / 10.1 | 5.1 / 5.9 | 9.1 / 9.7 |
+| 2 | 13.5 / 16.9 | 5.1 / 9.8 | 16.2 / 16.4 |
+| 3 | 22.8 / 20.2 | 6.4 / 8.5 | 5.1 / 12.4 |
+
+Block in act 3 normal fights (means): 52.9 a fight against the base's 32.6,
+13.5 on turns with an attack coming against 10.2, and 10.1 unblocked a hit
+turn against 12.6. Her fights run 4.2 turns against 3.4, so more attacks
+arrive (70.9 a fight against 55.2). Her Block rises from 4.7 a turn in act 1
+to 9.6 in act 3 (base 2.5 to 10.0). The seats drafted Usher, The Masquerade,
+The Show Must Go On, Velvet Curtain and Hymn of Many Waters.
+
+The act 3 boss killed 3 of her 4 runs that reached it, and 13 of the base
+five's 20. Her real gap is lane 1, dead on floor 28 in act 2.
