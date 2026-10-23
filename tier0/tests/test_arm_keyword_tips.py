@@ -439,8 +439,8 @@ def test_the_klee_tips_and_the_page_say_the_same_three_rules():
                                  "random Set off picks an enemy with Bombs.")
     assert page["Set off"] == tips["SetOffKey"]
     assert tips["MineKey"] == ("A Bomb that also goes off when its enemy "
-                               "attacks you, without the enemy's plain "
-                               "Bombs. Otherwise, it waits. Any Set off "
+                               "attacks you, and uses up the enemy's "
+                               "aura. Its plain Bombs stay. Any Set off "
                                "spends it too.")
     assert page["Mine"] == tips["MineKey"]
     for gone in ("stacks beside the first", "Block stops it",
@@ -495,7 +495,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "Start each combat with ",
             "Gone after combat.",
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks ",
-            "you, without the enemy's plain Bombs. Otherwise, it waits. Any ",
+            "you, and uses up the enemy's aura. Its plain Bombs stay. Any ",
             " spends it too.",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the

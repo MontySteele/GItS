@@ -66,17 +66,17 @@ def test_an_older_mod_with_no_seq_keeps_hits_then_puts():
 
 # ---- 3. the Mine tip --------------------------------------------------------
 
-# 2026-10-13 (text-only fix): the plain Bombs stay; "Otherwise, it waits"
-# keeps this round's claim in fewer words.
-MINE = ("A Bomb that also goes off when its enemy attacks you, without the "
-        "enemy's plain Bombs. Otherwise, it waits. Any Set off spends it too.")
+# 2026-10-13 (text-only fix): the plain Bombs stay. 2026-10-23 ("On Klee -
+# agreed on all."): it uses up the aura; "Otherwise, it waits" left to fit.
+MINE = ("A Bomb that also goes off when its enemy attacks you, and uses up "
+        "the enemy's aura. Its plain Bombs stay. Any Set off spends it too.")
 
 
-def test_the_mine_tip_says_it_waits_without_an_attack():
+def test_the_mine_tip_says_it_uses_up_the_aura():
     assert ARM_KEYWORDS["Mine"] == MINE
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
-    assert "Otherwise, it waits." in src.replace(
+    assert "and uses up the enemy's aura." in src.replace(
         '"\n          + "', "")
     assert len(MINE) <= 135
 
