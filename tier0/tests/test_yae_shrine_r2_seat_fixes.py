@@ -65,9 +65,9 @@ def _published(card, annotation=Y.RED_INK):
 # ---- 1. the per-enemy words --------------------------------------------------
 
 def test_a_foxfire_sakura_reads_per_enemy_in_the_clause():
-    assert Y.tenko_words({Y.FOXFIRE: 18}) == " (Sakura: 18 to each enemy)"
+    assert Y.tenko_words({Y.FOXFIRE: 18}) == " (Sakura: 18 to each enemy in total)"
     assert "ALL" not in Y.tenko_words({Y.THUNDER: 12, Y.FOXFIRE: 18})
-    assert Y.tenko_words({Y.THUNDER: 12}) == " (Sakura: 12 damage)"
+    assert Y.tenko_words({Y.THUNDER: 12}) == " (Sakura: 12 damage in total)"
 
 
 # ---- 2. an Edit on a Published card fills its temporary slot -----------------

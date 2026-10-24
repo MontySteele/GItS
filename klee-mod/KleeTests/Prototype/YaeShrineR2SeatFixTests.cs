@@ -43,7 +43,7 @@ public class YaeShrineR2SeatFixTests : IDisposable
     {
         Assert.Equal("18 to each enemy", YaeShrineFace.Amount(YaeSakuraKind.Foxfire, "18"));
         Assert.DoesNotContain("ALL", YaeShrineFace.TenkoWords(12, 18));
-        Assert.Equal(" (Sakura: 12 damage)", YaeShrineFace.TenkoWords(12));
+        Assert.Equal(" (Sakura: 12 damage in total)", YaeShrineFace.TenkoWords(12));
     }
 
     [Fact]

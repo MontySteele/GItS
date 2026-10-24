@@ -92,7 +92,7 @@ public class YaeBacklogBugsTests : IDisposable
     [Fact]
     public void The_tenko_clause_names_the_sakura()
     {
-        Assert.Equal(" (Sakura: 13 damage)", YaeShrineFace.TenkoWords(13));
+        Assert.Equal(" (Sakura: 13 damage in total)", YaeShrineFace.TenkoWords(13));
         Assert.Equal(" (no Sakura)", YaeShrineFace.TenkoWords(0));
     }
 }

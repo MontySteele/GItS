@@ -137,7 +137,7 @@ def test_levels_go_past_three():
     assert _led(st).sakura[0].level == 5
     # The Sakura Levels paper (2026-10-17): 1 + 2 per Level.
     assert Y.tenko_totals(st)[Y.THUNDER] == 1 + 2 * 5
-    assert Y.tenko_line(st) == " (Sakura: 11 damage)"
+    assert Y.tenko_line(st) == " (Sakura: 11 damage in total)"
 
 
 def test_mooncall_copies_stack():
