@@ -228,7 +228,7 @@ public class LiveLooks8bTests
         // route does not have is a refusal a round trip away, and a route
         // with an op no client can name is an op nobody uses.
         var client = Source(Path.Combine("understudy", "bridge.py"));
-        Assert.Contains("\"give_relic\", \"give_potion\", \"give_gold\")",
+        Assert.Contains("\"give_relic\", \"give_potion\", \"give_gold\", \"fight\")",
                         client);
     }
 }
