@@ -100,7 +100,7 @@ with a line from her act 1 choice:
 - *moved:* "Her piece is already here. She did not move it this far."
 - *pocketed:* "The general in her pocket has gone warm."
 
-*Across another sand table sits a figure in grey with no face, its pieces in
+*Across another sand table sits a figure in gray with no face, its pieces in
 a patient line. It opens a hand: your move.*
 
 | Option | Effect | Result |
@@ -127,7 +127,7 @@ to the surface and later died fighting the Shogun. His remains have poisoned peo
 
 **Act 2. A Report from Gorou** (her home event; all free). It follows A Room
 with No One in It, or no act 1 event. When it follows the room, it opens:
-*"Rested, she reads it properly this time."*
+*"The quiet room did her good."*
 
 *A Watatsumi scout is waiting on the stair, soaked to the knee, with a
 satchel and a wrapped box. "From the General, Your Excellency. He said to
@@ -144,7 +144,7 @@ reinforcements. —Gorou. P.S. Please eat properly."*
 **Act 3. Endgame** (follows The Other Commander; a price, with a free way
 out). It opens with a line from her act 2 choice:
 - *played:* "She beat it once, by a single piece."
-- *drew:* "Their game is still unfinished."
+- *drew:* "Their last game ended in a draw."
 - *conceded:* "She knows its opening by heart now."
 
 *The faceless commander waits at the top of the stairs without its board. It

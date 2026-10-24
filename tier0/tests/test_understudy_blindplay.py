@@ -6603,8 +6603,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # and the page's row opens with its sentence word for word, then
         # keeps the reward-slot sentence the tip does not carry. Until then
         # it was `EB-329`'s row with no tooltip to be held in step with.
-        "Companion": ["A card titled with a character's name, a dash, then "
-                      "its ", "own."],
+        "Companion": ["A shared ally card, such as Jean's Gale Blade. "
+                      "Varka's ", "Knights count too."],
         # The Guest Star keyword and the four guests' badges (the Salon's
         # Tab, 2026-10-05): the prose either side of each golded span and
         # interpolated numeral.
@@ -6737,7 +6737,8 @@ def test_the_companion_row_is_the_mods_own_sentence_about_the_slot():
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
     assert re.search(r'id: proto_mc_[a-z_]+, name:\s*"[^"]+ — [^"]+"', sheet)
-    assert "a character's name, a dash, then its own" in body
+    assert "such as Jean's Gale Blade" in body
+    assert re.search(r'id: proto_mc_jean_gale_blade, name:\s*"Jean — Gale Blade"', sheet)
     # `EB-430` PUT A SECOND ARM'S TRIGGER ON THIS ROW, and it is the reason
     # the bound moved. The word rides both kits, and the glossary is the ONE
     # surface that fires wherever a Companion card is read -- in hand, on a
@@ -6777,14 +6778,14 @@ def test_the_companion_stage_sentence_prints_under_furina_and_no_other_arm():
     """
     face = "Deal 3 damage for each Companion you played this turn."
     kokomi = blindplay.observe(keyword_hand_state([face]))
-    assert "- **Companion** — A card titled with a character's name" in kokomi
+    assert "- **Companion** — A shared ally card" in kokomi
     assert blindplay.COMPANION_SLOT_SENTENCE in kokomi
     assert "Furina" not in kokomi and "front member" not in kokomi
 
     state = keyword_hand_state([face])
     state["player"]["character"] = "Furina"
     furina = blindplay.observe(state)
-    assert "- **Companion** — A card titled with a character's name" in furina
+    assert "- **Companion** — A shared ally card" in furina
     assert "On Furina's stage playing one performs the front member" in furina
     assert "picks its own enemy at random" in furina
 
@@ -6810,7 +6811,7 @@ def test_the_companion_word_is_defined_where_a_card_prices_itself_on_it():
                  "Deal 3 damage for each Companion you played this turn.",
                  "Whenever you play a Companion card, apply 1 Weak."):
         page = blindplay.observe(keyword_hand_state([face]))
-        assert "- **Companion** — A card titled with a character's name"             in page, face
+        assert "- **Companion** — A shared ally card"             in page, face
         assert blindplay.COMPANION_SLOT_SENTENCE in page, face
 
 

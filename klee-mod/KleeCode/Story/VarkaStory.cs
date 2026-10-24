@@ -295,7 +295,7 @@ public static class VarkaStory
                 EventType: typeof(VarkaRearguard),
                 Title: "The Rearguard",
                 Body:
-                    "Three Favonius knights sit against the wall of the landing, bandaged and grey with "
+                    "Three Favonius knights sit against the wall of the landing, bandaged and gray with "
                   + "dust. They straighten when they see him. \"Grand Master. We fell behind. We can still "
                   + "fight, sir.\"",
                 Options: new[]

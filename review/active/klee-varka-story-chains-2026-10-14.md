@@ -97,7 +97,7 @@ Opening line by act-1 choice: *chased* "Klee knows this trail. She ran most of i
 |---|---|---|
 | Ask nicely for Dodoco back. | Choose 1 of 3 random Uncommon Attacks to add to your deck. Remove every **Doubt**. | Klee trades it her last snack. Dodoco is a little sticky, but fine. |
 | Grab Dodoco and some treasure, and run! | Lose 11 HP. Gain a random relic. Remove every **Doubt**. | It bites. Klee doesn't let go of either. |
-| Swap her best bomb for Dodoco. | Transform a card. Remove every **Doubt**. | It gives her a rock in return. Klee keeps the rock. |
+| Swap her best bomb for Dodoco. | Transform a card. Remove every **Doubt**. | The creature takes the bomb and lets Dodoco go. It gives her a rock, too. Klee keeps the rock. |
 
 **The Knights Come Looking** keeps its options and effects. On the Dodoco
 thread it opens: "Dodoco rides on Klee's shoulder the whole way." **If Dodoco
@@ -130,7 +130,7 @@ in the chain):
 | Option | Effect | Result |
 |---|---|---|
 | It's an emergency! Open it! | Lose 12 HP. Gain a random relic. | KABOOM. Mom wasn't joking about lively. Inside, wrapped in fireproof cloth, is something wonderful. |
-| Save it for a real emergency. | Lose 5 HP. Gain a random potion. Mom's chest will still be there. | The chest sputters at her the whole way up. Klee carries it very, very carefully. |
+| Save it for a real emergency. | Lose 5 HP. Gain a random potion. Klee takes Mom's chest with her. | The chest sputters at her the whole way up. Klee carries it very, very carefully. |
 | Leave it for the next adventurer. | Lose 100 Gold. Transform 2 cards. Locked with less than 100 Gold. | Klee swaps in two of her own bombs, and some Mora for luck. Fair's fair. |
 
 | Back away from the ticking. | Nothing. | Klee tiptoes backwards all the way to the stairs. Dodoco keeps watch. |
@@ -213,7 +213,7 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 
 **The Rearguard** (act 1, every option priced):
 
-> Three Favonius knights sit against the wall of the landing, bandaged and grey with dust. They straighten when they see him. "Grand Master. We fell behind. We can still fight, sir."
+> Three Favonius knights sit against the wall of the landing, bandaged and gray with dust. They straighten when they see him. "Grand Master. We fell behind. We can still fight, sir."
 
 | Option | Effect | Result |
 |---|---|---|

@@ -91,7 +91,7 @@ public static class FurinaStory
                 EventType: typeof(FurinaEmptyHouse),
                 Title: "An Empty House",
                 Body:
-                    "A theatre stands on this landing, impossibly: red velvet rows and not one seat taken. "
+                    "A theater stands on this landing, impossibly: red velvet rows and not one seat taken. "
                   + "As Furina walks in, the stage lights come up, as if they had been waiting for her. "
                   + "She straightens before she can stop herself.",
                 Options: new[]
@@ -232,7 +232,7 @@ public static class FurinaStory
                 {
                     new StoryOpening("PERFORMED",
                         new StoryCondition(typeof(FurinaEmptyHouse), "PERFORM_FOR_NO_ONE"),
-                        "Her voice is still a little hoarse from the empty theatre."),
+                        "Her voice is still a little hoarse from the empty theater."),
                     new StoryOpening("FRONT_ROW",
                         new StoryCondition(typeof(FurinaEmptyHouse), "SIT_IN_THE_FRONT_ROW"),
                         "She still remembers how soft those seats were."),
@@ -264,7 +264,7 @@ public static class FurinaStory
                         "Heal 15 HP. Add [gold]Stage Fright[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.Heal, 15),
                         "\"I did what I had to, and it worked.\" The scale doesn't move. \"Well? Say "
-                      + "something.\" It never could decide anything by itself.")
+                      + "something.\" This copy never could decide anything by itself.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(StageFright)) },
                     },

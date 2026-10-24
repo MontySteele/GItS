@@ -615,7 +615,7 @@ public class KleeStoryTests
     {
         var rows = StoryLoc.LineRows();
         var own = StoryRegistry.EntryOf(typeof(global::KleeMod.Klee));
-        Assert.Equal(StoryRegistry.All.Sum(s => (s.Lines == null ? 0 : 6) + 2 * s.Pairs.Count), rows.Count);
+        Assert.Equal(StoryRegistry.All.Sum(s => (s.Lines == null ? 0 : 6) + s.LineVariants.Count + 2 * s.Pairs.Count), rows.Count);
         Assert.Equal(Klee.Lines.Signature, rows[StoryLines.Key(own, StoryLines.Signature)]);
         foreach (var p in Klee.Pairs)
         {
@@ -661,6 +661,58 @@ public class KleeStoryTests
             Il.Calls(patch.GetMethod("Prefix", HeadlessGame.All)!));
         Assert.Contains("AncientDialogueClose.Close",
             Il.Calls(patch.GetMethod("Postfix", HeadlessGame.All)!));
+    }
+
+    // ---- Boss lines while Dodoco is missing (2026-10-24) ------------------------
+
+    [Fact]
+    public void Her_boss_lines_ask_after_Dodoco_while_it_is_missing()
+    {
+        var own = StoryRegistry.EntryOf(Klee.Character);
+        string Entry(params StoryRecord[] r) => StoryLines.LineKey(Klee, StoryLines.BossEntry, r);
+        string Kill(params StoryRecord[] r) => StoryLines.LineKey(Klee, StoryLines.BossKill, r);
+        var plainEntry = StoryLines.Key(own, StoryLines.BossEntry);
+        var plainKill = StoryLines.Key(own, StoryLines.BossKill);
+        var missingEntry = StoryLines.VariantKey(own, StoryLines.BossEntry, KleeStory.DodocoMissingLine);
+        var missingKill = StoryLines.VariantKey(own, StoryLines.BossKill, KleeStory.DodocoMissingLine);
+
+        var gone = new StoryRecord(0, typeof(KleeDodocoGoesMissing), "WAIT_HERE");
+        var found = new StoryRecord(1, typeof(KleeFoundYou), "ASK_NICELY");
+        var knights = new StoryRecord(2, typeof(KleeKnightsComeLooking), null);
+
+        // Never lost, or another act-1 event: the plain lines.
+        Assert.Equal(plainEntry, Entry());
+        Assert.Equal(plainKill, Kill(new StoryRecord(0, typeof(KleeStarsnatchCliff), null)));
+        // Missing, before either rescue.
+        Assert.Equal(missingEntry, Entry(gone));
+        Assert.Equal(missingKill, Kill(gone));
+        // Found You! (act 2) brings it back.
+        Assert.Equal(plainEntry, Entry(gone, found));
+        Assert.Equal(plainKill, Kill(gone, found, knights));
+        // No act-2 event: the knights bring it back in act 3 (DODOCO_FOUND).
+        Assert.Equal(plainEntry, Entry(gone, knights));
+        Assert.Equal(plainKill, Kill(gone, knights));
+
+        // The rows the bubbles read.
+        var rows = StoryLoc.LineRows();
+        Assert.Equal("Whoa, it's huge! Hang on, Dodoco, I'm coming!", rows[missingEntry]);
+        Assert.Equal("We won! Now let's go find Dodoco!", rows[missingKill]);
+        Assert.Equal("Whoa, look how big it is! Stand back, Dodoco!", rows[plainEntry]);
+        Assert.Equal("We did it! Did you see, Dodoco?", rows[plainKill]);
+    }
+
+    /// <summary>The missing test mirrors the knights event's DODOCO_FOUND
+    /// opening, so the bubble and the page agree on when Dodoco is back.</summary>
+    [Fact]
+    public void Dodoco_is_back_exactly_when_the_knights_page_says_so()
+    {
+        var knightsEvent = Klee.Events.Single(e => e.EventType == typeof(KleeKnightsComeLooking));
+        var dodocoFound = knightsEvent.Openings.Single(o => o.Key == "DODOCO_FOUND").When;
+        Assert.Equal(typeof(KleeDodocoGoesMissing), dodocoFound.Fired);
+        Assert.Contains(KleeStory.DodocoMissing, c =>
+            c.Fired == typeof(KleeKnightsComeLooking) && c.NoEventInAct == dodocoFound.NoEventInAct && c.Not);
+        var thread = knightsEvent.Openings.Single(o => o.Key == "DODOCO_THREAD").When;
+        Assert.Contains(KleeStory.DodocoMissing, c => c.Fired == thread.Fired && c.Not);
     }
 
     // ---- Helpers ---------------------------------------------------------------

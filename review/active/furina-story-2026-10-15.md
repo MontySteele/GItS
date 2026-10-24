@@ -40,7 +40,7 @@ Klee's Confinement and Varka's Overdue Reports.
 
 ## 2. The events
 
-**Act 1. An Empty House** (price, free way out). *A theatre stands on this
+**Act 1. An Empty House** (price, free way out). *A theater stands on this
 landing, impossibly: red velvet rows and not one seat taken. As Furina walks
 in, the stage lights come up, as if they had been waiting for her. She
 straightens before she can stop herself.*
@@ -80,7 +80,7 @@ Varka's satchels). The interview is canon (Charlotte keeps asking; Furina is
 
 **Act 2. The Understudy** (follows An Empty House; price, free way out).
 Opening by act-1 choice: *performed* "Her voice is still a little hoarse from
-the empty theatre." *front row* "She still remembers how soft those seats
+the empty theater." *front row* "She still remembers how soft those seats
 were." *costume* "The costume still fits. She still wishes it didn't."
 *Body:* A smaller stage, and someone on it: a girl in a copy of Furina's old
 costume, saying the lines a beat late. She sees Furina and freezes. "I'm only
@@ -102,7 +102,7 @@ know. A plate reads: *State your case.*
 | Option | Effect | Result |
 |---|---|---|
 | Plead guilty. | Lose 12 HP. Gain a random relic. | "I lied to everyone for five hundred years." A pause. "And it kept them alive." The scale tips, and something drops into the tray. |
-| Plead innocent. | Heal 15 HP. Add **Stage Fright** to your deck. | "I did what I had to, and it worked." The scale doesn't move. "Well? Say something." It never could decide anything by itself. |
+| Plead innocent. | Heal 15 HP. Add **Stage Fright** to your deck. | "I did what I had to, and it worked." The scale doesn't move. "Well? Say something." This copy never could decide anything by itself. |
 | Give it a performance. | Lose 100 Gold. Transform 2 cards. Locked with less than 100 Gold. | There is a slot for an admission fee. She pays, under protest, then gives it the old monologue from the top. It's still good. The machine hands back something new. |
 
 **Act 2. A Letter from the Court** (home; follows A Steambird Clipping or no

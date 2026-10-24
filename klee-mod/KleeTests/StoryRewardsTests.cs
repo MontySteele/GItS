@@ -224,7 +224,7 @@ public class StoryRewardsTests
     public void Saving_the_cache_says_the_chest_waits()
     {
         var o = O(typeof(KleeAlicesCache), "SAVE_IT");
-        Assert.Equal("Lose 5 HP. Gain a random potion. Mom's chest will still be there.", o.Description);
+        Assert.Equal("Lose 5 HP. Gain a random potion. Klee takes Mom's chest with her.", o.Description);
         Steps(typeof(KleeAlicesCache), "SAVE_IT", (StoryEffectKind.LoseHp, 5), (StoryEffectKind.GainRandomPotions, 1));
     }
 

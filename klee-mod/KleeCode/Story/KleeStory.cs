@@ -33,6 +33,19 @@ public static class KleeStory
         new(StoryEffectKind.RemoveEvery, 0, typeof(MegaCrit.Sts2.Core.Models.Cards.Doubt)),
     };
 
+    /// <summary>The boss lines' variant name while Dodoco is missing.</summary>
+    public const string DodocoMissingLine = "dodocoMissing";
+
+    /// <summary>Dodoco is missing: Dodoco Goes Missing fired, and neither
+    /// rescue has: Found You! (act 2), or The Knights Come Looking opening on
+    /// DODOCO_FOUND (act 3, no act-2 story event), its own test below.</summary>
+    public static readonly IReadOnlyList<StoryCondition> DodocoMissing = new[]
+    {
+        new StoryCondition(Fired: typeof(KleeDodocoGoesMissing)),
+        new StoryCondition(Fired: typeof(KleeFoundYou), Not: true),
+        new StoryCondition(Fired: typeof(KleeKnightsComeLooking), NoEventInAct: 1, Not: true),
+    };
+
     /// <summary>Mom's Last Note: "Saved the cache" (Alice's Cache, Save it
     /// for a real emergency).</summary>
     private static readonly StoryCondition SavedTheCache = new(typeof(KleeAlicesCache), "SAVE_IT");
@@ -81,6 +94,16 @@ public static class KleeStory
             BossKill: "We did it! Did you see, Dodoco?",
             RunLoss: "Jean... can you come get me?",
             RunWin: "I made it all the way up! Mom's gonna be so proud!"),
+
+        // Dodoco is missing from Dodoco Goes Missing until Found You! (act 2)
+        // or, with no act-2 event, the knights bring it back in act 3.
+        LineVariants = new[]
+        {
+            new CombatLineVariant(StoryLines.BossEntry, DodocoMissingLine, DodocoMissing,
+                "Whoa, it's huge! Hang on, Dodoco, I'm coming!"),
+            new CombatLineVariant(StoryLines.BossKill, DodocoMissingLine, DodocoMissing,
+                "We won! Now let's go find Dodoco!"),
+        },
 
         Pairs = new[]
         {
@@ -269,7 +292,7 @@ public static class KleeStory
                     new StoryOption("SWAP_HER_BEST_BOMB", "Swap her best bomb for Dodoco.",
                         "Transform a card. Remove every [gold]Doubt[/gold].",
                         new StoryEffect(StoryEffectKind.TransformCards, 1),
-                        "It gives her a rock in return. Klee keeps the rock.")
+                        "The creature takes the bomb and lets Dodoco go. It gives her a rock, too. Klee keeps the rock.")
                     {
                         Then = DodocoHome,
                     },
@@ -339,7 +362,7 @@ public static class KleeStory
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic) },
                     },
                     new StoryOption("SAVE_IT", "Save it for a real emergency.",
-                        "Lose 5 HP. Gain a random potion. Mom's chest will still be there.",
+                        "Lose 5 HP. Gain a random potion. Klee takes Mom's chest with her.",
                         new StoryEffect(StoryEffectKind.LoseHp, 5),
                         "The chest sputters at her the whole way up. Klee carries it very, very carefully.")
                     {

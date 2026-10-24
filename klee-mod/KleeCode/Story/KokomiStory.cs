@@ -193,7 +193,7 @@ public static class KokomiStory
                 EventType: typeof(KokomiOtherCommander),
                 Title: "The Other Commander",
                 Body:
-                    "Across another sand table sits a figure in grey with no face, its pieces in a "
+                    "Across another sand table sits a figure in gray with no face, its pieces in a "
                   + "patient line. It opens a hand: your move.",
                 Options: new[]
                 {
@@ -328,7 +328,7 @@ public static class KokomiStory
                 {
                     new StoryOpening("RESTED",
                         new StoryCondition(typeof(KokomiEmptyRoom)),
-                        "Rested, she reads it properly this time."),
+                        "The quiet room did her good."),
                 },
             },
 
@@ -378,7 +378,7 @@ public static class KokomiStory
                         "She beat it once, by a single piece."),
                     new StoryOpening("DREW",
                         new StoryCondition(typeof(KokomiOtherCommander), "OFFER_A_DRAW"),
-                        "Their game is still unfinished."),
+                        "Their last game ended in a draw."),
                     new StoryOpening("CONCEDED",
                         new StoryCondition(typeof(KokomiOtherCommander), "CONCEDE"),
                         "She knows its opening by heart now."),

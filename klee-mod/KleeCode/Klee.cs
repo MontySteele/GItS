@@ -73,7 +73,7 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
         // CharacterLoc set plus bestiaryQuote). A missing row renders as
         // its raw key: the co-op end-turn ping bubble did (playtest
         // 2026-10-03). CharacterLocCompletenessTests pins the set.
-        ("aromaPrinciple", "[sine][red]Ooh... can I light the fuse?[/red][/sine]"),
+        ("aromaPrinciple", "[sine][red]Klee has to get home... Master Jean is waiting...[/red][/sine]"),
         ("banter.alive.endTurnPing", "Hurry, hurry! Klee's ready!"),
         ("banter.dead.endTurnPing", "..."),
         ("bestiaryQuote", "I haven't seen this one before. Do you think it bites?"),

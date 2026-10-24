@@ -154,7 +154,7 @@ def test_elemental_reaction_is_defined_on_courtroom_dramas_reward():
 def test_companion_is_defined_on_an_invitations_reward():
     words = _words(_reward(AN_INVITATION))
     assert words["Companion"].startswith(
-        "A card titled with a character's name, a dash, then its own.")
+        "A shared ally card, such as Jean's Gale Blade. Varka's Knights count too.")
 
 
 def test_swirl_is_defined_on_lynettes_reward():

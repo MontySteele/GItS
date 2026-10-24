@@ -280,5 +280,29 @@ public class LocReferenceTests
         Assert.True(reference.ContainsKey("acts"));
         Assert.DoesNotContain(reference.Values.SelectMany(r => r.Keys), k => k.Contains("SEA_GLASS.VARKA", StringComparison.Ordinal));
     }
+
+    /// <summary>
+    /// The Architect's finale (2026-10-24): the five exchanges used to be a
+    /// here-string in <c>tools/build_pck.ps1</c>, outside this reference, so a
+    /// translation skipped them. They ship from
+    /// <c>klee-mod/pck-src/klee/localization/eng/ancients.json</c> now: all
+    /// fifteen rows are here, every one REPEATING ("r" on X-Y; a
+    /// non-repeating-only set softlocks the second win, KleeSelfCheck R12).
+    /// </summary>
+    [Fact]
+    public void The_Architect_finale_rows_are_in_the_reference()
+    {
+        var rows = Build()["ancients"].Keys
+            .Where(k => k.StartsWith("THE_ARCHITECT.", StringComparison.Ordinal))
+            .ToList();
+        Assert.Equal(15, rows.Count);
+        foreach (var who in new[] { "KLEE", "KOKOMI", "FURINA", "VARKA", "YAE" })
+        {
+            var key = $"THE_ARCHITECT.talk.KLEEMOD-{who}.";
+            Assert.Contains(key + "0-0r.ancient", rows);
+            Assert.Contains(key + "0-0r.next", rows);
+            Assert.Contains(key + "0-1r.char", rows);
+        }
+    }
 }
 

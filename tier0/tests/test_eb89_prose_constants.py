@@ -294,33 +294,24 @@ def test_a_stale_derived_entry_is_itself_a_finding(fake_mod, tmp_path,
     assert any("gone.json" in c for c in complaints), complaints
 
 
-def test_the_packers_own_here_string_table_is_read(fake_mod, tmp_path):
-    """The other half of the row, and the one the register names: the packer
-    still types a loc table into `$locDir` at pack time, so that table exists
-    as a file NOWHERE in the repo and was outside every gate."""
+def test_a_packer_here_string_loc_table_is_a_finding(fake_mod, tmp_path):
+    """The packer once typed the Architect's rows into `$locDir` from a
+    here-string, a table that existed as a file nowhere in the repo and so
+    sat outside every gate and outside the English reference. They live in
+    pck-src now (2026-10-24); a here-string table coming back is a finding."""
     fake_mod("")
     _loc_table(tmp_path, "events.json", {"E.body": "Nothing to see here."})
-    _packer(tmp_path,
-            '{\n  "A.talk": "Its next action deals half damage; attacking '
-            'it Shatters for 6 damage."\n}')
-
-    findings = lint.prose_findings()
-    assert [f.const for f in findings] == ["ReactionConstants.ShatterDamage"]
-    assert "(ancients.json)" in findings[0].path
-    # The line is the ROW's, not the script's first line: a finding nobody can
-    # locate is a finding nobody fixes.
-    assert findings[0].line == 4
-
-
-def test_a_packer_table_that_does_not_parse_is_a_finding(fake_mod, tmp_path):
-    """Nothing but a loc table is written into `$locDir`, and the game merges
-    a broken one as nothing at all."""
-    fake_mod("")
-    _loc_table(tmp_path, "events.json", {"E.body": "Nothing to see here."})
-    _packer(tmp_path, "{ not json at all }")
+    _packer(tmp_path, '{\n  "A.talk": "Climb, little spark."\n}')
 
     _rows, complaints = lint.loc_corpus()
-    assert any("does not parse as JSON" in c for c in complaints), complaints
+    assert any("ancients.json from a here-string" in c for c in complaints), \
+        complaints
+
+
+def test_the_shipped_packer_types_no_loc_table():
+    """The real packer writes no loc table by hand."""
+    _rows, complaints = lint.pck_loc_strings()
+    assert complaints == []
 
 
 # --- GREEN: the shipped mod ------------------------------------------------
