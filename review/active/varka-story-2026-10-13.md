@@ -32,14 +32,14 @@ Trimmed 2026-10-20 to fit the character-select box (the last sentence pushed the
 
 | Ancient | The Ancient | Varka |
 |---|---|---|
-| Neow | "A knight. A large one." | "Grand Master, if we're being formal. Let's not." |
-| Orobas | "Your trinket hums. Let me make it sing." | "Teach it a drinking song and we have a deal." |
-| Pael | "You have bitten off more than you can chew." | "Ha! I've had worse odds. Let's see what we're dealing with." |
-| Tezcatara | "Warm yourself by my light." | "Gladly. It's been a long winter up north." |
-| Nonupeipe | "Two blades. One will." | "And Lord Barbatos behind them." |
-| Tanx | "Do you fight for glory?" | "A good story never hurts. But first, I've got people to bring home." |
-| Vakuu | "Trade with me." | "I have a stack of unsigned reports. I'll pay you to take them." |
-| Darv | "I collect what others leave behind." | "Found a whetstone, by any chance? Mine's about worn through." |
+| Neow | "[sine]...knight...<br>..will you go... ..up...?[/sine]" | "Up, then home. My people are waiting." |
+| Orobas | "Big knight! Big pack! What inside? Show!!" | "Rations, mostly. And a few things worth more than they look." |
+| Pael | "[thinky_dots]So many walk behind you...<br>Let my strength carry some of them...[/thinky_dots]" | "I'll take it. They're heavier than they look." |
+| Tezcatara | "Such a big strong boy! Eat something. Can't climb on an empty stomach!" | "Now that's an order I can follow." |
+| Nonupeipe | "That armor has seen better days. Come forth, knight, and be made splendid." | "Splendid's fine. Sturdy's better." |
+| Tanx | "TWO SWORDS! NOW THAT IS MORE LIKE IT!!" | "Ha! I knew you'd approve." |
+| Vakuu | "You realize your knights may [sine]never[/sine] see home?" | "They will. Name your price, and keep it honest." |
+| Darv | "Grand Master! Got just the thing for ya... somewhere in here..." | "Got a whetstone in there? Mine's about worn through." |
 
 ## 3. Act 1: Dispatch from Mondstadt
 

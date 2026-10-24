@@ -77,9 +77,9 @@ swim out to coral like this and stay until someone came looking.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Reach in for a piece. | Lose 10 HP. Gain a random relic. | The coral cuts, as coral does. She would have done it at ten as well. |
-| Kneel at the water and pray. | Lose 6 HP. Upgrade 2 random cards. | The water is cold to the knee. She says the old island words softly, as fishing families say them before a voyage. |
-| Leave a pearl for it. | Lose 50 Gold. Remove a card. Locked under 50 Gold. | On Watatsumi you pay the sea back. She picks her best pearl. |
+| Reach in for a piece. | Lose 10 HP. Gain a random relic. | The coral cuts her hand. She wraps it and keeps the piece anyway. |
+| Kneel at the water and pray. | Lose 6 HP. Upgrade 2 random cards. | The water is cold to the knee. She kneels anyway and prays for everyone still at sea. |
+| Leave a pearl for it. | Lose 50 Gold. Remove a card. Locked under 50 Gold. | She leaves her best pearl beside it, a thank-you to the sea. |
 | Leave the coral undisturbed. | Nothing. | She watches it glow for a while, then climbs on. |
 
 **Act 1. A Room with No One in It** (all free).
@@ -91,7 +91,7 @@ first time since the Spire began, nobody needs her to decide anything.*
 |---|---|---|
 | Take an hour to herself. | Heal 15 HP. | She does nothing at all, carefully, for a whole hour. |
 | Read the top book. | Choose 1 of 3 random Uncommon Powers to add to your deck. | A treatise on naval supply. On page forty the author is wrong about tides, and she fills three margins explaining why. |
-| Plan a holiday. | Gain a random potion. | Three days off, two fallbacks, one beach. She files it under *urgent*. |
+| Plan a holiday. | Gain a random potion. | Three days off, one beach, and two fallback plans in case of rain. |
 
 **Act 2. The Other Commander** (follows The Sand Table; a price, with a
 free way out). Each route shows the same habit, which Endgame uses. It opens
@@ -122,7 +122,7 @@ to the surface and later died fighting the Shogun. His remains have poisoned peo
 | Option | Effect | Result |
 |---|---|---|
 | Lay a hand on it, through her sleeve. | Lose 8 Max HP. Gain a random relic. | She wraps her hand first and keeps the touch short; she knows what his remains did to Inazuma. For a moment she can feel the island he gave her people. The cold stays in her fingers. |
-| Gather the offerings at its foot. | Gain 100 Gold. Add **Doubt** to your deck. | Someone has been leaving Mora here for a very long time. She takes it home for the shrine's poor box. The bone whispers to her all the way up. |
+| Gather the offerings at its foot. | Gain 100 Gold. Add **Doubt** to your deck. | Someone has been leaving Mora here for a very long time. She gathers it to take back to Watatsumi, where it can do some good. The bone whispers to her all the way up. |
 | Promise him a rite at home. | Remove a card. Add **Public Address** to your deck. | A proper one, on Watatsumi, with the whole shrine there. She means every word, and she is already dreading the speech. |
 
 **Act 2. A Report from Gorou** (her home event; all free). It follows A Room
@@ -137,7 +137,7 @@ reinforcements. —Gorou. P.S. Please eat properly."*
 
 | Option | Effect | Result |
 |---|---|---|
-| Send for reinforcements. | Choose 1 of 3 random Uncommon Companions to add to your deck. | The scout runs down the stairs with her orders. An hour later there are paw prints on the landing and a familiar voice calling drill. |
+| Send for reinforcements. | Choose 1 of 3 random Uncommon Companions to add to your deck. | The scout runs down the stairs with her orders. An hour later there are boots on the stairs below, and a familiar voice already calling drill. |
 | Write back with new orders. | Upgrade 2 random cards. | Three pages of orders, and a fourth telling him to rest too. The scout salutes and goes. |
 | Eat the sushi while it is fresh. | Heal 20 HP. | Bird egg sushi, her favorite. Gorou remembered. She eats every piece and sends the box back with a thank-you. |
 
@@ -170,7 +170,7 @@ same pull she uses to shape her Bake-Kurage, and the water answers her.*
 |---|---|---|
 | Shape a whole shoal. | Lose 6 HP. Choose 1 of 3 random upgraded Uncommon Powers to add to your deck. | A dozen Bake-Kurage, more than she has ever held at once. The whole stairwell turns blue with their light. |
 | Ride the tide up. | Heal 20 HP. | She lets the water carry her a floor and a half, eyes closed, like floating off the reef at home. |
-| Send the water home to the sea. | Remove a card. | She sends it down toward the sea, with a message folded into the current for whoever on Watatsumi is listening. |
+| Send the water home to the sea. | Remove a card. | She sends it back down toward the sea, and thinks of home until it's gone. |
 
 ## Her lines (every other surface)
 
@@ -212,14 +212,14 @@ approved.)
 
 | Ancient | Ancient says | Kokomi |
 |---|---|---|
-| Neow | "A strategist. Your mind is very busy." | "It usually is. You're welcome to the quiet parts, if you find any." |
-| Orobas | "Give me what you carry. I will make it stranger." | "Stranger is fine. Tell me what it does first." |
-| Pael | "You are smaller than your ambitions." | "Most generals are. That's why we bring friends." |
-| Tezcatara | "Warm yourself by my light." | "Thank you. It's been a long climb, and I'll take the warmth." |
-| Nonupeipe | "You carry a whole island on your back." | "Only some days. Today it's mostly a satchel." |
-| Tanx | "Do you lead from the front?" | "When I must. I'd rather stand where I can see everything." |
-| Vakuu | "Trade with me." | "Gladly. Show me the terms, then the small print." |
-| Darv | "I collect what others leave behind." | "Then you'd get on with quartermasters. We never throw anything away." |
+| Neow | "[sine]...the sea...<br>..brought you...?[/sine]" | "In a way. Is there anything I should know before I climb?" |
+| Orobas | "Look look! Better thing! Trade?" | "Tell me what it does first, please." |
+| Pael | "[thinky_dots]You carry so many plans...<br>Set them down. Let me help...[/thinky_dots]" | "Just for a moment, then. Thank you." |
+| Tezcatara | "Do come in, dear! You look frozen through. Sit, sit." | "Thank you. I hadn't realized how cold I was." |
+| Nonupeipe | "A priestess in such plain travel clothes? Come forward, let me refine you." | "These are practical. ...But I wouldn't mind something nice." |
+| Tanx | "A COMMANDER! COMMANDERS NEED WEAPONS TOO!!" | "I have an army for that. ...But I'll take a look." |
+| Vakuu | "Seeking glory in the Spire, priestess? I have some [sine]propositions[/sine]." | "That depends on what you're asking in return." |
+| Darv | "Busy day, busy day! Take whatever ya want from that pile!" | "May I look properly first? I'll put everything back." |
 
 **The Architect** replaces the current exchange:
 - **Architect:** "Priestess. You could have stayed on your island. Why climb

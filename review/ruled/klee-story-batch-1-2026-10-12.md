@@ -18,14 +18,14 @@ One short exchange per Ancient, on the first visit. Before the build, I check ea
 
 | Ancient | The Ancient | Klee |
 |---|---|---|
-| Neow | "A child. Carrying... fire." | "Don't worry! I haven't lit the fuse yet." |
-| Orobas | "Your trinket hums. Let me make it sing." | "Ooh! Can you make it go *boom* louder?" |
-| Pael | "You have bitten off more than you can chew, little one." | "But I haven't eaten anything! Do you have snacks?" |
-| Tezcatara | "Warm yourself by my light." | "It's so warm! Dodoco, come closer!" |
-| Nonupeipe | "Small hands. Many sparks." | "I made these myself! Mom showed me how." |
-| Tanx | "Do you fight for glory?" | "I'm looking for treasure! I'll bring some back for everyone." |
-| Vakuu | "Trade with me." | "You can have this shiny pebble! But Dodoco stays with me." |
-| Darv | "I collect what others leave behind." | "Oh! Have you seen any little round bombs? I dropped one..." |
+| Neow | "[sine]...little.. one...<br>..so.. far.. from home...[/sine]" | "I'm not lost! I'm exploring! ...Is this the way up?" |
+| Orobas | "Small one! Pockets full! Show show!" | "Okay! But don't shake them. Some of them go boom." |
+| Pael | "[thinky_dots]Such a little one... climbing so late...<br>Rest a moment. Take from me...[/thinky_dots]" | "You're really sleepy, huh? Klee will be quiet." |
+| Tezcatara | "Come in, come in, sweetie! Have you eaten? You look half starved." | "Yes please! Klee's starving!" |
+| Nonupeipe | "Come closer, little one! Let me make you dazzling." | "Can I be dazzling and sparkly? Like fireworks?" |
+| Tanx | "TINY WARRIOR! WHERE IS YOUR WEAPON!?" | "Right here! It's a bomb! ...Wanna see?" |
+| Vakuu | "Such a small one, so far up. I could make you [sine]strong[/sine]. Shall we deal?" | "Master Jean says no deals with strangers. ...What kind of deal?" |
+| Darv | "Little bomber! Dig through that pile, there's somethin' for ya in there!" | "Treasure hunt! Have you seen any little round bombs? I dropped one..." |
 
 ## 3. Act 1's story event: Starsnatch Cliff
 

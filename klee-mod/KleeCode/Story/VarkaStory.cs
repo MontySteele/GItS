@@ -46,29 +46,29 @@ public static class VarkaStory
         Ancients = new[]
         {
             new AncientExchange("Neow", "NEOW",
-                "A knight. A large one.",
-                "Grand Master, if we're being formal. Let's not."),
+                "[sine]...knight...\n..will you go... ..up...?[/sine]",
+                "Up, then home. My people are waiting."),
             new AncientExchange("Orobas", "OROBAS",
-                "Your trinket hums. Let me make it sing.",
-                "Teach it a drinking song and we have a deal."),
+                "Big knight! Big pack! What inside? Show!!",
+                "Rations, mostly. And a few things worth more than they look."),
             new AncientExchange("Pael", "PAEL",
-                "You have bitten off more than you can chew.",
-                "Ha! I've had worse odds. Let's see what we're dealing with."),
+                "[thinky_dots]So many walk behind you...\nLet my strength carry some of them...[/thinky_dots]",
+                "I'll take it. They're heavier than they look."),
             new AncientExchange("Tezcatara", "TEZCATARA",
-                "Warm yourself by my light.",
-                "Gladly. It's been a long winter up north."),
+                "Such a big strong boy! Eat something. Can't climb on an empty stomach!",
+                "Now that's an order I can follow."),
             new AncientExchange("Nonupeipe", "NONUPEIPE",
-                "Two blades. One will.",
-                "And Lord Barbatos behind them."),
+                "That armor has seen better days. Come forth, knight, and be made splendid.",
+                "Splendid's fine. Sturdy's better."),
             new AncientExchange("Tanx", "TANX",
-                "Do you fight for glory?",
-                "A good story never hurts. But first, I've got people to bring home."),
+                "TWO SWORDS! NOW THAT IS MORE LIKE IT!!",
+                "Ha! I knew you'd approve."),
             new AncientExchange("Vakuu", "VAKUU",
-                "Trade with me.",
-                "I have a stack of unsigned reports. I'll pay you to take them."),
+                "You realize your knights may [sine]never[/sine] see home?",
+                "They will. Name your price, and keep it honest."),
             new AncientExchange("Darv", "DARV",
-                "I collect what others leave behind.",
-                "Found a whetstone, by any chance? Mine's about worn through."),
+                "Grand Master! Got just the thing for ya... somewhere in here...",
+                "Got a whetstone in there? Mine's about worn through."),
         },
 
         Lines = new CombatLines(
@@ -105,12 +105,13 @@ public static class VarkaStory
                     new StoryOption("SIGN_EVERY_ONE", "Stop to sign every one of them.",
                         "Upgrade 2 random cards.",
                         new StoryEffect(StoryEffectKind.UpgradeRandomCards, 2),
-                        "He signs them against the wall, one after another. The courier has never seen "
-                      + "him read a report so carefully."),
+                        "He sorts out the ones that can't wait and signs them against the wall. The "
+                      + "courier finally gets to sit down."),
                     new StoryOption("SIGN_THEM_LATER", "Sign them later.",
                         "Gain 75 Gold. Add [gold]Overdue Reports[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.GainGoldAddCard, 75, typeof(OverdueReports)),
-                        "\"Tell her they're in good hands.\" He tucks the satchel under his cloak."),
+                        "\"Tell her they're in good hands.\" He tucks the satchel, and the expedition "
+                      + "funds packed with it, under his cloak."),
                     new StoryOption("REQUEST_REINFORCEMENTS", "Request reinforcements for the expedition.",
                         "Choose 1 of 3 random Uncommon Companions to add to your deck.",
                         StoryEffect.ChooseCompanion(CardRarity.Uncommon),
@@ -214,7 +215,8 @@ public static class VarkaStory
                     new StoryOption("SIGN_BY_LAMPLIGHT", "Sign them by lamplight.",
                         "Lose 8 HP. Upgrade 2 random cards. Remove all [gold]Overdue Reports[/gold] from your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 8),
-                        "He signs the last page at dawn, then goes back and reads the casualty lists twice.")
+                        "He reads every name on the casualty lists before he signs the last page. The lamp "
+                      + "burns out at dawn.")
                     {
                         Then = new[]
                         {
@@ -232,7 +234,7 @@ public static class VarkaStory
                     new StoryOption("LOSE_THEM_ON_THE_STAIRS", "Lose them on the stairs.",
                         "Gain 2 random potions. Add [gold]Overdue Reports[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.GainRandomPotions, 2),
-                        "He keeps the satchel. It had snacks in it.")
+                        "The reports go astray somewhere on the stairs. The potions packed under them don't.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(OverdueReports)) },
                     },
@@ -279,7 +281,7 @@ public static class VarkaStory
                     new StoryOption("CARRY_HER_LEDGER", "Carry her ledger the rest of the way.",
                         "Upgrade 3 random cards. Add [gold]Overdue Reports[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.UpgradeRandomCards, 3),
-                        "He reads it on the way. It's mostly complaints about him.")
+                        "He reads it on the way. Supply routes, a budget, and one page of complaints about him.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(OverdueReports)) },
                     },

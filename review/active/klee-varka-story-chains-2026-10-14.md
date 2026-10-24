@@ -183,8 +183,8 @@ he carries it now.
 
 | Option | Result |
 |---|---|
-| Stop to sign every one of them. | He signs them against the wall, one after another. The courier has never seen him read a report so carefully. |
-| Sign them later. | "Tell her they're in good hands." He tucks the satchel under his cloak. |
+| Stop to sign every one of them. | He sorts out the ones that can't wait and signs them against the wall. The courier finally gets to sit down. |
+| Sign them later. | "Tell her they're in good hands." He tucks the satchel, and the expedition funds packed with it, under his cloak. |
 | Request reinforcements. | "And not the new recruits. Send the ones who complain. They're usually right." |
 
 **The Second Satchel** (act 2, every option priced). Signing pays out whether
@@ -196,9 +196,9 @@ Opening line by act-1 choice: *signed* "You signed the last lot so fast, sir, sh
 
 | Option | Effect | Result |
 |---|---|---|
-| Sign them by lamplight. | Lose 8 HP. Upgrade 2 random cards. Remove all **Overdue Reports** from your deck. | He signs the last page at dawn, then goes back and reads the casualty lists twice. |
+| Sign them by lamplight. | Lose 8 HP. Upgrade 2 random cards. Remove all **Overdue Reports** from your deck. | He reads every name on the casualty lists before he signs the last page. The lamp burns out at dawn. |
 | Hand them to the courier. | Lose 75 Gold. Remove a card. | "Consider it a promotion. And a raise." |
-| Lose them on the stairs. | Gain 2 random potions. Add **Overdue Reports** to your deck. | He keeps the satchel. It had snacks in it. |
+| Lose them on the stairs. | Gain 2 random potions. Add **Overdue Reports** to your deck. | The reports go astray somewhere on the stairs. The potions packed under them don't. |
 
 **The Acting Grand Master** (act 3, a price with free ways out). Jean has a
 reason to be here, unlike Alice: she came to collect her late Grand Master.
@@ -209,7 +209,7 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 |---|---|---|
 | Let her lead the last stretch. | Lose 10 HP. Choose 1 of 3 random upgraded Rare Companions to add to your deck. | "Lead on, Acting Grand Master." "Then keep up, Grand Master." |
 | Promise a full report at Angel's Share. | Remove every Curse. Lose 50 Gold for each. Locked with no Curse, or with less Gold than the price. | "Every word. I'm buying." |
-| Carry her ledger the rest of the way. | Upgrade 3 random cards. Add **Overdue Reports** to your deck. | He reads it on the way. It's mostly complaints about him. |
+| Carry her ledger the rest of the way. | Upgrade 3 random cards. Add **Overdue Reports** to your deck. | He reads it on the way. Supply routes, a budget, and one page of complaints about him. |
 
 **The Rearguard** (act 1, every option priced):
 

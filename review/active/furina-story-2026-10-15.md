@@ -48,7 +48,7 @@ straightens before she can stop herself.*
 | Option | Effect | Result |
 |---|---|---|
 | Perform for no one. | Lose 8 HP. Upgrade 2 random cards. | She plays every part and finally lands the high note in the second act. Nobody claps. She bows anyway, and makes a note about the lighting. |
-| Sit in the front row. | Heal 10 HP. | She has never actually sat out here. The seats are softer than she thought. She stays until her feet stop aching. |
+| Sit in the front row. | Heal 10 HP. | No one turns to look at her. The seats are softer than she thought. She stays until her feet stop aching. |
 | Take a costume from the rack. | Gain a random relic. Add **Doubt** to your deck. | It fits perfectly. She would very much like to know who took her measurements. |
 
 **Act 1. Rising Water** (a memory; every option priced). *Water is creeping up
@@ -111,9 +111,9 @@ Charlotte's voice under her breath." *cast* "The cast list in the margin
 keeps growing." *kept* "The clipping is still in her glove." *no event*
 none. *Body:* A Melusine in a Palais courier's cap is waiting on the step,
 holding a very neatly addressed letter. "I'm to wait for your reply, Miss
-Furina." The letter reads: "Miss Furina. The Court notes your absence. The
-Court also notes that Café Lutèce has not sold a single La Lettre à Focalors
-in some weeks, and is concerned. N."
+Furina." The letter reads: "Miss Furina. The Court notes your absence.
+Café Lutèce reports that you have not been in for your usual. Please write.
+N."
 
 | Option | Effect | Result |
 |---|---|---|
@@ -151,7 +151,7 @@ for one.
 |---|---|---|
 | Sit in it one last time. | Lose 18 HP. Gain a random Rare relic. | Just as cold as she remembers. She tells herself she won't cry, and then she does. |
 | Walk past it. | Heal 20 HP. | "No, thank you," she says, as if it had offered, and keeps climbing. |
-| Break it. | Lose 8 HP. Remove a card. Remove every **Doubt**. | It shatters like a stage prop, because that's all this one is. |
+| Break it. | Lose 8 HP. Remove a card. Remove every **Doubt**. | It shatters like a stage prop, and a splinter catches her palm. |
 
 Cards named that already exist: Understudy's Debut, Let the People Rejoice,
 Tearful Monologue, and the eleven Guest Stars. Doubt is the base curse.
@@ -159,21 +159,21 @@ Tearful Monologue, and the eleven Guest Stars. Doubt is the base curse.
 ## 3. Her lines
 
 **Character select.** *The Regina of All Waters.* "She played a god for five
-hundred years and was very good at it. Now she chooses her own roles, and the
+hundred years to save Fontaine. Now she chooses her own roles, and the
 Spire is the biggest stage she has ever seen."
 
 **Ancients** (each Ancient's greeting, then hers):
 
 | Ancient | Greeting | Furina |
 |---|---|---|
-| Neow | A performer. How bright you burn. | Oh! Well. Thank you. Do you say that to everyone? |
-| Orobas | Your trinket hums. Let me make it sing. | As long as it's in tune. I'll know if it isn't. |
-| Pael | You have bitten off more than you can chew. | Did anyone ask you? No. I didn't think so. |
-| Tezcatara | Warm yourself by my light. | That's... actually very kind. Thank you. |
-| Nonupeipe | You wear a crown you set down. | I set it down on purpose. My neck is much happier. |
-| Tanx | Do you fight for glory? | Glory? Please. Have you read my reviews? |
-| Vakuu | Trade with me. | Show me what you have. And don't tell me it's priceless; everyone says that. |
-| Darv | I collect what others leave behind. | You'd have loved the Palais's lost property office. |
+| Neow | [sine]...you.. waited... ..so long...<br>..climb.. now...[/sine] | Five hundred years of waiting? I'm done with that. Up it is. |
+| Orobas | Shiny hat! Shiny everything! Change it? Change it!! | Not the hat. |
+| Pael | [thinky_dots]You have not slept in a long time...<br>Take from me... and rest...[/thinky_dots] | Is it that obvious? ...Don't answer that. |
+| Tezcatara | Oh, look at you, dear! Let me [jitter][b]burn[/b][/jitter] away all that worry. | ...Only the worry, please. Not the eyebrows. |
+| Nonupeipe | Ah, someone who knows how to wear a costume. Come, receive my blessing. | Finally, someone up here with taste. |
+| Tanx | A SWORD AND A SINGER!? SING AND FIGHT! BOTH!! | Finally, someone who appreciates range. |
+| Vakuu | Back on stage after so long? Let me make you [sine]unforgettable[/sine]. | I know exactly what being unforgettable costs. Read me the price. |
+| Darv | A star, here!? Quick, take somethin' before I change my mind! | Don't rush me. A star chooses her props carefully. |
 
 **In combat:** boss entry "So you're the headliner? Fine. Let's see who they
 came to see." Low HP "I'm fine! I'm... fine. Keep going." Her full Spend

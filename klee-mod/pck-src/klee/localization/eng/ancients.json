@@ -1,17 +1,17 @@
 {
-  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.ancient": "You have climbed far, little spark. Show me what you carried up my Spire.",
+  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.ancient": "A child. Here, at the top of my Spire.",
   "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.next": "Respond",
   "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-1r.char": "I saved this one for the top! You might wanna cover your ears!",
-  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.ancient": "The curtain falls at last, Regina of All Waters. Was it a performance, or was it real?",
+  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.ancient": "Still playing to an audience, Regina?",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now - the people rejoice, and their Regina takes her bow.",
-  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You could have stayed on your island. Why climb so far from the people who need you?",
+  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Every good show needs a villain. Places, please!",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "You left your island to climb my Spire.",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Because I couldn't be sure this place would never reach them. I'd rather find out myself than wait at home.",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. Five years on the road, and still you climb. What did you expect to find at the top?",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "I left it in good hands. I came to make sure this place never reaches them.",
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. Five years on the road, and still you climb.",
   "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "A good fight, then the road home. Mondstadt has waited long enough.",
-  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-0r.ancient": "Guuji. You climbed my Spire as if you were reading it. How does it end?",
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "Almost done. One fight, then the road home.",
+  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-0r.ancient": "Guuji. You read my Spire like a book.",
   "THE_ARCHITECT.talk.KLEEMOD-YAE.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-1r.char": "With a twist, naturally. Do keep up. I would hate to edit you out."
+  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-1r.char": "And I've reached the last page. Do keep up; I would hate to edit you out."
 }

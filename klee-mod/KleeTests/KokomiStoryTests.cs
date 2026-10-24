@@ -419,7 +419,7 @@ public class KokomiStoryTests
             K.Ancients.Select(a => a.AncientEntry));
         foreach (var a in K.Ancients)
         {
-            Assert.Contains(a.AncientLine, flat);
+            Assert.Contains(a.AncientLine.Replace("\n", "<br>"), flat);
             Assert.Contains(a.CharacterLine, flat);
             Assert.Equal(a.Ancient.ToUpperInvariant(), a.AncientEntry);
         }
