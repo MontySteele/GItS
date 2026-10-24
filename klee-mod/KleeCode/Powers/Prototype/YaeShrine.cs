@@ -1228,7 +1228,7 @@ public static class YaeShrine
 /// THE LIVE TENKO CLAUSE. A Tenko card's face carries
 /// <c>{InCombat:{YaeTenko}|}</c> right after "Tenko". In combat it says
 /// what the Tenko would do now, summed by kind over the Sakura standing
-/// (review r3): "Tenko (Sakura: 8 damage, 4 to each enemy, 5 Block)", a kind with
+/// (review r3): "Tenko (Sakura: 8 damage, 4 to each enemy, 5 Block in total)", a kind with
 /// none standing left out; with none at all "Tenko (no Sakura)". Empty off
 /// a combat, on a canonical card, and for anyone but a live Yae. The
 /// Tenko's own job only: before Edict and Fox Fire. Display only. Sim twin:
@@ -1247,15 +1247,20 @@ public static class YaeShrineFace
     /// read as the card's own damage.</summary>
     public const string TenkoPrefix = "Sakura: ";
 
+    /// <summary>The Yae suite (2026-10-23): the clause is the sum over every
+    /// Sakura standing, and "Tenko (Sakura: 15 damage)" read as each
+    /// Sakura's. The words say it is the total.</summary>
+    public const string TenkoSuffix = " in total";
+
     // KEYED (the localization census, 2026-10-23, step 3): the clause and
     // each kind's amount are rows beside the Tenko tip's
     // (`KLEEMOD-ARM_YAE_TENKO.live*`, `card_keywords`); the parts are a
-    // SmartFormat list, so a translation sets its own separator. The two
+    // SmartFormat list, so a translation sets its own separator. The three
     // consts above are the English, and the sim twin's.
     private const string Table = "card_keywords";
     private const string Tenko = "KLEEMOD-ARM_YAE_TENKO.";
     private static readonly CodeRow NoSakuraRow = new(Table, Tenko + "live_none", NoSakura);
-    private static readonly CodeRow LiveRow = new(Table, Tenko + "live", " (" + TenkoPrefix + "{Parts:list:{}|, })");
+    private static readonly CodeRow LiveRow = new(Table, Tenko + "live", " (" + TenkoPrefix + "{Parts:list:{}|, }" + TenkoSuffix + ")");
     private static readonly CodeRow DamageRow = new(Table, Tenko + "live_damage", "{n} damage");
     private static readonly CodeRow ToEachRow = new(Table, Tenko + "live_to_each", "{n} to each enemy");
     private static readonly CodeRow BlockRow = new(Table, Tenko + "live_block", "{n} Block");
@@ -1287,7 +1292,7 @@ public static class YaeShrineFace
                                               s.Annotations));
 
     /// <summary>The clause for each kind's sum, in kind order, zeros left
-    /// out: " (Sakura: 8 damage, 4 to each enemy, 5 Block)"; all zero is the "no
+    /// out: " (Sakura: 8 damage, 4 to each enemy, 5 Block in total)"; all zero is the "no
     /// Sakura" words. PURE.</summary>
     public static string TenkoWords(int damage, int toEach = 0, int block = 0)
     {

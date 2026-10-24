@@ -95,10 +95,10 @@ def test_the_tenko_clause_sums_the_sakura_standing_by_kind():
     st = _state()
     for _ in range(3):
         _play(st, _ym("yakan_evocation"))        # Levels 1, 1, 1
-    assert Y.tenko_line(st) == " (Sakura: 9 damage)"
+    assert Y.tenko_line(st) == " (Sakura: 9 damage in total)"
     Y.ledger(st.player).sakura[1].kind = Y.FOXFIRE
     Y.ledger(st.player).sakura[2].kind = Y.KITSUNE
-    assert Y.tenko_line(st) == " (Sakura: 3 damage, 2 to each enemy, 3 Block)"
+    assert Y.tenko_line(st) == " (Sakura: 3 damage, 2 to each enemy, 3 Block in total)"
 
 
 def test_the_clause_reads_levels_and_red_ink_as_the_action_does():
@@ -191,7 +191,7 @@ def test_the_tenko_clause_reads_the_shrine():
     st = _state()
     assert Y.tenko_line(st) == Y.NO_SAKURA == " (no Sakura)"
     _play(st, _ym("yakan_evocation"))
-    assert Y.tenko_line(st) == " (Sakura: 3 damage)"
+    assert Y.tenko_line(st) == " (Sakura: 3 damage in total)"
 
 
 # ---------------------------------------------------------------------------

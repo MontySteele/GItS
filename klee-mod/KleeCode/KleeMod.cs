@@ -396,9 +396,13 @@ public static class KleeMod
                     // numbers ("that is a 4-point swing on a 1-cost card and it is
                     // nowhere on the screen"). The comment sits ABOVE the key: this row
                     // is scraped by `tools/gen_keyword_loc.py`, whose reader wants the
-                    // string to follow the `=` directly.
+                    // string to follow the `=` directly. The Yae suite (2026-10-23):
+                    // "which applies before this hit" left a seat asking whether the
+                    // card's printed number already counted it. It does (this
+                    // `AuraPower.ModifyDamageMultiplicative` x1.5 runs in the preview
+                    // too), so the row says the hit's 1.5x the way Melt says its 1.75x.
                     ["KLEEMOD-SUPERCONDUCT_PREVIEW.description"] =
-                        $"[gold]Electro[/gold] meets [gold]Cryo[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.SuperconductVuln}[/blue] [gold]Vulnerable[/gold], which applies before this hit.",
+                        $"[gold]Electro[/gold] meets [gold]Cryo[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.SuperconductVuln}[/blue] [gold]Vulnerable[/gold] before this hit, so this hit deals 1.5x damage.",
                     ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.title"] = "Reaction preview: Electro-Charged",
                     // `EB-665` (Klee r24 lane 1). THE PREVIEW NAMES THE DEBUFF
                     // THE BODY SHOWS. The dot IS the core's own PoisonPower
