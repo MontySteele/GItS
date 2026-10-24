@@ -16,16 +16,13 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
-- Power badges: check the three Reaction-icon badges (Aftershock, Grand Strategist, All Four Winds) read at game size; they are wide and render small.
+- Power badges: Aftershock, Grand Strategist and All Four Winds are rows of element glyphs about half the height of a base badge; at game size "Pyro × Hydro" reads as two dots (live look 2026-10-23). Redraw at full badge size; the look is a pick in `QUEUE.md`.
 - Icon declutter leftovers (2026-10-19): Courtroom Drama and Quick Change are gone from both engines. Study Buddy (`ReplayNextCompanionPower`) stays: the generator's `replay_next_companion` op emits it, and that op is live in the sim, the pilot and the tier05 draft model, so retiring it is a sim change, not a repoint. The sim also keeps twins of the powers deleted on 2026-10-19 (`furina_stage.py`, `kokomi_plan.py`, `klee_overhaul.py`, `varka_oath.py`), and nothing applies them; left while the Furina and Kokomi passes are open.
-- Klee's rest-site pose is a still: BaseLib rebuilds the rest sprite from the texture alone, so an idle loop there needs code.
+- Rest-site idle loops: every kit's rest pose is one seated still with the breathing of `StaticPortraitIdle.cs`; a loop needs a seated loop clip in `tools/klee_render/clips.py` rendered per kit, and then only a `Node2D`-rooted rest scene in `tools/build_pck.ps1` (BaseLib keeps its children; no patch). Waits on the art.
 - Turn-start order: Durin's Pyro hit, Neuvillette's Hydro, Varka's Swirl, Navia's Geo and Sigewinne's Hydro all share `AfterPlayerTurnStart`, so the mod gives them no order where the sim does; stage them into one ordered broadcast if a seat sees the two disagree.
 - Element port, phase two (`review/ruled/element-home-review-2026-09-28.md` §7.2, §7.4): Burning (a Swirl or Crystallize on a burning enemy consumes the held Pyro; Burning keeps ticking) and Dendro as ruled, tested on Kirara and Emilie. Neither engine has Burning or Dendro today.
-- Kaiser Crab (Varka wave 2026-10-13, lane 5 fight 16): when Baron Bunny's turn-start hit killed Rocket, Crab Rage's 99 Block never reached Crusher. The base game grants it in `CrabRagePower.AfterDeath` and no mod code was found that removes it; reproduce live (`set_hp` Rocket low, Baron Bunny).
 - Upgrades that only cut cost or add Innate: Yae's half is built (2026-10-23, `review/active/yae-block-edit-pass-2026-10-19.md`, "Upgrade census (2026-10-23)"). At Furina's next card pass, count their cost-only and Innate-only upgrades against the base five and replace the excess with a real upgrade, as Kokomi's finish pass (`review/active/kokomi-cards-2026-10-18.md` sec. 7, upgrade census) and Varka's powers pass (`varka-fang-next`) did ([USER], 2026-10-19: "You do have a habit of making too many powers just decrease their cost by 1 on upgrade").
-- Durin's start-of-turn tick skipped one fight (Fogmog, trace); `RandomEnemy` may pick the Eye With Teeth illusion (`CompanionOverhaulPowers.cs:51`). Live look.
 
-- Kokomi: a Strike planned by Grand Design carried out with no HP loss against a sleeping Bygone Effigy (suite 1 lane 5, fight 5); replay in a scenario to tell a sleep/Slow interaction from a dropped hit.
 
 ## Harness, bridge, tools and sim
 

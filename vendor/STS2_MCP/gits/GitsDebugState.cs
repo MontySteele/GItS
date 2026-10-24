@@ -467,6 +467,7 @@ using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Multiplayer.Game;
 using MegaCrit.Sts2.Core.Multiplayer.Game.PeerInput;
+using MegaCrit.Sts2.Core.DevConsole.ConsoleCommands;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
 
@@ -487,7 +488,7 @@ public static partial class McpMod
     private static readonly string[] GitsDebugStateOps =
         { "set_resource", "set_energy", "set_hp", "set_block", "set_power",
           "clear_hand", "hover", "unhover", "force_next_event", "skip_act",
-          "give_relic", "give_potion", "give_gold" };
+          "give_relic", "give_potion", "give_gold", "fight" };
 
     /// <summary>
     /// THE THREE RUN GRANTS (live look 8b, 2026-09-16; `give_gold` from
@@ -541,7 +542,7 @@ public static partial class McpMod
     /// makes its own, in its own words, through
     /// <see cref="GitsSkipAct.Decide"/>.</summary>
     private static readonly string[] GitsDebugStateOutOfCombatOps =
-        { "force_next_event", "skip_act" };
+        { "force_next_event", "skip_act", "fight" };
 
     /// <summary>
     /// The card id this route last hovered, or the empty string -- THIS
@@ -882,7 +883,7 @@ public static partial class McpMod
     private static Dictionary<string, object?> GitsDebugStateApply(
         string op, string who, string resourceId, string powerId,
         string cardName, string eventId, string relicId, string potionId,
-        int amount, int slot, string why)
+        int amount, int slot, string why, string encounterId = "")
     {
         if (!RunManager.Instance.IsInProgress)
             return Error("No run in progress; there is no player to write to.");
@@ -898,9 +899,12 @@ public static partial class McpMod
         // its OWN combat refusal a line later, in its own words.
         // Everything else keeps the check unchanged.
         if (Array.IndexOf(GitsDebugStateOutOfCombatOps, op) >= 0)
-            return op == "skip_act"
-                ? GitsSkipActApply(op, why)
-                : GitsForceNextEventApply(op, eventId, why);
+            return op switch
+            {
+                "skip_act" => GitsSkipActApply(op, why),
+                "fight" => GitsFightApply(op, encounterId, why),
+                _ => GitsForceNextEventApply(op, eventId, why),
+            };
 
         // Live look 8b. THE TWO RUN GRANTS, above the combat gate and below
         // the multiplayer one: they work on a map and in a fight alike, and
@@ -1286,6 +1290,39 @@ public static partial class McpMod
             ["queued"] = true,
             ["why"] = why,
             ["relic"] = entry
+        };
+    }
+
+    /// <summary>
+    /// Jump the local player into one named encounter (`KAISER_CRAB_BOSS`),
+    /// through the game's own dev console command, <c>FightConsoleCmd</c>:
+    /// <c>RunManager.EnterRoomDebug(RoomType.Monster, ...)</c> with the
+    /// encounter's rng re-rolled. For a live repro of one fight (the 2026-10-23
+    /// backlog live looks), never for a number: the room is not one the map
+    /// produced. Out of combat only, like `force_next_event`.
+    /// </summary>
+    private static Dictionary<string, object?> GitsFightApply(
+        string op, string encounterId, string why)
+    {
+        if (string.IsNullOrWhiteSpace(encounterId))
+            return Error("fight needs an 'encounter' id, e.g. KAISER_CRAB_BOSS.");
+        if (CombatManager.Instance.IsInProgress)
+            return Error("fight is refused in combat: finish or leave this one first.");
+        var runState = RunManager.Instance.DebugOnlyGetState();
+        var player = runState == null ? null : LocalContext.GetMe(runState);
+        var result = new FightConsoleCmd().Process(player, new[] { encounterId });
+        GD.Print($"[STS2 MCP][GItS] debug_state: {op} {encounterId} "
+                 + $"success={result.success} | why: {why}");
+        if (!result.success) return Error(result.msg ?? $"fight {encounterId} refused");
+        return new Dictionary<string, object?>
+        {
+            ["status"] = "ok",
+            ["message"] = result.msg,
+            ["guardrail"] = GitsDebugStateGuardrail,
+            ["op"] = op,
+            ["queued"] = true,
+            ["why"] = why,
+            ["encounter"] = encounterId.ToUpperInvariant(),
         };
     }
 
@@ -2038,13 +2075,15 @@ public static partial class McpMod
             string evt = GitsDebugStr(parsed, "event") ?? "";
             string relic = GitsDebugStr(parsed, "relic") ?? "";
             string potion = GitsDebugStr(parsed, "potion") ?? "";
+            string encounter = GitsDebugStr(parsed, "encounter") ?? "";
 
             var applyTask = RunOnMainThread(
                 () => GitsDebugStateApply(op!.Trim(), who.Trim(),
                                           resource.Trim(), power.Trim(),
                                           card.Trim(), evt.Trim(),
                                           relic.Trim(), potion.Trim(),
-                                          amount, slot, why!.Trim()));
+                                          amount, slot, why!.Trim(),
+                                          encounter.Trim()));
             SendJson(response, applyTask.GetAwaiter().GetResult());
         }
         catch (Exception ex)

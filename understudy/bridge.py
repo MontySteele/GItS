@@ -772,13 +772,13 @@ def meter_ledger() -> dict:
 # Tasks.
 DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block", "set_power",
              "clear_hand", "hover", "unhover", "force_next_event", "skip_act",
-             "give_relic", "give_potion", "give_gold")
+             "give_relic", "give_potion", "give_gold", "fight")
 
 
 def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
                 resource: str = "", power: str = "", card: str = "",
                 event: str = "", relic: str = "", potion: str = "",
-                slot: int = -1) -> dict:
+                slot: int = -1, encounter: str = "") -> dict:
     """Set one combat number. Returns the endpoint's report.
 
     A `status: "error"` answer comes back as an ordinary dict, not an
@@ -794,12 +794,13 @@ def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
         # happens when a live game is up.
         raise ValueError("debug_state needs a --why: every board write is "
                          "logged with its reason")
-    return _request(DEBUG_STATE, {"op": op, "amount": int(amount),
-                                  "who": who, "resource": resource,
-                                  "power": power, "card": card,
-                                  "event": event, "relic": relic,
-                                  "potion": potion, "slot": int(slot),
-                                  "why": str(why)})
+    payload = {"op": op, "amount": int(amount), "who": who,
+               "resource": resource, "power": power, "card": card,
+               "event": event, "relic": relic, "potion": potion,
+               "slot": int(slot), "why": str(why)}
+    if encounter:
+        payload["encounter"] = encounter
+    return _request(DEBUG_STATE, payload)
 
 
 def give_relic(relic_id: str, why: str) -> dict:
@@ -851,6 +852,16 @@ def give_gold(amount: int, why: str) -> dict:
     prediction and the next state is what landed.
     """
     return debug_state("give_gold", why, amount=amount)
+
+
+def fight(encounter_id: str, why: str) -> dict:
+    """Jump into one named encounter (`KAISER_CRAB_BOSS`) off a map screen.
+
+    The game's own dev console `fight` command (`FightConsoleCmd`). For a
+    live repro of one fight; the room is not one the map produced, so
+    nothing measured in it is comparable to anything.
+    """
+    return debug_state("fight", why, encounter=encounter_id)
 
 
 def debug_state_info() -> dict:

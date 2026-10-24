@@ -232,6 +232,7 @@ python -m understudy.force_event <EVENT_ID> --why "..."
 python -m understudy.skip_act --list
 python -m understudy.skip_act --why "..."
 python -c "from understudy import bridge; print(bridge.give_relic('THE_BOOT', why='...'))"
+python -c "from understudy import bridge; print(bridge.fight('KAISER_CRAB_BOSS', why='...'))"   # off a map or reward screen
 ```
 
 All need the bridge and an open run, all require `--why`, and every response

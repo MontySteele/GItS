@@ -227,7 +227,7 @@ CURSOR_STEPS = ("hover", "unhover")
 # `bridge.give_potion` / `bridge.give_gold` are the attended doors instead --
 # `give_card`'s own posture one endpoint over.
 NON_SCENARIO_OPS = ("force_next_event", "skip_act",
-                    "give_relic", "give_potion", "give_gold")
+                    "give_relic", "give_potion", "give_gold", "fight")
 
 OTHER_STEPS = ("expect", "read", "mark", "wait")
 STEP_VERBS = ACTION_STEPS + SETUP_STEPS + CURSOR_STEPS + OTHER_STEPS
