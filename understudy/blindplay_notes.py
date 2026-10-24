@@ -2726,8 +2726,8 @@ REACTION_KEYWORDS: dict[str, str] = {
     # C#'s own, added to `KLEEMOD-SUPERCONDUCT_PREVIEW` in the same commit, so
     # the tooltip and this page cannot say different things about it.
     "Superconduct": ("Electro on a Cryo aura, or Cryo on an Electro aura. The "
-                     "reacted enemy gains 2 Vulnerable, which applies before "
-                     "this hit."),
+                     "reacted enemy gains 2 Vulnerable before this hit, so this "
+                     "hit deals 1.5x damage."),
     # `EB-357`: AND WHAT IT LOOKS LIKE ON THE PANEL. The dot is the game's own
     # Poison stack, so it prints as `Poison N`, the stacks add (3, 10, 13 on
     # one Eel), and it ticks before the enemy acts; the entry said none of

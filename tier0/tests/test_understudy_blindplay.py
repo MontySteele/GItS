@@ -7327,12 +7327,17 @@ def test_the_superconduct_row_says_its_vulnerable_lands_before_the_hit():
     sighted player hovers and this page say one thing.
 
     Seen to FAIL: the row named the debuff and not its timing.
+
+    THE YAE SUITE (2026-10-23): "which applies before this hit" left a seat
+    asking whether the card's printed number already counted it. It does
+    (`AuraPower.ModifyDamageMultiplicative` folds the x1.5 in the preview
+    too), so the row says the hit's 1.5x the way Melt says its 1.75x.
     """
     page = blindplay.observe(
         elemental_hand_state(elements=("Electro", "Cryo")))
     assert ("- **Superconduct** — Electro on a Cryo aura, or Cryo on an "
-            "Electro aura. The reacted enemy gains 2 Vulnerable, which "
-            "applies before this hit.") in page
+            "Electro aura. The reacted enemy gains 2 Vulnerable before this "
+            "hit, so this hit deals 1.5x damage.") in page
     # The rows whose effect does NOT touch the triggering hit are unchanged:
     # a clause that printed on all six would be six claims to check, five of
     # them about nothing.
@@ -7462,7 +7467,7 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         # `EB-472` put the order clause on this row, in the C# and here in
         # one commit, so the anchor holds both halves of the sentence.
         "Superconduct": ["reacted enemy gains ",
-                         "which applies before this hit"],
+                         "before this hit, so this hit deals 1.5x damage"],
         # `EB-665` put the DEBUFF'S NAME on this row, in the C# and here in one
         # commit: the body prints `Poison 4` and the preview said only "loses
         # 4 HP", so the anchor holds the name as well as the tick.
