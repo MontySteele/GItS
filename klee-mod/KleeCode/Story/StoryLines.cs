@@ -68,6 +68,24 @@ public static class StoryLines
     public static string Key(string characterEntry, string line) =>
         $"{characterEntry}.story.{line}";
 
+    /// <summary>The loc key of a line's variant (<see cref="CombatLineVariant"/>):
+    /// <c>KLEEMOD-KLEE.story.bossEntry_dodocoMissing</c>.</summary>
+    public static string VariantKey(string characterEntry, string line, string variant) =>
+        Key(characterEntry, line + "_" + variant);
+
+    /// <summary>The loc key she says for this moment, given the run's saved
+    /// story: the first of her variants for it whose tests all hold, else
+    /// her plain line.</summary>
+    public static string LineKey(CharacterStory story, string line, IReadOnlyList<StoryRecord> records)
+    {
+        var own = StoryRegistry.EntryOf(story.Character);
+        foreach (var v in story.LineVariants)
+        {
+            if (v.Line == line && v.When.All(c => c.Holds(records))) return VariantKey(own, line, v.Name);
+        }
+        return Key(own, line);
+    }
+
     /// <summary>The loc keys of a pair exchange, filed under the character
     /// whose table holds it (the partner speaks the first).</summary>
     public static string PairKey(string characterEntry, string partnerEntry, bool partnerSpeaks) =>
@@ -130,7 +148,8 @@ public static class StoryLines
             var own = StoryRegistry.EntryOf(speech.Story.Character);
             if (speech.Pair == null)
             {
-                Say(owner.Creature, Key(own, BossEntry));
+                Say(owner.Creature, LineKey(speech.Story, BossEntry,
+                    StoryHistory.RecordsFor(owner.RunState, owner)));
                 continue;
             }
             var partner = players[speech.PartnerSeat];
@@ -281,8 +300,8 @@ public sealed class StoryCombatHooks : AbstractModel
             {
                 var story = StoryRegistry.For(player.Character);
                 if (story?.Lines == null) continue;
-                StoryLines.Say(player.Creature,
-                    StoryLines.Key(StoryRegistry.EntryOf(story.Character), StoryLines.BossKill));
+                StoryLines.Say(player.Creature, StoryLines.LineKey(story, StoryLines.BossKill,
+                    StoryHistory.RecordsFor(room.CombatState.RunState, player)));
             }
         }
         catch (Exception e)

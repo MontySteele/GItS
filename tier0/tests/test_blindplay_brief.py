@@ -322,7 +322,7 @@ def test_define_falls_back_to_the_glossary_marked_off_screen():
                    + blindplay_brief.OFF_SCREEN_MARK + "\n")
     assert out.rstrip("\n").endswith("(not on this screen)")
     assert blindplay_brief.define(page, '"Companion"').startswith(
-        "- **Companion** — A card titled with")
+        "- **Companion** — A shared ally card")
     # The Bomb row's `{growth}` is filled with the rule's constant.
     bomb = blindplay_brief.define(page, "BOMB")
     assert "{" not in bomb and "}" not in bomb

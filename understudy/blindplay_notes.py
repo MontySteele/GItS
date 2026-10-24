@@ -1676,8 +1676,8 @@ COMPANION_SLOT_SENTENCE = (
 
 #: 2026-09-25. What a Companion IS, word for word the in-game tip
 #: (`ArmKeywordTips.ForCompanion`).
-COMPANION_DEFINITION = ("A card titled with a character's name, a dash, then "
-                        "its own.")
+COMPANION_DEFINITION = ("A shared ally card, such as Jean's Gale Blade. "
+                        "Varka's Knights count too.")
 
 def _summon_row(hay: str) -> str:
     """The Summon row. ONE variant since the trio can be cloned (2026-09-25;

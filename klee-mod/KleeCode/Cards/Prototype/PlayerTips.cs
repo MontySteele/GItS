@@ -50,8 +50,8 @@ internal static class PlayerTips
     /// <summary>The merged Guest Star box, the paper's sentence. Declared
     /// before <see cref="Bodies"/>, which reads it at type init.</summary>
     internal static readonly string GuestStarBody =
-        "Joins at the back and acts at the end of your turn. A fourth guest "
-      + "pushes out the oldest.";
+        "Joins at the back and acts at the end of your turn. If the stage "
+      + "is full, it pushes out the oldest.";
 
     /// <summary>The law constants the bodies quote, by var name.</summary>
     internal static readonly IReadOnlyDictionary<string, object> Vars = CodeText.Vars(
@@ -117,8 +117,8 @@ internal static class PlayerTips
             "An element meets another element's aura on an enemy, and the "
           + "two react.",
         [ArmKeywordTips.CompanionKey] =
-            "A card titled with a character's name, a dash, then its "
-          + "own.",
+            "A shared ally card, such as Jean's Gale Blade. Varka's "
+          + "Knights count too.",
         [ArmKeywordTips.LightfallSwordKey] =
             "A blade hung over an enemy. Its badge counts down the turns "
           + "until it falls.",

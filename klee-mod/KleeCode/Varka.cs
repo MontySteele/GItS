@@ -39,7 +39,7 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
         // CharacterLoc set plus bestiaryQuote). A missing row renders as
         // its raw key: the co-op end-turn ping bubble did (playtest
         // 2026-10-03). CharacterLocCompletenessTests pins the set.
-        ("aromaPrinciple", "[sine][green]Tempting... but I've still got people counting on me.[/green][/sine]"),
+        ("aromaPrinciple", "[sine][green]For Mondstadt... and the knights who followed me...[/green][/sine]"),
         ("banter.alive.endTurnPing", "All set? Let's keep moving."),
         ("banter.dead.endTurnPing", "..."),
         ("bestiaryQuote", "Haven't fought one of these yet. Should be interesting."),

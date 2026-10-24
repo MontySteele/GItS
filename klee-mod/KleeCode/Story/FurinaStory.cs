@@ -33,34 +33,34 @@ public static class FurinaStory
 
         IntroTitle = "The Regina of All Waters.",
         IntroLine =
-            "She played a god for five hundred years and was very good at it. Now she chooses her own roles, and the Spire is the biggest stage she has ever seen.",
+            "She played a god for five hundred years to save Fontaine. Now she chooses her own roles, and the Spire is the biggest stage she has ever seen.",
 
         Ancients = new[]
         {
             new AncientExchange("Neow", "NEOW",
-                "A performer. How bright you burn.",
-                "Oh! Well. Thank you. Do you say that to everyone?"),
+                "[sine]...you.. waited... ..so long...\n..climb.. now...[/sine]",
+                "Five hundred years of waiting? I'm done with that. Up it is."),
             new AncientExchange("Orobas", "OROBAS",
-                "Your trinket hums. Let me make it sing.",
-                "As long as it's in tune. I'll know if it isn't."),
+                "Shiny hat! Shiny everything! Change it? Change it!!",
+                "Not the hat."),
             new AncientExchange("Pael", "PAEL",
-                "You have bitten off more than you can chew.",
-                "Did anyone ask you? No. I didn't think so."),
+                "[thinky_dots]You have not slept in a long time...\nTake from me... and rest...[/thinky_dots]",
+                "Is it that obvious? ...Don't answer that."),
             new AncientExchange("Tezcatara", "TEZCATARA",
-                "Warm yourself by my light.",
-                "That's... actually very kind. Thank you."),
+                "Oh, look at you, dear! Let me [jitter][b]burn[/b][/jitter] away all that worry.",
+                "...Only the worry, please. Not the eyebrows."),
             new AncientExchange("Nonupeipe", "NONUPEIPE",
-                "You wear a crown you set down.",
-                "I set it down on purpose. My neck is much happier."),
+                "Ah, someone who knows how to wear a costume. Come, receive my blessing.",
+                "Finally, someone up here with taste."),
             new AncientExchange("Tanx", "TANX",
-                "Do you fight for glory?",
-                "Glory? Please. Have you read my reviews?"),
+                "A SWORD AND A SINGER!? SING AND FIGHT! BOTH!!",
+                "Finally, someone who appreciates range."),
             new AncientExchange("Vakuu", "VAKUU",
-                "Trade with me.",
-                "Show me what you have. And don't tell me it's priceless; everyone says that."),
+                "Back on stage after so long? Let me make you [sine]unforgettable[/sine].",
+                "I know exactly what being unforgettable costs. Read me the price."),
             new AncientExchange("Darv", "DARV",
-                "I collect what others leave behind.",
-                "You'd have loved the Palais's lost property office."),
+                "A star, here!? Quick, take somethin' before I change my mind!",
+                "Don't rush me. A star chooses her props carefully."),
         },
 
         Lines = new CombatLines(
@@ -91,7 +91,7 @@ public static class FurinaStory
                 EventType: typeof(FurinaEmptyHouse),
                 Title: "An Empty House",
                 Body:
-                    "A theatre stands on this landing, impossibly: red velvet rows and not one seat taken. "
+                    "A theater stands on this landing, impossibly: red velvet rows and not one seat taken. "
                   + "As Furina walks in, the stage lights come up, as if they had been waiting for her. "
                   + "She straightens before she can stop herself.",
                 Options: new[]
@@ -107,7 +107,7 @@ public static class FurinaStory
                     new StoryOption("SIT_IN_THE_FRONT_ROW", "Sit in the front row.",
                         "Heal 10 HP.",
                         new StoryEffect(StoryEffectKind.Heal, 10),
-                        "She has never actually sat out here. The seats are softer than she thought. She "
+                        "No one turns to look at her. The seats are softer than she thought. She "
                       + "stays until her feet stop aching."),
                     new StoryOption("TAKE_A_COSTUME", "Take a costume from the rack.",
                         "Gain a random relic. Add [gold]Doubt[/gold] to your deck.",
@@ -232,7 +232,7 @@ public static class FurinaStory
                 {
                     new StoryOpening("PERFORMED",
                         new StoryCondition(typeof(FurinaEmptyHouse), "PERFORM_FOR_NO_ONE"),
-                        "Her voice is still a little hoarse from the empty theatre."),
+                        "Her voice is still a little hoarse from the empty theater."),
                     new StoryOpening("FRONT_ROW",
                         new StoryCondition(typeof(FurinaEmptyHouse), "SIT_IN_THE_FRONT_ROW"),
                         "She still remembers how soft those seats were."),
@@ -264,7 +264,7 @@ public static class FurinaStory
                         "Heal 15 HP. Add [gold]Stage Fright[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.Heal, 15),
                         "\"I did what I had to, and it worked.\" The scale doesn't move. \"Well? Say "
-                      + "something.\" It never could decide anything by itself.")
+                      + "something.\" This copy never could decide anything by itself.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(StageFright)) },
                     },
@@ -302,8 +302,8 @@ public static class FurinaStory
                 Body:
                     "A Melusine in a Palais courier's cap is waiting on the step, holding a very neatly "
                   + "addressed letter. \"I'm to wait for your reply, Miss Furina.\" The letter reads: "
-                  + "\"Miss Furina. The Court notes your absence. The Court also notes that Café Lutèce has "
-                  + "not sold a single La Lettre à Focalors in some weeks, and is concerned. N.\"",
+                  + "\"Miss Furina. The Court notes your absence. Café Lutèce reports that you have not "
+                  + "been in for your usual. Please write. N.\"",
                 Options: new[]
                 {
                     new StoryOption("WRITE_BACK_AT_LENGTH", "Write back at length.",
@@ -422,7 +422,7 @@ public static class FurinaStory
                     new StoryOption("BREAK_IT", "Break it.",
                         "Lose 8 HP. Remove a card. Remove every [gold]Doubt[/gold].",
                         new StoryEffect(StoryEffectKind.LoseHp, 8),
-                        "It shatters like a stage prop, because that's all this one is.")
+                        "It shatters like a stage prop, and a splinter catches her palm.")
                     {
                         Then = new[]
                         {

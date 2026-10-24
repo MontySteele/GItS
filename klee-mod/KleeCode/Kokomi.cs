@@ -47,7 +47,7 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         // its raw key: the co-op end-turn ping bubble did (playtest
         // 2026-10-03). CharacterLocCompletenessTests pins the set.
         // Utility lines: review/active/kokomi-story-2026-10-16.md, pick 3 (a).
-        ("aromaPrinciple", "[sine][blue]Give me a moment. I'll find the way through.[/blue][/sine]"),
+        ("aromaPrinciple", "[sine][blue]Watatsumi is counting on me... I will not lose my way...[/blue][/sine]"),
         ("banter.alive.endTurnPing", "Whenever you're ready. I'm set."),
         ("banter.dead.endTurnPing", "..."),
         ("bestiaryQuote", "I have no notes on this one yet."),

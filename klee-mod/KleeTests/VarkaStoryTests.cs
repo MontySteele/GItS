@@ -62,7 +62,7 @@ public class VarkaStoryTests
         foreach (var a in V.Ancients)
         {
             Assert.Contains(
-                $"| {a.Ancient} | \"{ToPaper(a.AncientLine)}\" | \"{ToPaper(a.CharacterLine)}\" |",
+                $"| {a.Ancient} | \"{ToPaper(a.AncientLine).Replace("\n", "<br>")}\" | \"{ToPaper(a.CharacterLine)}\" |",
                 paper);
             Assert.Equal(a.Ancient.ToUpperInvariant(), a.AncientEntry);
         }

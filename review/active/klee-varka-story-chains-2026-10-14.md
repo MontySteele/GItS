@@ -97,7 +97,7 @@ Opening line by act-1 choice: *chased* "Klee knows this trail. She ran most of i
 |---|---|---|
 | Ask nicely for Dodoco back. | Choose 1 of 3 random Uncommon Attacks to add to your deck. Remove every **Doubt**. | Klee trades it her last snack. Dodoco is a little sticky, but fine. |
 | Grab Dodoco and some treasure, and run! | Lose 11 HP. Gain a random relic. Remove every **Doubt**. | It bites. Klee doesn't let go of either. |
-| Swap her best bomb for Dodoco. | Transform a card. Remove every **Doubt**. | It gives her a rock in return. Klee keeps the rock. |
+| Swap her best bomb for Dodoco. | Transform a card. Remove every **Doubt**. | The creature takes the bomb and lets Dodoco go. It gives her a rock, too. Klee keeps the rock. |
 
 **The Knights Come Looking** keeps its options and effects. On the Dodoco
 thread it opens: "Dodoco rides on Klee's shoulder the whole way." **If Dodoco
@@ -130,7 +130,7 @@ in the chain):
 | Option | Effect | Result |
 |---|---|---|
 | It's an emergency! Open it! | Lose 12 HP. Gain a random relic. | KABOOM. Mom wasn't joking about lively. Inside, wrapped in fireproof cloth, is something wonderful. |
-| Save it for a real emergency. | Lose 5 HP. Gain a random potion. Mom's chest will still be there. | The chest sputters at her the whole way up. Klee carries it very, very carefully. |
+| Save it for a real emergency. | Lose 5 HP. Gain a random potion. Klee takes Mom's chest with her. | The chest sputters at her the whole way up. Klee carries it very, very carefully. |
 | Leave it for the next adventurer. | Lose 100 Gold. Transform 2 cards. Locked with less than 100 Gold. | Klee swaps in two of her own bombs, and some Mora for luck. Fair's fair. |
 
 | Back away from the ticking. | Nothing. | Klee tiptoes backwards all the way to the stairs. Dodoco keeps watch. |
@@ -183,8 +183,8 @@ he carries it now.
 
 | Option | Result |
 |---|---|
-| Stop to sign every one of them. | He signs them against the wall, one after another. The courier has never seen him read a report so carefully. |
-| Sign them later. | "Tell her they're in good hands." He tucks the satchel under his cloak. |
+| Stop to sign every one of them. | He sorts out the ones that can't wait and signs them against the wall. The courier finally gets to sit down. |
+| Sign them later. | "Tell her they're in good hands." He tucks the satchel, and the expedition funds packed with it, under his cloak. |
 | Request reinforcements. | "And not the new recruits. Send the ones who complain. They're usually right." |
 
 **The Second Satchel** (act 2, every option priced). Signing pays out whether
@@ -196,9 +196,9 @@ Opening line by act-1 choice: *signed* "You signed the last lot so fast, sir, sh
 
 | Option | Effect | Result |
 |---|---|---|
-| Sign them by lamplight. | Lose 8 HP. Upgrade 2 random cards. Remove all **Overdue Reports** from your deck. | He signs the last page at dawn, then goes back and reads the casualty lists twice. |
+| Sign them by lamplight. | Lose 8 HP. Upgrade 2 random cards. Remove all **Overdue Reports** from your deck. | He reads every name on the casualty lists before he signs the last page. The lamp burns out at dawn. |
 | Hand them to the courier. | Lose 75 Gold. Remove a card. | "Consider it a promotion. And a raise." |
-| Lose them on the stairs. | Gain 2 random potions. Add **Overdue Reports** to your deck. | He keeps the satchel. It had snacks in it. |
+| Lose them on the stairs. | Gain 2 random potions. Add **Overdue Reports** to your deck. | The reports go astray somewhere on the stairs. The potions packed under them don't. |
 
 **The Acting Grand Master** (act 3, a price with free ways out). Jean has a
 reason to be here, unlike Alice: she came to collect her late Grand Master.
@@ -209,11 +209,11 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 |---|---|---|
 | Let her lead the last stretch. | Lose 10 HP. Choose 1 of 3 random upgraded Rare Companions to add to your deck. | "Lead on, Acting Grand Master." "Then keep up, Grand Master." |
 | Promise a full report at Angel's Share. | Remove every Curse. Lose 50 Gold for each. Locked with no Curse, or with less Gold than the price. | "Every word. I'm buying." |
-| Carry her ledger the rest of the way. | Upgrade 3 random cards. Add **Overdue Reports** to your deck. | He reads it on the way. It's mostly complaints about him. |
+| Carry her ledger the rest of the way. | Upgrade 3 random cards. Add **Overdue Reports** to your deck. | He reads it on the way. Supply routes, a budget, and one page of complaints about him. |
 
 **The Rearguard** (act 1, every option priced):
 
-> Three Favonius knights sit against the wall of the landing, bandaged and grey with dust. They straighten when they see him. "Grand Master. We fell behind. We can still fight, sir."
+> Three Favonius knights sit against the wall of the landing, bandaged and gray with dust. They straighten when they see him. "Grand Master. We fell behind. We can still fight, sir."
 
 | Option | Effect | Result |
 |---|---|---|

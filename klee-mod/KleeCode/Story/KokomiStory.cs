@@ -45,29 +45,29 @@ public static class KokomiStory
         Ancients = new[]
         {
             new AncientExchange("Neow", "NEOW",
-                "A strategist. Your mind is very busy.",
-                "It usually is. You're welcome to the quiet parts, if you find any."),
+                "[sine]...the sea...\n..brought you...?[/sine]",
+                "In a way. Is there anything I should know before I climb?"),
             new AncientExchange("Orobas", "OROBAS",
-                "Give me what you carry. I will make it stranger.",
-                "Stranger is fine. Tell me what it does first."),
+                "Look look! Better thing! Trade?",
+                "Tell me what it does first, please."),
             new AncientExchange("Pael", "PAEL",
-                "You are smaller than your ambitions.",
-                "Most generals are. That's why we bring friends."),
+                "[thinky_dots]You carry so many plans...\nSet them down. Let me help...[/thinky_dots]",
+                "Just for a moment, then. Thank you."),
             new AncientExchange("Tezcatara", "TEZCATARA",
-                "Warm yourself by my light.",
-                "Thank you. It's been a long climb, and I'll take the warmth."),
+                "Do come in, dear! You look frozen through. Sit, sit.",
+                "Thank you. I hadn't realized how cold I was."),
             new AncientExchange("Nonupeipe", "NONUPEIPE",
-                "You carry a whole island on your back.",
-                "Only some days. Today it's mostly a satchel."),
+                "A priestess in such plain travel clothes? Come forward, let me refine you.",
+                "These are practical. ...But I wouldn't mind something nice."),
             new AncientExchange("Tanx", "TANX",
-                "Do you lead from the front?",
-                "When I must. I'd rather stand where I can see everything."),
+                "A COMMANDER! COMMANDERS NEED WEAPONS TOO!!",
+                "I have an army for that. ...But I'll take a look."),
             new AncientExchange("Vakuu", "VAKUU",
-                "Trade with me.",
-                "Gladly. Show me the terms, then the small print."),
+                "Seeking glory in the Spire, priestess? I have some [sine]propositions[/sine].",
+                "That depends on what you're asking in return."),
             new AncientExchange("Darv", "DARV",
-                "I collect what others leave behind.",
-                "Then you'd get on with quartermasters. We never throw anything away."),
+                "Busy day, busy day! Take whatever ya want from that pile!",
+                "May I look properly first? I'll put everything back."),
         },
 
         Lines = new CombatLines(
@@ -130,15 +130,15 @@ public static class KokomiStory
                     new StoryOption("REACH_IN", "Reach in for a piece.",
                         "Lose 10 HP. Gain a random relic.",
                         new StoryEffect(StoryEffectKind.LoseHp, 10),
-                        "The coral cuts, as coral does. She would have done it at ten as well.")
+                        "The coral cuts her hand. She wraps it and keeps the piece anyway.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic) },
                     },
                     new StoryOption("SAY_THE_SEA_PRAYER", "Kneel at the water and pray.",
                         "Lose 6 HP. Upgrade 2 random cards.",
                         new StoryEffect(StoryEffectKind.LoseHp, 6),
-                        "The water is cold to the knee. She says the old island words softly, as fishing "
-                      + "families say them before a voyage.")
+                        "The water is cold to the knee. She kneels anyway and prays for everyone still "
+                      + "at sea.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.UpgradeRandomCards, 2) },
                     },
@@ -147,7 +147,7 @@ public static class KokomiStory
                     new StoryOption("LEAVE_A_PEARL", "Leave a pearl for it.",
                         "Lose 50 Gold. Remove a card.",
                         new StoryEffect(StoryEffectKind.LoseGold, 50),
-                        "On Watatsumi you pay the sea back. She picks her best pearl.")
+                        "She leaves her best pearl beside it, a thank-you to the sea.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.RemoveCard) },
                     },
@@ -181,7 +181,7 @@ public static class KokomiStory
                     new StoryOption("PLAN_A_HOLIDAY", "Plan a holiday.",
                         "Gain a random potion.",
                         new StoryEffect(StoryEffectKind.GainRandomPotions, 1),
-                        "Three days off, two fallbacks, one beach. She files it under [i]urgent[/i]."),
+                        "Three days off, one beach, and two fallback plans in case of rain."),
                 },
                 Portrait: () => KleeArt.CardPortrait("event_kokomi_room_with_no_one"),
                 FallbackPortraitPath: "res://images/events/self_help_book.png"),
@@ -193,7 +193,7 @@ public static class KokomiStory
                 EventType: typeof(KokomiOtherCommander),
                 Title: "The Other Commander",
                 Body:
-                    "Across another sand table sits a figure in grey with no face, its pieces in a "
+                    "Across another sand table sits a figure in gray with no face, its pieces in a "
                   + "patient line. It opens a hand: your move.",
                 Options: new[]
                 {
@@ -259,8 +259,8 @@ public static class KokomiStory
                     new StoryOption("GATHER_THE_OFFERINGS", "Gather the offerings at its foot.",
                         "Gain 100 Gold. Add [gold]Doubt[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.GainGold, 100),
-                        "Someone has been leaving Mora here for a very long time. She takes it home for "
-                      + "the shrine's poor box. The bone whispers to her all the way up.")
+                        "Someone has been leaving Mora here for a very long time. She gathers it to take "
+                      + "back to Watatsumi, where it can do some good. The bone whispers to her all the way up.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(Doubt)) },
                     },
@@ -306,8 +306,8 @@ public static class KokomiStory
                     new StoryOption("SEND_FOR_REINFORCEMENTS", "Send for reinforcements.",
                         "Choose 1 of 3 random Uncommon Companions to add to your deck.",
                         StoryEffect.ChooseCompanion(CardRarity.Uncommon),
-                        "The scout runs down the stairs with her orders. An hour later there are paw "
-                      + "prints on the landing and a familiar voice calling drill."),
+                        "The scout runs down the stairs with her orders. An hour later there are boots "
+                      + "on the stairs below, and a familiar voice already calling drill."),
                     new StoryOption("WRITE_BACK", "Write back with new orders.",
                         "Upgrade 2 random cards.",
                         new StoryEffect(StoryEffectKind.UpgradeRandomCards, 2),
@@ -328,7 +328,7 @@ public static class KokomiStory
                 {
                     new StoryOpening("RESTED",
                         new StoryCondition(typeof(KokomiEmptyRoom)),
-                        "Rested, she reads it properly this time."),
+                        "The quiet room did her good."),
                 },
             },
 
@@ -378,7 +378,7 @@ public static class KokomiStory
                         "She beat it once, by a single piece."),
                     new StoryOpening("DREW",
                         new StoryCondition(typeof(KokomiOtherCommander), "OFFER_A_DRAW"),
-                        "Their game is still unfinished."),
+                        "Their last game ended in a draw."),
                     new StoryOpening("CONCEDED",
                         new StoryCondition(typeof(KokomiOtherCommander), "CONCEDE"),
                         "She knows its opening by heart now."),
@@ -413,8 +413,7 @@ public static class KokomiStory
                     new StoryOption("SEND_THE_WATER_HOME", "Send the water home to the sea.",
                         "Remove a card.",
                         new StoryEffect(StoryEffectKind.RemoveCard),
-                        "She sends it down toward the sea, with a message folded into the current for "
-                      + "whoever on Watatsumi is listening."),
+                        "She sends it back down toward the sea, and thinks of home until it's gone."),
                 },
                 Portrait: () => KleeArt.CardPortrait("event_kokomi_tide_comes_in"),
                 FallbackPortraitPath: "res://images/events/wellspring.png")
