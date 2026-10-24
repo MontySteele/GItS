@@ -19,11 +19,6 @@ public launch; listen for the modded death sound (`set_hp player 1`).
   2026-10-23: "the writing surfaces for character dialogue / new events still
   needs a human inspection before translation"): the four chains, the run
   lines and the Ancients' lines; the translation waits on it.
-- **Reaction badges at game size** (live look 2026-10-23): Aftershock,
-  Grand Strategist and All Four Winds print as tiny element rows beside
-  full-size base badges. (a) redraw each as one bold symbol at base-badge
-  size, shown to you before it ships; (b) use their full-size fallback icons;
-  (c) leave them. Default (a).
 
 ## Open packets in `review/active/`
 

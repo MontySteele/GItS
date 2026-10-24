@@ -16,7 +16,6 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
-- Power badges: Aftershock, Grand Strategist and All Four Winds are rows of element glyphs about half the height of a base badge; at game size "Pyro × Hydro" reads as two dots (live look 2026-10-23). Redraw at full badge size; the look is a pick in `QUEUE.md`.
 - Icon declutter leftovers (2026-10-19): Courtroom Drama and Quick Change are gone from both engines. Study Buddy (`ReplayNextCompanionPower`) stays: the generator's `replay_next_companion` op emits it, and that op is live in the sim, the pilot and the tier05 draft model, so retiring it is a sim change, not a repoint. The sim also keeps twins of the powers deleted on 2026-10-19 (`furina_stage.py`, `kokomi_plan.py`, `klee_overhaul.py`, `varka_oath.py`), and nothing applies them; left while the Furina and Kokomi passes are open.
 - Rest-site idle loops: every kit's rest pose is one seated still with the breathing of `StaticPortraitIdle.cs`; a loop needs a seated loop clip in `tools/klee_render/clips.py` rendered per kit, and then only a `Node2D`-rooted rest scene in `tools/build_pck.ps1` (BaseLib keeps its children; no patch). Waits on the art.
 - Turn-start order: Durin's Pyro hit, Neuvillette's Hydro, Varka's Swirl, Navia's Geo and Sigewinne's Hydro all share `AfterPlayerTurnStart`, so the mod gives them no order where the sim does; stage them into one ordered broadcast if a seat sees the two disagree.
