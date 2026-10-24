@@ -89,8 +89,9 @@ public class FurinaRelicsPotionsTests : IDisposable
         Assert.Equal("At the start of each combat, [gold]Summon[/gold] a random guest.",
                      Face(typeof(OperaTicketStub)));
         // furina-next paper 3 (2026-10-16), pick 1.
-        Assert.Equal("An unreturned [gold]Repay[/gold] gains 2 [gold]Block[/gold] for "
-                     + "each HP instead of 1.", Face(typeof(FontaineTeardrop)));
+        // Furina text audit (2026-10-23): the Repay tip's words.
+        Assert.Equal("Any HP a [gold]Repay[/gold] cannot return gives 2 "
+                     + "[gold]Block[/gold] instead of 1.", Face(typeof(FontaineTeardrop)));
         Assert.Equal("Whenever a guest acts, gain [blue]1[/blue] [gold]Fanfare[/gold].",
                      Face(typeof(ClaquesLedger)));
         Assert.Equal("Whenever you [gold]Spend[/gold] 10 or more at once, gain "

@@ -152,7 +152,7 @@ public class ReleaseFixesKkVkFsTests
     }
 
     [Fact]
-    public void Every_spend_up_to_says_it_spends_all_it_can()
+    public void No_spend_up_to_repeats_the_tip()
     {
         foreach (var card in new CardModel[]
                  {
@@ -162,7 +162,8 @@ public class ReleaseFixesKkVkFsTests
         {
             var face = Face(card);
             Assert.Contains("up to", face);
-            Assert.Contains(", all you can:", face);
+            // Furina text audit (2026-10-23), pick 2: the Spend tip says it.
+            Assert.DoesNotContain("all you can", face);
         }
     }
 }

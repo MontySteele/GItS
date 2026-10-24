@@ -3,7 +3,8 @@
 1. A face that says "below half" prints the threshold in combat, "below half
    (39 HP)", through the base game's `{InCombat:...|}` seam
    (`gen_klee_cards.half_hp_face_lines`, C# `HalfHpFace`).
-2. Every "Spend up to X" says it spends all it can, with no chooser.
+2. Every "Spend up to X" has no chooser; the Spend tip says it pays all it
+   can (", all you can" left the faces in the Furina text audit, 2026-10-23).
 
 The C# twin is `klee-mod/KleeTests/Prototype/ReleaseFixesKkVkFsTests.cs`.
 """
@@ -39,17 +40,18 @@ def test_generated_faces_print_the_number():
     assert 'description.Add("HalfHp", HalfHpFace.Line(this));' in src
 
 
-def test_every_spend_up_to_spends_all_it_can():
+def test_no_spend_up_to_repeats_the_tip():
     rows = _rows()
     ups = [rid for rid, row in rows.items()
            if "[gold]Spend[/gold] up to" in (row.get("description") or "")]
-    # furina-next paper 2 (2026-10-16): Bravura and Bring the House Down
-    # spend up to a cap; Extended Run names the clause and spends nothing.
+    # furina-next paper 2 (2026-10-16): Bravura spends up to a cap (Bring
+    # the House Down did until the upgrade census, 2026-10-23); Extended Run
+    # names the clause and spends nothing.
     assert sorted(ups) == ["proto_fs_bis", "proto_fs_bravura",
-                           "proto_fs_bring_the_house_down",
                            "proto_fs_crashing_waves", "proto_fs_hold_the_stage",
                            "proto_fs_the_full_house", "proto_fs_tidal_flourish"]
     for rid in ups:
         if rid == "proto_fs_bis":
             continue
-        assert ", all you can" in rows[rid]["description"], rid
+        # Furina text audit (2026-10-23), pick 2: the Spend tip carries it.
+        assert "all you can" not in rows[rid]["description"], rid

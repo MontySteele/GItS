@@ -181,7 +181,7 @@ internal static class PlayerTips
             "Regain that much drained HP. Any HP a Repay cannot return becomes "
           + "[gold]Block[/gold].",
         [ArmKeywordTips.FlipKey] =
-            "Turn this card to its other face; it starts each combat on Ousia.",
+            "Turn this card to its other face. It starts each combat on Ousia.",
         [ArmKeywordTips.BankDamageKey] =
             "Whenever you lose HP, gain that much [gold]Fanfare[/gold]. Its "
           + "damage is the [gold]Fanfare[/gold] you hold: play it when "

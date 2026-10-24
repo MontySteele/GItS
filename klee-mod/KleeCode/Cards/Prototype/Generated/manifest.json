@@ -1223,7 +1223,7 @@
       "damage": 2
     },
     "proto_fs_bring_the_house_down": {
-      "cost": -1
+      "damage": 3
     },
     "proto_fs_bubble_aria": {
       "conditional_block": 2
@@ -1253,7 +1253,7 @@
       "power_amount": 1
     },
     "proto_fs_critics_darling": {
-      "cost": -1
+      "upgraded_power": "fs_critics_darling_plus"
     },
     "proto_fs_crowd_favorite": {
       "innate": true
@@ -1273,7 +1273,7 @@
       "cost": -1
     },
     "proto_fs_ensemble_cast": {
-      "cost": -1
+      "furina_amount": 1
     },
     "proto_fs_facade": {
       "furina_amount": 4
@@ -1341,7 +1341,7 @@
       "conditional_then_block": 1
     },
     "proto_fs_let_the_people_rejoice": {
-      "cost": -1
+      "formula_per": 1
     },
     "proto_fs_mademoiselle_crabaletta": {
       "damage": 6
@@ -1376,7 +1376,10 @@
       "damage": 3
     },
     "proto_fs_rainfall_overture": {
-      "cost": -1
+      "add": {
+        "op": "draw",
+        "amount": 1
+      }
     },
     "proto_fs_regina_of_all_waters": {
       "cost": -1
@@ -1394,7 +1397,7 @@
       ]
     },
     "proto_fs_showstopper": {
-      "cost": -1
+      "upgraded_power": "fs_showstopper_plus"
     },
     "proto_fs_singer_of_many_waters": {
       "cost": -1
@@ -1426,10 +1429,10 @@
       "power_amount": 1
     },
     "proto_fs_the_masquerade": {
-      "cost": -1
+      "upgraded_power": "fs_the_masquerade_plus"
     },
     "proto_fs_the_show_must_go_on": {
-      "cost": -1
+      "retain": true
     },
     "proto_fs_the_shows_not_over": {
       "energy": 1
@@ -1444,7 +1447,7 @@
       "power_amount": 1
     },
     "proto_fs_tutti": {
-      "cost": -1
+      "draw": 1
     },
     "proto_fs_undercurrent": {
       "formula_base": 2

@@ -41,13 +41,13 @@ public sealed class ProtoFsEnsembleCast : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ensemble Cast"),
-        ("description", "You have 4 guest seats. [gold]Summon[/gold] a random guest."),
+        ("description", "You have 4 guest seats. [gold]Summon[/gold] {IfUpgraded:show:2 random guests|a random guest}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("FsAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,6 +65,6 @@ public sealed class ProtoFsEnsembleCast : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["FsAmount"].UpgradeValueBy(1m);
     }
 }

@@ -92,16 +92,7 @@ YAE_SPELLINGS = ("hand-plain", "bare-hand", "pile-plain", "parenthesis")
 #: card text pass of 2026-10-12 (`review/ruled/card-text-pass-2026-10-12.md`,
 #: rules 1 and 8): Team Effort, Sparkling Burst, Treasure Map and Come Back and
 #: Play! took the spellings they were held from.
-DEFERRED: dict[tuple[str, str], str] = {
-    # The localization census (2026-10-23): Escoffier's line printed its
-    # number from a parenthesised `upgraded ? ... : ...` the old reader
-    # rendered as nothing, so "N more damage" was never seen; the keying made
-    # the number a var and the lint can read it. The English is unchanged by
-    # rule (the keying is plumbing).
-    ("EscoffierKey", "more-damage"): (
-        "Escoffier's line, 'Your guests' acts deal N more damage'; a "
-        "rewording is the Furina text audit's"),
-}
+DEFERRED: dict[tuple[str, str], str] = {}
 
 # --- the exceptions: id -> reason. Rot semantics, see the module doc. ----
 EXCEPTIONS = {
@@ -154,14 +145,6 @@ EXCEPTIONS = {
         "in one box, shown on every planting card. Measured for the first "
         "time by the 2026-10-23 keying at 161 of 135; a rewording is the "
         "Yae text audit's"),
-    # Two guests' sentences, the same story: their line's number sat in a
-    # parenthesised `upgraded ? ... : ...` the old reader rendered as no
-    # numeral at all, so neither row met its rule until the keying made the
-    # number a var (2026-10-23). The English is unchanged, by rule.
-    "NeuvilletteKey": (
-        "Neuvillette's line and act, 136 of 135 with its number measured; "
-        "unseen until the 2026-10-23 keying. A rewording is the Furina text "
-        "audit's"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.

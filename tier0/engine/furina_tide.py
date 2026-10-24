@@ -174,6 +174,13 @@ ESCOFFIER_LINE_BONUS = 2           # line: your guests' acts deal 2 [3] more dam
 ESCOFFIER_LINE_BONUS_UPGRADED = 3
 ENSEMBLE_SEATS = 4                 # Ensemble Cast: 4 guest seats
 SHOWSTOPPER_SPEND = 5              # Showstopper: end of turn, Spend 5
+# Bring the House Down (the upgrade census, 2026-10-23): "Spend 5 for each
+# guest on stage: each guest acts twice."
+HOUSE_DOWN_SPEND_PER_GUEST = 5
+# The upgrade census (2026-10-23): what an upgraded card's copy changes.
+SHOWSTOPPER_PLUS_PRICE = 3     # Showstopper+: Spend 3
+MASQUERADE_PLUS_BLOCK = 2      # The Masquerade+: that much Block plus 2
+CRITICS_DARLING_RAISE = 1  # Critics' Darling+: that much plus 1
 # High Stakes (the Spend round 2, 2026-10-10): "Your Attacks deal 1
 # additional damage for every 5 HP you have Drained this combat." [every 4].
 # The Spend rounds review (2026-10-10) made it every 4 [3], round 2's
@@ -529,8 +536,12 @@ CARDS: dict[str, Spec] = {
                                    "power", (1,), "standing_room_only"),
     # Spend up to 10 for each guest on stage (furina-next paper 2): damage
     # per point, then the cap per guest.
+    # Bring the House Down (Attack, 2, Rare; the upgrade census,
+    # 2026-10-23): Deal 8 damage. Spend 5 for each guest on stage: each
+    # guest acts twice.
     "ftd_bring_the_house_down": Spec("Bring the House Down", 2, "attack",
-                                     "rare", "house_down", (1, 10)),
+                                     "rare", "house_down",
+                                     (8, HOUSE_DOWN_SPEND_PER_GUEST)),
     # Ousia, Drain (10).
     "ftd_undercurrent": Spec("Unheard Confession", 1, "attack", "common",
                              "undercurrent", (2, 5, 1)),
@@ -937,10 +948,12 @@ def _loop_readers(state, n: int) -> None:
     copies = revelry_copies(state)
     if copies and n > 0:
         gain(state, n * copies, "revelry")
-    critics = _player_power(state.player, "critics_darling")
-    if critics and state.living_enemies:
-        _hit(state, state.rng.choice(state.living_enemies), n * critics,
-             None)
+    plus = _player_power(state.player, "critics_darling_plus")
+    critics = _player_power(state.player, "critics_darling") + plus
+    if critics and n > 0 and state.living_enemies:
+        # The upgrade census (2026-10-23): an upgraded copy deals 1 more.
+        _hit(state, state.rng.choice(state.living_enemies),
+             n * critics + CRITICS_DARLING_RAISE * plus, None)
 
 
 def spend(state, amount: int) -> bool:
@@ -1114,9 +1127,12 @@ def drain(state, n: int) -> bool:
     # The Masquerade (the block gap, 2026-10-09): the HP actually drained as
     # Block, per copy; a Power's Block, unpowered (the C# `StageDirector`).
     # A guest act's Drain arrives here already stopped at the line.
-    masquerade = _player_power(p, "masquerade")
+    masquerade_plus = _player_power(p, "masquerade_plus")
+    masquerade = _player_power(p, "masquerade") + masquerade_plus
     if masquerade and not state.over:
-        p.block += n * masquerade
+        # The upgrade census (2026-10-23): an upgraded copy gains 2 more.
+        p.block += (n * masquerade
+                    + MASQUERADE_PLUS_BLOCK * masquerade_plus)
     encore = (SALON_ENCORE_DAMAGE * f.powers["salon_encore"]
               + _arm_power(state, "salon_encore"))
     if encore:
@@ -1546,6 +1562,42 @@ def act_all(state) -> int:
     return acts
 
 
+def act_each_twice(state) -> int:
+    """Bottled Encore and Bring the House Down: "Each guest acts twice."
+    Front to back, each guest's two acts together (the C#
+    `StageDirector.ActEachTwice`). Returns the acts made."""
+    f = _f(state)
+    acts = 0
+    for member in list(f.stage):
+        for _ in range(2):
+            if (state.over or not state.player.alive
+                    or not state.living_enemies or member not in f.stage):
+                break
+            act(state, member)
+            acts += 1
+    return acts
+
+
+def house_down_price(guests: int) -> int:
+    """Bring the House Down's price: 5 for each guest on stage."""
+    return max(0, int(guests)) * HOUSE_DOWN_SPEND_PER_GUEST
+
+
+def house_down(state) -> bool:
+    """Bring the House Down (the upgrade census, 2026-10-23): "Spend 5 for
+    each guest on stage: each guest acts twice." Showstopper's conditional
+    Spend: no guest, or a bank short of the price, and nothing happens (the
+    C# `FurinaStage.HouseDown`). Returns whether the guests acted."""
+    f = _f(state)
+    if state.over or not state.player.alive or not f.stage:
+        return False
+    price = house_down_price(len(f.stage))
+    if f.fanfare < price_of(f, price) or not spend(state, price):
+        return False
+    act_each_twice(state)
+    return True
+
+
 def act_oldest(state) -> bool:
     """Encore!: "Your oldest guest acts." """
     f = _f(state)
@@ -1686,11 +1738,17 @@ def end_of_turn(state) -> None:
         return
     f = _f(state)
     act_all(state)
-    for _ in range(_player_power(state.player, "showstopper")):
+    # The upgrade census (2026-10-23): an upgraded copy Spends 3, and the
+    # cheaper rounds are paid first (the C# `StageDirector.ShowstopperPrices`).
+    plus = _player_power(state.player, "showstopper_plus")
+    prices = ([SHOWSTOPPER_PLUS_PRICE] * plus
+              + [SHOWSTOPPER_SPEND]
+              * _player_power(state.player, "showstopper"))
+    for price in prices:
         if (state.over or not state.player.alive or not f.stage
-                or f.fanfare < price_of(f, SHOWSTOPPER_SPEND)):
+                or f.fanfare < price_of(f, price)):
             break
-        if not spend(state, SHOWSTOPPER_SPEND):
+        if not spend(state, price):
             break
         f.ledger["showstopper_rounds"] = (
             f.ledger.get("showstopper_rounds", 0) + 1)
@@ -1857,10 +1915,10 @@ def resolve_card(state, card) -> None:
     elif k == "star_turn":
         _card_damage(state, card, n[0])
     elif k == "house_down":
-        # furina-next paper 2: Spend up to 10 for each guest on stage.
-        held = spend_up_to_card(state, n[1] * len(f.stage))
-        _card_damage(state, card, n[0] * held)
-        act_all(state)
+        # The upgrade census (2026-10-23): the hit, then Spend 5 for each
+        # guest on stage: each guest acts twice.
+        _card_damage(state, card, n[0])
+        house_down(state)
     elif k == "undercurrent":
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1

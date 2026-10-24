@@ -151,65 +151,9 @@ public class FurinaSpendAllPreviewWeakTests
         return var.PreviewValue;
     }
 
-    /// <summary>Bring the House Down's formula with three guests on stage:
-    /// up to 10 a guest (furina-next paper 2, 2026-10-16), so 0 + 1 x 30 of
-    /// the seat's 38. (Bravura carried these pins until the diversity pass,
-    /// 2026-10-11, made it one hit of 7 for every 3 spent, which has no
-    /// calculated var.)</summary>
-    private const decimal HouseFormula = 0m + 1m * 30;
-
-    /// <summary>Three guests on her stage: Bring the House Down's cap is
-    /// 30.</summary>
-    private static Board WithThreeGuests(Board b)
-    {
-        var ledger = FurinaStageLedger.For(b.Furina.Creature);
-        ledger.Seat(StagePerformer.Charlotte);
-        ledger.Seat(StagePerformer.Wriothesley);
-        ledger.Seat(StagePerformer.Clorinde);
-        return b;
-    }
-
-    [Fact]
-    public void Bring_the_house_down_in_hand_under_weak_2_previews_the_weakened_hit()
-    {
-        InCombat(() =>
-        {
-            var b = WithThreeGuests(Build(new ProtoFsBringTheHouseDown(),
-                                          f => f.WithPower<WeakPower>(2)));
-            Assert.Equal(HouseFormula,
-                         b.Card.DynamicVars.CalculatedDamage.Calculate(null));
-
-            var preview = Preview(b.Card, null, inHand: true);
-
-            // 30 x 0.75 = 22.5, printed 22: Weak folded, once.
-            Assert.Equal(22.5m, preview);
-            Assert.Equal(HitOrder.Compose(b.Furina.Creature, null,
-                                          HouseFormula, ValueProp.Move,
-                                          b.Card),
-                         preview);
-            Assert.NotEqual(HouseFormula, preview);
-        });
-    }
-
-    [Fact]
-    public void Bring_the_house_down_aimed_folds_strength_weak_and_the_targets_vulnerable()
-    {
-        InCombat(() =>
-        {
-            var b = WithThreeGuests(Build(new ProtoFsBringTheHouseDown(),
-                          f => f.WithPower<WeakPower>(2).WithPower<StrengthPower>(3),
-                          e => e.WithPower<VulnerablePower>(2)));
-
-            var preview = Preview(b.Card, b.Enemy, inHand: true);
-
-            // (30 + 3) x 0.75 x 1.5 = 37.125: the engine's order, one product.
-            Assert.Equal(37.125m, preview);
-            Assert.Equal(HitOrder.Compose(b.Furina.Creature, b.Enemy,
-                                          HouseFormula, ValueProp.Move,
-                                          b.Card),
-                         preview);
-        });
-    }
+    // Bring the House Down carried the spend-for-damage pins until the
+    // upgrade census (2026-10-23) gave it a plain 8 [11] hit, which has no
+    // calculated var; Let the People Rejoice carries them now.
 
     [Fact]
     public void Let_the_people_rejoice_in_hand_under_weak_2_previews_the_weakened_hit()
@@ -237,11 +181,12 @@ public class FurinaSpendAllPreviewWeakTests
         // CalculatedDamageVar, unchanged by this mod.
         InCombat(() =>
         {
-            var b = WithThreeGuests(Build(new ProtoFsBringTheHouseDown(),
-                          f => f.WithPower<WeakPower>(2), inHand: false));
+            var b = Build(new ProtoFsLetThePeopleRejoice(),
+                          f => f.WithPower<WeakPower>(2), inHand: false);
             Assert.Equal(PileType.Draw, b.Card.Pile!.Type);
 
-            Assert.Equal(HouseFormula, Preview(b.Card, null, inHand: false));
+            Assert.Equal(0m + 2m * SeatFanfare,
+                         Preview(b.Card, null, inHand: false));
         });
     }
 }

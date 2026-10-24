@@ -3489,8 +3489,18 @@ FURINA_KINDS = {
     "facade": "Facade",
     "encore_performance": "EncorePerformance",
     "verdict": "Verdict",
+    # The upgrade census (2026-10-23): Bring the House Down's "Spend 5 for
+    # each guest on stage: each guest acts twice", Showstopper's conditional
+    # Spend (`FurinaStage.HouseDown`).
+    "house_down": "HouseDown",
 }
-FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest", "facade"}
+#: The kinds whose own play pays Fanfare, so the row is a Spend card
+#: (`stage_spend_card`).
+FURINA_SPEND_KINDS = frozenset({"house_down"})
+FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest", "facade",
+                      # Upgrade census (2026-10-23): Ensemble Cast summons
+                      # 1 [2].
+                      "summon_random"}
 #: The kinds that read `cardPlay.Target`, and the only ones that say
 #: `target: enemy` (Yae's `YAE_AIMED_KINDS` shape).
 FURINA_AIMED_KINDS = {"verdict"}
@@ -4075,6 +4085,11 @@ APPLY_POWERS = {
     "fs_critics_darling": ("CriticsDarlingPower", None,
         "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
         "much damage to a random enemy."),
+    # Upgrade census (2026-10-23): the upgraded card's copy deals 1 more
+    # (`upgraded_power`), counted on the same class (`UpgradeTwinPower`).
+    "fs_critics_darling_plus": ("CriticsDarlingPower", None,
+        "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
+        "much damage plus 1 to a random enemy."),
     # furina-next paper 2 (2026-10-16): Extended Run takes Bis!'s slot.
     "fs_extended_run": ("ExtendedRunPower", None,
         "Attacks and Skills that [gold]Spend[/gold] up to a number can "
@@ -4086,6 +4101,11 @@ APPLY_POWERS = {
         "Whenever you play a Guest Star, [gold]Repay[/gold] {X}."),
     "fs_showstopper": ("ShowstopperPower", None,
         "At the end of your turn, [gold]Spend[/gold] 5: your guests act "
+        "again."),
+    # Upgrade census (2026-10-23): the upgraded card's copy Spends 3
+    # (`upgraded_power`), counted on the same class (`UpgradeTwinPower`).
+    "fs_showstopper_plus": ("ShowstopperPower", None,
+        "At the end of your turn, [gold]Spend[/gold] 3: your guests act "
         "again."),
     "fs_ensemble_cast": ("EnsembleCastPower", None,
         "You have 4 guest seats."),
@@ -4112,6 +4132,11 @@ APPLY_POWERS = {
     "fs_the_masquerade": ("TheMasqueradePower", None,
         "Whenever you [gold]Drain[/gold], gain that much "
         "[gold]Block[/gold]."),
+    # Upgrade census (2026-10-23): the upgraded card's copy gains 2 more
+    # (`upgraded_power`), counted on the same class (`UpgradeTwinPower`).
+    "fs_the_masquerade_plus": ("TheMasqueradePower", None,
+        "Whenever you [gold]Drain[/gold], gain that much "
+        "[gold]Block[/gold] plus 2."),
     # THE DIVERSITY PASS (review/ruled/furina-diversity-pass-2026-10-11.md,
     # ruled 2026-10-11). The classes live in
     # klee-mod/KleeCode/Powers/Prototype/FurinaPool75Powers.cs.
@@ -4129,7 +4154,7 @@ APPLY_POWERS = {
         "The next time an enemy's attack makes you lose HP this turn, it "
         "takes twice that much."),
     "fs_trial_by_water": ("TrialByWaterPower", None,
-        "Until end of turn, whenever this enemy takes damage, its accuser "
+        "This turn, whenever this enemy takes damage, its accuser "
         "gains {X} [gold]Fanfare[/gold]."),
     "fs_rainfall_overture": ("RainfallOverturePower", None,
         "Your next Attack this turn hits ALL enemies."),
@@ -4139,8 +4164,8 @@ APPLY_POWERS = {
     "fs_plot_twist": ("PlotTwistPower", None,
         "This turn, this enemy's attack hits itself."),
     "fs_full_house": ("FullHousePower", None,
-        "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}, "
-        "all you can: it deals that much more."),
+        "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}: "
+        "it deals that much additional damage."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
@@ -7705,8 +7730,11 @@ STAGE_SPEND_OPS = frozenset({"stage_spend", "stage_spend_all",
 
 
 def stage_spend_card(card: dict) -> bool:
-    """True when the row's own play pays Fanfare (a Spend card)."""
+    """True when the row's own play pays Fanfare (a Spend card): a stage
+    Spend op, or a `furina` kind that Spends (Bring the House Down)."""
     return any(fx.get("op") in STAGE_SPEND_OPS
+               or (fx.get("op") == "furina"
+                   and fx.get("kind") in FURINA_SPEND_KINDS)
                for fx in iter_card_effects(card))
 
 #: The stage op whose `amount` an upgrade moves through a var named for what

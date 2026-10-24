@@ -299,11 +299,14 @@ def test_tutti_and_bring_the_house_down_act_each_guest():
     st.player.ftd.stage = ["wriothesley", "clorinde"]
     _play(st, _card("proto_fs_tutti"))
     assert sum(st.player.ftd.ledger["guest_acts"].values()) == 2
+    # Bring the House Down (the upgrade census, 2026-10-23): 8 damage, then
+    # Spend 5 a guest (10 for two): each guest acts twice.
     st.player.ftd.fanfare = 10
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_bring_the_house_down"))
-    assert sum(st.player.ftd.ledger["guest_acts"].values()) == 4
-    assert hp - st.enemies[0].hp >= 10
+    assert sum(st.player.ftd.ledger["guest_acts"].values()) == 6
+    assert st.player.ftd.fanfare == 0
+    assert hp - st.enemies[0].hp >= 8
 
 
 def test_casting_call_puts_a_guest_star_into_the_hand():

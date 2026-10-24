@@ -114,7 +114,7 @@ public class FurinaDrainLineRoundTests
     public void Lyneys_badge_says_his_drain_stops_at_the_line()
     {
         // The card text pass (2026-10-12): the face's words, no parentheses.
-        Assert.Contains(", deal 5 [gold]Pyro[/gold] damage to ALL enemies. "
+        Assert.Contains(" and deal 5 [gold]Pyro[/gold] damage to ALL enemies. "
                         + "It never [gold]Drains[/gold] past your line.",
                         StagePerformerBadge.ActText(StagePerformer.Lyney));
     }

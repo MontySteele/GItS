@@ -245,6 +245,8 @@ public static class FurinaStage
     {
         int Sum<T>() where T : PowerModel =>
             (int)owner.Powers.OfType<T>().Sum(p => p.Amount);
+        int Upgraded<T>() where T : UpgradeTwinPower =>
+            owner.Powers.OfType<T>().Sum(p => p.UpgradedCopies);
         // Her relics (Furina's card pass, 2026-10-15), counted off the
         // player; none headless.
         // Relic effects are Furina's own (the off-character fix,
@@ -264,6 +266,10 @@ public static class FurinaStage
             BouquetOfRoses = Held<Relics.BouquetOfRoses>(),
             GrandEntrance = Sum<GrandEntrancePower>(),
             Showstopper = Sum<ShowstopperPower>(),
+            // The upgrade census (2026-10-23): one badge for both versions;
+            // an upgraded card's copy Spends 3, gains 2 more Block, deals 1
+            // more.
+            ShowstopperUpgraded = Upgraded<ShowstopperPower>(),
             Crescendo = Sum<CrescendoPower>(),
             // One badge for both versions (the icon declutter, 2026-10-19):
             // every copy is Energy, an upgraded card's copy is also a card.
@@ -275,8 +281,10 @@ public static class FurinaStage
             Thunderous = Sum<ThunderousApplausePower>(),
             FiveCenturyAct = owner.Powers.OfType<FiveCenturyActPower>().Count(),
             CriticsDarling = Sum<CriticsDarlingPower>(),
+            CriticsDarlingUpgraded = Upgraded<CriticsDarlingPower>(),
             ExtendedRun = Sum<ExtendedRunPower>(),
             Masquerade = Sum<TheMasqueradePower>(),
+            MasqueradeUpgraded = Upgraded<TheMasqueradePower>(),
             FullHouse = Sum<FullHousePower>(),
         };
     }
@@ -509,7 +517,7 @@ public static class FurinaStage
         await Done(owner);
     }
 
-    /// <summary>Tutti! and Bring the House Down: "Each guest acts."</summary>
+    /// <summary>Tutti!: "Each guest acts."</summary>
     public static async Task ActAll(PlayerChoiceContext choiceContext,
                                     Creature? owner)
     {
@@ -517,6 +525,38 @@ public static class FurinaStage
         await Director(choiceContext, owner!).ActAll();
         await Done(owner);
     }
+
+    /// <summary>Bring the House Down (the upgrade census, 2026-10-23):
+    /// "Spend 5 for each guest on stage: each guest acts twice." With no
+    /// guest on stage, or a bank short of the price, nothing happens
+    /// (Showstopper's "Spend 5: ..."). A card's Spend N, so Center of
+    /// Attention's free Spend pays it. Sim twin:
+    /// <c>furina_tide.house_down</c>.</summary>
+    public static async Task HouseDown(PlayerChoiceContext choiceContext,
+                                       Creature? owner)
+    {
+        if (!Ensure(owner)) return;
+        var ledger = FurinaStageLedger.For(owner!);
+        if (ledger.IsEmpty) return;
+        var price = HouseDownPrice(ledger.Seats.Count);
+        var director = Director(choiceContext, owner!);
+        if (CenterOfAttentionPower.TryClaim(owner!))
+        {
+            RefreshBadges(owner);
+        }
+        else
+        {
+            if (!ledger.CanSpend(price)) return;
+            if (await director.Spend(price) <= 0) return;
+        }
+        await director.ActEachTwice();
+        await Done(owner);
+    }
+
+    /// <summary>Bring the House Down's price: 5 for each guest on stage.
+    /// PURE.</summary>
+    public static int HouseDownPrice(int guests) =>
+        System.Math.Max(0, guests) * FurinaStageLaw.HouseDownSpendPerGuest;
 
     /// <summary>Final Bow: "Choose a guest. It acts twice, then leaves."
     /// [3 times]. One guest is taken without a screen; with more, the player

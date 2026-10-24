@@ -28,4 +28,4 @@ def test_neuvilletes_act_text_says_drains_count():
     # The badge's keyed act row since the localization census (2026-10-23).
     from tools import lint_text_conventions as ltc
     assert ltc._guest_halves()["Neuvillette"][1].endswith(
-        "equal to HP you lost or [gold]Drained[/gold] since your last turn.")
+        "equal to HP lost or [gold]Drained[/gold] since your last turn.")

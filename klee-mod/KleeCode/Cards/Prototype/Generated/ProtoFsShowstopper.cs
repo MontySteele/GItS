@@ -45,7 +45,7 @@ public sealed class ProtoFsShowstopper : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Showstopper"),
-        ("description", "At the end of your turn, [gold]Spend[/gold] 5: your guests act again."),
+        ("description", "At the end of your turn, [gold]Spend[/gold] {IfUpgraded:show:3|5}: your guests act again."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,11 @@ public sealed class ProtoFsShowstopper : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<ShowstopperPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await UpgradeTwinPower.Install<ShowstopperPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        // upgraded_power: the upgraded card's copy of ShowstopperPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

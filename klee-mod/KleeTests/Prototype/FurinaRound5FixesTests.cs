@@ -63,7 +63,7 @@ public class FurinaRound5FixesTests : IDisposable
         var face = ((BaseLib.Abstracts.CustomCardModel)new ProtoFsGuestStarLyney())
             .Localization!.Single(p => p.Item1 == "description").Item2;
         Assert.Contains("Act: [gold]Drain[/gold] "
-                        + FurinaStageLaw.LyneyActDrain + ", deal ", face);
+                        + FurinaStageLaw.LyneyActDrain + " and deal ", face);
     }
 
     // ---- telemetry: the Spend cards by name, and the enemies alive --------------

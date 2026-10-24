@@ -564,7 +564,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "returns.",
             # The pool to 75 (2026-10-09): the guest rule's words; the Block
             # floor's one line since furina-next paper 3 (2026-10-16).
-            "Regain that much drained HP; a Repay counts the HP it returns. ",
+            "Regain that much drained HP. A Repay counts only the HP it returns. ",
             "Any HP a Repay cannot return becomes [gold]Block[/gold].",
             "A guest joins at the back. On a full stage, the oldest guest ",
             "Exhausts. Acts at the end of your turn. When it leaves, this ",
@@ -1201,7 +1201,7 @@ def test_the_rare_spend_all_carries_no_reader_tip():
     row = {r["id"]: r for r in proto._rows()}["proto_fs_let_the_people_rejoice"]
     assert ("[gold]Spend[/gold] all your [gold]Fanfare[/gold]"
             in row["description"])
-    assert "per point" in row["description"]
+    assert "for each [gold]Fanfare[/gold] spent" in row["description"]
 
 
 def test_the_readers_tip_is_gone():

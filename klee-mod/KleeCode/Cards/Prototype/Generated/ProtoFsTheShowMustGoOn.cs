@@ -70,6 +70,6 @@ public sealed class ProtoFsTheShowMustGoOn : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        AddKeyword(CardKeyword.Retain);
     }
 }

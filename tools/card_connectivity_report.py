@@ -986,6 +986,8 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                               _hook("shared", "hp_ledger", "write")],
     "fs_fountain_of_lucine": [_hook("private", "stage", "write")],
     "fs_critics_darling": [_hook("private", "stage", "read")],
+    # The upgrade census (2026-10-23): the upgraded cards' copies, same hooks.
+    "fs_critics_darling_plus": [_hook("private", "stage", "read")],
     # furina-next paper 2 (2026-10-16): Extended Run raises a played card's
     # "Spend up to" cap.
     "fs_extended_run": [_hook("private", "stage", "read")],
@@ -994,6 +996,7 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                           _hook("private", "stage", "write"),
                           _hook("shared", "block_held", "write")],
     "fs_showstopper": [_hook("private", "stage", "use")],
+    "fs_showstopper_plus": [_hook("private", "stage", "use")],
     "fs_ensemble_cast": [_hook("private", "stage", "write")],
     # furina-next (2026-10-16): Crescendo writes Fanfare at turn start; the
     # upgraded Prima Donna draws.
@@ -1010,6 +1013,8 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "fs_hymn_of_renewal": [_hook("private", "stage", "read")],
     "fs_the_masquerade": [_hook("private", "stage", "read"),
                           _hook("shared", "block_held", "write")],
+    "fs_the_masquerade_plus": [_hook("private", "stage", "read"),
+                               _hook("shared", "block_held", "write")],
     "fs_leading_lady": [_hook("private", "stage", "read"),
                         _hook("shared", "card_identity", "write")],
     "fs_full_house": [_hook("private", "stage", "use")],

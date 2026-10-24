@@ -38,7 +38,7 @@ public sealed class FanfarePower : PowerModel, ILocalizationProvider
         ("title", "Fanfare"),
         ("description",
             "Gain 1 [gold]Fanfare[/gold] for each HP you lose or "
-          + "[gold]Repay[/gold]. [gold]Spend[/gold] pays it."),
+          + "[gold]Repay[/gold]. [gold]Spend[/gold] uses it."),
         ("smartDescription",
             "You have {Fanfare} [gold]Fanfare[/gold]. Gain 1 "
           + "[gold]Fanfare[/gold] for each HP you lose or [gold]Repay[/gold]. "
@@ -208,8 +208,11 @@ public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary><i>Critics' Darling</i>: "Whenever you Drain or Repay, deal that
-/// much damage to a random enemy." Copies add.</summary>
-public sealed class CriticsDarlingPower : PowerModel, ILocalizationProvider
+/// much damage [plus 1] to a random enemy." Copies add; a copy the upgraded
+/// card installed adds 1 more a hit (the upgrade census, 2026-10-23; was
+/// cost -1). One badge for both versions
+/// (<see cref="UpgradeTwinPower"/>).</summary>
+public sealed class CriticsDarlingPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -217,11 +220,10 @@ public sealed class CriticsDarlingPower : PowerModel, ILocalizationProvider
         ("description",
             "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
           + "much damage to a random enemy."),
+        ("smartDescription",
+            "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
+          + "much damage{Upgraded:cond:>0? plus 1|} to a random enemy."),
     };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary><i>Extended Run</i> (furina-next paper 2, 2026-10-16; Bis!'s

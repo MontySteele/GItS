@@ -285,7 +285,8 @@ def _outlet_rate(spec) -> float:
     if k == "sold_out":
         return (NEXT_ENERGY * 0.5 * n[1] + DRAW * n[2]) / n[0]
     if k == "house_down":
-        return float(n[0])
+        # The upgrade census (2026-10-23): two guest acts per 5 spent.
+        return 2 * GUEST_ACT / n[1]
     if k == "bravura":
         return n[0] / n[1]
     if k == "block_spend_hit":
@@ -552,7 +553,7 @@ def card_damage(state, card) -> float:
     if k == "rising_tide":
         return float(n[0] + n[1] * f.repays_this_turn)
     if k == "house_down":
-        return float(n[0] * T.card_up_to_of(state, n[1] * len(f.stage)))
+        return float(n[0])
     return 0.0
 
 
@@ -737,9 +738,12 @@ def value(state, card, playable: list, decider) -> float:
     if k == "star_turn":
         return _single(state, n[0])
     if k == "house_down":
-        pts = T.card_up_to_of(state, n[1] * len(f.stage))
-        return (_single(state, n[0] * pts) - spend_cost(state, pts)
-                + GUEST_ACT * len(f.stage))
+        # The upgrade census (2026-10-23): the hit, then each guest acts
+        # twice if the bank holds 5 a guest.
+        price = T.house_down_price(len(f.stage))
+        encore = (2 * GUEST_ACT * len(f.stage) - spend_cost(state, price)
+                  if f.stage and f.fanfare >= T.price_of(f, price) else 0.0)
+        return _single(state, n[0]) + encore
     if k in T.FIXED_DRAIN_KINDS:
         pass                                         # handled above
     if k == "drained_turn_hit":

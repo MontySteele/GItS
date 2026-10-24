@@ -88,26 +88,15 @@ public class FurinaExtendedRunTests : IDisposable
     // ---- the scope -------------------------------------------------------------
 
     [Fact]
-    public void It_adds_once_to_bring_the_house_downs_whole_cap()
+    public void Bring_the_house_down_is_a_fixed_spend_it_leaves_alone()
     {
-        // Three guests: up to 30; one Extended Run: up to 38, in one Spend.
-        var kit = StageKit.With(new StageMods { ExtendedRun = 8 }, 200,
-                                StagePerformer.Charlotte,
-                                StagePerformer.Wriothesley,
-                                StagePerformer.Clorinde);
-        Assert.Equal(38, CardSpend(kit, 10 * kit.Stage.Seats.Count));
-        Assert.Equal(162, kit.Stage.Fanfare);
-        Assert.Equal(1, kit.Stage.SpendsThisTurn);
-        Assert.Equal(38, kit.Stage.SpentThisPlay);
-        // The card reads its cap off the guests on stage.
-        Assert.Contains(
-            "await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, "
-            + "10 * FurinaStage.Of(Owner.Creature).Count);",
-            Generated("ProtoFsBringTheHouseDown"));
+        // The upgrade census (2026-10-23): "Spend 5 for each guest on stage"
+        // is a Spend N, not a "Spend up to", so no cap for Extended Run to
+        // raise (it added 8 to the old 10-a-guest cap).
+        Assert.DoesNotContain("SpendUpTo", Generated("ProtoFsBringTheHouseDown"));
         Assert.Equal(
-            "[gold]Spend[/gold] up to 10 for each guest on stage, all you "
-            + "can. Deal that much damage. Each guest acts.{InCombat:\n"
-            + "(Deals {CalculatedDamage:diff()} damage)|}",
+            "Deal {Damage:diff()} damage. [gold]Spend[/gold] 5 for each "
+            + "guest on stage: each guest acts twice.",
             Face(new ProtoFsBringTheHouseDown()));
     }
 
@@ -140,7 +129,7 @@ public class FurinaExtendedRunTests : IDisposable
         Assert.Equal(9m, Upgraded(new ProtoFsBravura())
             .DynamicVars.Damage.BaseValue);
         Assert.StartsWith(
-            "[gold]Spend[/gold] up to 18, all you can. Deal {Damage:diff()} "
+            "[gold]Spend[/gold] up to 18. Deal {Damage:diff()} "
             + "[gold]Hydro[/gold] damage for every 3 spent.",
             Face(new ProtoFsBravura()));
     }
