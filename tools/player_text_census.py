@@ -12,8 +12,8 @@ options), every `new Dictionary<string, string> { ["key"] = ... }` the mod
 merges into a loc table (prompts, tooltips, the Teyvat frame's events,
 Ancients and enemy names), the story tables (`Story/*Story.cs`, read as
 data), the Spiral Abyss texts (one variant per act), the packaged
-`card_keywords.json`, and the Architect's finale lines in
-`tools/build_pck.ps1`.
+`card_keywords.json`, and the Architect's finale lines in the packaged
+`ancients.json`.
 
 HOW. The C# is read by a small lexer, an expression parser and an evaluator
 that knows constants, expression-bodied members, records and switch
@@ -45,7 +45,8 @@ CS_ROOT = REPO / "klee-mod" / "KleeCode"
 SHEET = REPO / "docs" / "prototype-surface.yaml"
 KEYWORD_JSON = (REPO / "klee-mod" / "pck-src" / "klee" / "localization" / "eng"
                 / "card_keywords.json")
-BUILD_PCK = REPO / "tools" / "build_pck.ps1"
+ANCIENTS_JSON = (REPO / "klee-mod" / "pck-src" / "klee" / "localization" / "eng"
+                 / "ancients.json")
 GENERATED_CARDS = CS_ROOT / "Cards" / "Prototype" / "Generated"
 
 CHARACTERS = ("Klee", "Kokomi", "Furina", "Varka", "Yae", "Shared")
@@ -2487,8 +2488,11 @@ class Census:
                     continue
                 ev = EnumVal(enum, member)
                 env = {"b": ev, "s": ev}
-                name = self._overload(ci, "Name", env)
-                vs = [clean(to_text(self._overload(ci, "Text", {**env, "act": a, "elementAct": a}))) for a in range(3)]
+                # Keyed rows since the localization census (2026-10-23): the
+                # name and text are templates, the act's numbers their vars.
+                name = self._overload(ci, "NameTemplate", env)
+                template = to_text(self._overload(ci, "TextTemplate", env))
+                vs = [clean(self._abyss_fill(template, a)) for a in range(3)]
                 dur = ""
                 if durations:
                     d = self._overload(durations[0], "Of", env)
@@ -2496,11 +2500,37 @@ class Census:
                         dur = "This act" if d.name == "ThisAct" else "Whole run"
                 item = {"id": f"{enum}.{member}", "name": to_text(name),
                         "kind": kind + (f" ({dur})" if dur else ""), "text": vs[0],
-                        "source": f"{rel(ci.file.path)}:{self._arm_line(ci, 'Text', enum, member)}"}
+                        "source": f"{rel(ci.file.path)}:{self._arm_line(ci, 'TextTemplate', enum, member)}"}
                 if len(set(vs)) > 1:
                     item["variants"] = {f"act {k + 1}": v for k, v in enumerate(vs)}
                     item["context"] = "The numbers are the act the entry is taken in; text shown is act 1."
                 self.add("Shared", section, item)
+
+    def _abyss_fill(self, template: str, act: int) -> str:
+        """An Abyss text row's vars for act `act`: each `{Name}` is
+        `AbyssNumbers.Name(act)` (or the constant), the element of the act
+        and its counter golded, as `AbyssText.Numbers` fills them."""
+        nums = self.idx.classes("AbyssNumbers")
+        src = (REPO / "klee-mod" / "KleeCode" / "Abyss" / "AbyssEntries.cs").read_text(encoding="utf-8")
+        by_act = re.findall(r"Element\.(\w+)", re.search(r"ByAct = \{([^}]*)\}", src).group(1))
+        counters = dict(re.findall(r"Element\.(\w+) => Element\.(\w+),", src))
+        element = by_act[min(max(act, 0), len(by_act) - 1)]
+
+        def hole(m: re.Match) -> str:
+            name = m.group(1)
+            if name == "Element":
+                return f"[gold]{element}[/gold]"
+            if name == "Counter":
+                return counters.get(element, "")
+            if name == "HeraldHpPercent":
+                bonus = re.search(r"HeraldHpBonus = ([0-9.]+)m;", src)
+                return str(int(round(float(bonus.group(1)) * 100))) if bonus else m.group(0)
+            if nums:
+                v = self._overload(nums[0], name, {"act": act})
+                if not isinstance(v, U):
+                    return to_text(v)
+            return m.group(0)
+        return re.sub(r"\{(\w+)\}", hole, template)
 
     def _overload(self, ci: ClassInfo, name: str, env: dict) -> Any:
         best = None
@@ -2852,11 +2882,11 @@ class Census:
                                 "kind": f"{rtype}.{params[k]}", "text": clean(vals[k]),
                                 "source": f"{rel(f.path)}:{el[1].line}", "context": ctx})
 
-    # -- the Architect's finale lines (build_pck.ps1 writes them into the pck)
+    # -- the Architect's finale lines (pck-src ancients.json, merged by BaseLib)
     def architect(self) -> None:
-        if not BUILD_PCK.exists():
+        if not ANCIENTS_JSON.exists():
             return
-        for k, line in enumerate(BUILD_PCK.read_text(encoding="utf-8").splitlines(), 1):
+        for k, line in enumerate(ANCIENTS_JSON.read_text(encoding="utf-8").splitlines(), 1):
             m = re.match(r'\s*"THE_ARCHITECT\.talk\.(KLEEMOD-\w+)\.([\w-]+)\.(\w+)"\s*:\s*"(.*)",?\s*$',
                          line)
             if not m:
@@ -2866,7 +2896,7 @@ class Census:
             self.add(owner, "Architect finale", {
                 "id": f"THE_ARCHITECT.{m.group(1)}.{m.group(2)}.{m.group(3)}", "name": who,
                 "kind": f"finale {m.group(3)}", "text": json.loads('"' + m.group(4) + '"'),
-                "source": f"{rel(BUILD_PCK)}:{k}"})
+                "source": f"{rel(ANCIENTS_JSON)}:{k}"})
 
     # -- leftovers: player-looking literals that no extractor read
     _SKIP_CTX = re.compile(

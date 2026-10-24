@@ -32,10 +32,11 @@ Concretely:
   * SCOPE ALSO COVERS THE PACKAGED LOC TABLES (`EB-160`). The game merges
     `res://klee/localization/<lang>/<table>.json` OVER the dll's rows, so the
     copy a player actually reads is the JSON, and until this row the lint
-    could not see it at all. Two sources reach the pack: the tracked tables
-    under `klee-mod/pck-src/**/localization/**/*.json`, and the tables
-    `tools/build_pck.ps1` still writes from a here-string at pack time. Both
-    are read here; a numeral in a VALUE is a numeral a player is shown.
+    could not see it at all. The tracked tables under
+    `klee-mod/pck-src/**/localization/**/*.json` reach the pack and are read
+    here; a numeral in a VALUE is a numeral a player is shown. The packer
+    once typed a table from a here-string at pack time (the Architect's rows,
+    moved to pck-src 2026-10-24); one coming back is a finding.
     `gen_keyword_loc.py` derives `card_keywords.json` from the C# and
     `--check` gates its staleness, so that table's rows can no longer drift on
     their own -- but the gate for a HAND-TYPED table (today `ancients.json`,
@@ -612,63 +613,36 @@ def loc_json_strings(path: Path) -> list[Literal]:
     return out
 
 
-# The loc tables `tools/build_pck.ps1` still writes at pack time, as
-# `[IO.File]::WriteAllText((Join-Path $locDir 'ancients.json'), @'...'@)`.
-# These never exist as a file in the repo -- they are a here-string inside the
-# packer -- which is exactly why they were outside every gate the repo owns
-# (`EB-160`). `$locDir` is the localization directory the script builds once,
-# so matching on that variable is matching on "a loc table", not on a filename
-# that could be renamed out from under this pattern.
+# THE PACKER TYPES NO LOC TABLE BY HAND (2026-10-24). It used to write the
+# Architect's finale rows as
+# `[IO.File]::WriteAllText((Join-Path $locDir 'ancients.json'), @'...'@)`,
+# a table that existed as a file nowhere in the repo, so it was outside every
+# gate (`EB-160`) and outside the English reference translators work from.
+# Those rows now live in `klee-mod/pck-src/klee/localization/eng/ancients.json`
+# and are scanned with the other tracked tables. A here-string table written
+# into `$locDir` again is a finding: put it in pck-src instead.
 PCK_LOC_HERESTRING = re.compile(
-    r"WriteAllText\(\(Join-Path\s+\$locDir\s+'(?P<name>[^']+)'\)\s*,\s*@'"
-    r"(?P<body>.*?)^'@\)",
+    r"WriteAllText\(\(Join-Path\s+\$locDir\s+'(?P<name>[^']+)'\)\s*,\s*@'",
     re.S | re.M)
 
 
 def pck_loc_strings() -> tuple[list[tuple[str, int, str]], list[str]]:
-    """(rows, complaints) for every loc table the packer types by hand.
-
-    A row is `(rel path, line, value)`. A COMPLAINT is a table under
-    `$locDir` that will not parse as JSON: nothing else is written there, the
-    game would merge a broken table as nothing at all, and a lint that shrugged
-    at it would be reading past exactly the file it was widened to reach.
-    """
+    """(rows, complaints) for the packer: no rows, and a complaint for every
+    loc table it still writes from a here-string."""
     script = pck_script()
     if not script.exists():
         return [], [f"{script.name} is missing -- the packer moved, and a "
                     f"lint that passes because it read nothing is not a gate."]
     raw = script.read_text(encoding="utf-8")
-    out: list[tuple[str, int, str]] = []
     complaints: list[str] = []
-    if not PCK_LOC_HERESTRING.search(raw):
-        complaints.append(
-            f"{script.relative_to(REPO).as_posix()}: no loc table is "
-            f"written from a here-string any more. If the packer stopped "
-            f"typing tables by hand that is the row's goal reached -- drop "
-            f"this reader; if the shape changed, point the pattern at it. A "
-            f"gate that reads nothing is not a gate.")
     for match in PCK_LOC_HERESTRING.finditer(raw):
-        base = raw.count("\n", 0, match.start("body")) + 1
-        name = match.group("name")
-        rel = f"{script.relative_to(REPO).as_posix()} ({name})"
-        body = match.group("body")
-        try:
-            rows = json.loads(body)
-        except json.JSONDecodeError as exc:
-            complaints.append(f"{rel}:{base}: this loc table does not parse "
-                              f"as JSON ({exc.msg}), so the game merges "
-                              f"nothing from it.")
-            continue
-        if not isinstance(rows, dict):
-            continue
-        lines = body.splitlines()
-        for key, value in rows.items():
-            if not isinstance(value, str):
-                continue
-            at = base + next((i for i, line in enumerate(lines)
-                              if f'"{key}"' in line), 0)
-            out.append((rel, at, value))
-    return out, complaints
+        line = raw.count("\n", 0, match.start()) + 1
+        complaints.append(
+            f"{script.relative_to(REPO).as_posix()}:{line}: the packer types "
+            f"the loc table {match.group('name')} from a here-string. Put it "
+            f"in klee-mod/pck-src/klee/localization/eng/ so it is gated and "
+            f"in the English reference.")
+    return [], complaints
 
 
 def numeric_constants() -> dict[float, list[str]]:

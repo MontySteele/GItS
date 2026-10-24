@@ -227,11 +227,13 @@ def test_an_every_turn_after_face_is_not_named_before_its_turn():
 # ---- 7a, 7b. The Tenko clause and Saiguu's Lesson's words --------------------
 
 def test_the_tenko_clause_names_the_sakura():
-    assert Y.tenko_words({Y.THUNDER: 13}) == " (Sakura: 13 damage)"
+    assert Y.tenko_words({Y.THUNDER: 13}) == " (Sakura: 13 damage in total)"
     assert Y.tenko_words({}) == Y.NO_SAKURA
     cs = (REPO / "klee-mod/KleeCode/Powers/Prototype/YaeShrine.cs").read_text(
         encoding="utf-8")
     assert f'TenkoPrefix = "{Y.TENKO_PREFIX}"' in cs
+    # The Yae suite (2026-10-23): the clause says it is the total.
+    assert f'TenkoSuffix = "{Y.TENKO_SUFFIX}"' in cs
 
 
 def test_saiguus_lesson_says_a_striking_sakura():

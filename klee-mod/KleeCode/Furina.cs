@@ -33,7 +33,7 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
         // CharacterLoc set plus bestiaryQuote). A missing row renders as
         // its raw key: the co-op end-turn ping bubble did (playtest
         // 2026-10-03). CharacterLocCompletenessTests pins the set.
-        ("aromaPrinciple", "[sine][blue]The show must go on, and I am its star![/blue][/sine]"),
+        ("aromaPrinciple", "[sine][blue]I chose this role... and I will see it through...[/blue][/sine]"),
         ("banter.alive.endTurnPing", "Places, everyone! The curtain waits for no one!"),
         ("banter.dead.endTurnPing", "..."),
         ("bestiaryQuote", "This one has yet to see my performance."),

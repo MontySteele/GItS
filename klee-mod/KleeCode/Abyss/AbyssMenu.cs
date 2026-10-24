@@ -108,7 +108,7 @@ public static class AbyssMenu
         [LocPrefix + ".title"] = "Spiral Abyss",
         [LocPrefix + ".description"] =
             "Before each act's Ancient, take a Blessing. The enemies take a Shadow. "
-          + "Both last the whole run.",
+          + "Some end with the act; others last the whole run.",
         [LocPrefix + ".LOCKED.description"] = "Unlocks with Custom runs.",
     };
 

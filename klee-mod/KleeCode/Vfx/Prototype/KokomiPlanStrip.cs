@@ -113,16 +113,16 @@ internal static class KokomiPlanStrip
     private const float HintHeight = 32f;
 
     /// <summary>The caption under a two-line Plan.</summary>
-    internal const string PlanLineCaption = "Plan line";
-    internal const string NowLineCaption = "Now-line";
+    internal static string PlanLineCaption => KokomiPlanText.Text(KokomiPlanText.PlanLine);
+    internal static string NowLineCaption => KokomiPlanText.Text(KokomiPlanText.NowLine);
 
     /// <summary>A flipped Plan Opening Gambit's double would have reached
     /// (Kokomi Balance suite 4, 2026-10-21).</summary>
-    internal const string NowLineNotDoubledCaption = "Now, not doubled";
+    internal static string NowLineNotDoubledCaption => KokomiPlanText.Text(KokomiPlanText.NowLineNotDoubled);
 
     /// <summary>The mark on the top picture: the Plan carried out first
     /// (Kokomi review 2026-10-13).</summary>
-    internal const string FirstCaption = "First";
+    internal static string FirstCaption => KokomiPlanText.Text(KokomiPlanText.First);
 
     /// <summary>The page the strip is showing, on the root node.</summary>
     private const string PageMeta = "kleemod_plan_page";
@@ -760,7 +760,7 @@ public static class KokomiPlanPages
     public const int PerPage = 4;
 
     /// <summary>The pager under the column on its last page.</summary>
-    public const string BackCaption = "Back";
+    public static string BackCaption => KokomiPlanText.Text(KokomiPlanText.Back);
 
     /// <summary>How many pages a queue of <paramref name="count"/> needs (at
     /// least one).</summary>
@@ -787,7 +787,7 @@ public static class KokomiPlanPages
     {
         if (count <= PerPage) return string.Empty;
         var after = count - (ClampPage(page, count) + 1) * PerPage;
-        return after > 0 ? "+" + after : BackCaption;
+        return after > 0 ? KokomiPlanText.Text(KokomiPlanText.More, ("N", after)) : BackCaption;
     }
 
     /// <summary>The mark at the top of a picture: "First" on the front Plan
@@ -796,7 +796,7 @@ public static class KokomiPlanPages
     public static string? PositionCaption(int index, int page, int count)
     {
         if (index == 0) return count > 1 ? KokomiPlanStrip.FirstCaption : null;
-        return ClampPage(page, count) > 0 ? "Plan " + (index + 1) : null;
+        return ClampPage(page, count) > 0 ? KokomiPlanText.Text(KokomiPlanText.PlanAt, ("N", index + 1)) : null;
     }
 }
 

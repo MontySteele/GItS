@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using HarmonyLib;
 using KleeMod.Cards;
@@ -71,12 +73,28 @@ public static class NationEmblem
     /// </summary>
     public static Style? StyleFor(string? nation) => nation switch
     {
-        "mondstadt" => new Style(new Color("3FB894"), "M"),
-        "liyue" => new Style(new Color("D9A62E"), "L"),
-        "inazuma" => new Style(new Color("9A5FD9"), "I"),
-        "fontaine" => new Style(new Color("3A86D9"), "F"),
+        "mondstadt" => new Style(new Color("3FB894"), Initial(nation)),
+        "liyue" => new Style(new Color("D9A62E"), Initial(nation)),
+        "inazuma" => new Style(new Color("9A5FD9"), Initial(nation)),
+        "fontaine" => new Style(new Color("3A86D9"), Initial(nation)),
         _ => null,
     };
+
+    /// <summary>The four initials, keyed (the localization census,
+    /// 2026-10-23, step 3): a translation names the nation its own way.</summary>
+    private static CodeRow InitialRow(string nation) => new("card_keywords",
+        "KLEEMOD-NATION_INITIAL." + nation.ToUpperInvariant(), nation switch
+        {
+            "mondstadt" => "M",
+            "liyue" => "L",
+            "inazuma" => "I",
+            _ => "F",
+        });
+
+    private static string Initial(string nation) => CodeText.Format(InitialRow(nation));
+
+    internal static IEnumerable<CodeRow> Rows() =>
+        new[] { "mondstadt", "liyue", "inazuma", "fontaine" }.Select(InitialRow);
 
     /// <summary>The nation a card's face shows, or null.</summary>
     public static string? NationOf(CardModel? card) =>

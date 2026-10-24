@@ -81,8 +81,8 @@ internal static class AnnotationFace
 {
     internal static List<(string, string)> For(YaeAnnotation annotation) => new()
     {
-        ("title", YaeAnnotationText.Name(annotation)),
-        ("description", YaeAnnotationText.Rule(annotation)),
+        ("title", YaeAnnotationText.NameEnglish(annotation)),
+        ("description", YaeAnnotationText.RuleEnglish(annotation)),
     };
 }
 

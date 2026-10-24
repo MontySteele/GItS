@@ -95,10 +95,10 @@ def test_the_tenko_clause_sums_the_sakura_standing_by_kind():
     st = _state()
     for _ in range(3):
         _play(st, _ym("yakan_evocation"))        # Levels 1, 1, 1
-    assert Y.tenko_line(st) == " (Sakura: 9 damage)"
+    assert Y.tenko_line(st) == " (Sakura: 9 damage in total)"
     Y.ledger(st.player).sakura[1].kind = Y.FOXFIRE
     Y.ledger(st.player).sakura[2].kind = Y.KITSUNE
-    assert Y.tenko_line(st) == " (Sakura: 3 damage, 2 to each enemy, 3 Block)"
+    assert Y.tenko_line(st) == " (Sakura: 3 damage, 2 to each enemy, 3 Block in total)"
 
 
 def test_the_clause_reads_levels_and_red_ink_as_the_action_does():
@@ -120,13 +120,12 @@ def test_the_clause_is_what_the_tenko_then_does():
 
 def test_the_words_are_one_table_in_both_engines():
     cs = SHRINE_CS.read_text(encoding="utf-8")
+    # Keyed rows since the localization census (2026-10-23): each kind's
+    # words are its row's English, the same `{n}` template.
+    rows = {Y.THUNDER: "live_damage", Y.FOXFIRE: "live_to_each", Y.KITSUNE: "live_block"}
     for kind in Y.SAKURA_KINDS:
         words = Y.TENKO_FACE[kind]
-        if kind == Y.THUNDER:
-            assert '_ => $"' + words + '"' in cs, words
-        else:
-            name = gen.YAE_SAKURA_KINDS[kind]
-            assert f'YaeSakuraKind.{name} => $"{words}"' in cs, words
+        assert f'Tenko + "{rows[kind]}", "{words}")' in cs, words
     assert f'NoSakura = "{Y.NO_SAKURA}"' in cs
     assert "YaeTenkoKind" not in cs
 
@@ -192,7 +191,7 @@ def test_the_tenko_clause_reads_the_shrine():
     st = _state()
     assert Y.tenko_line(st) == Y.NO_SAKURA == " (no Sakura)"
     _play(st, _ym("yakan_evocation"))
-    assert Y.tenko_line(st) == " (Sakura: 3 damage)"
+    assert Y.tenko_line(st) == " (Sakura: 3 damage in total)"
 
 
 # ---------------------------------------------------------------------------

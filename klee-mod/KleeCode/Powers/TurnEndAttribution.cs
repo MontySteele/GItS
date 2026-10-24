@@ -91,7 +91,9 @@ public sealed class TurnEndSource
 
     /// <summary>Hover copy. Same discipline as SalonMemberTips: written once,
     /// numbers from the constants, so a repricing cannot leave it quoting a
-    /// retired figure.</summary>
+    /// retired figure. Player text: a new source reads its body from a
+    /// keyed row (<see cref="CodeText.Format"/>; the localization census,
+    /// 2026-10-23), never an English literal.</summary>
     public required Func<Creature, string> Body { get; init; }
 
     /// <summary>Resolution. Lifted verbatim out of the sequencer's four

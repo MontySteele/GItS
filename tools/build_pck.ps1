@@ -1283,6 +1283,10 @@ if (-not (Test-Path $keywordSrc)) {
 # Dialogues: false) -- a roster character with no rows here softlocks the
 # win-the-run screen. BaseLib merges "THE_ARCHITECT.talk.<CHAR>.<X>-<Y>"
 # rows from this table into the game's dialogue set (AddAncientDialogues).
+# THE ROWS LIVE IN klee-mod/pck-src/klee/localization/eng/ancients.json
+# (2026-10-24), not in a here-string here: a tracked table reaches the pack
+# through the pck-src overlay below and is part of the English reference
+# (LocReferenceTests), so translation sees them. One source of the English.
 # Key law (from AncientDialogueSet's own doc): X-Y = dialogue-line, suffix
 # .ancient/.char = speaker, "r" on X-Y = repeating, ".next" = button text
 # for every line but the last. The "r" is LOAD-BEARING: GetValidDialogues
@@ -1293,25 +1297,10 @@ if (-not (Test-Path $keywordSrc)) {
 # Klee and Varka: dialogue cleanup, review/active/klee-varka-dialogue-review-2026-10-13.md.
 # Yae Miko (2026-10-13): placeholder lines with her prototype; outside that pass.
 # Furina remains outside that pass. Kokomi's (2026-10-16): review/active/kokomi-story-2026-10-16.md, pick 3 (a).
-[IO.File]::WriteAllText((Join-Path $locDir 'ancients.json'), @'
-{
-  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.ancient": "You have climbed far, little spark. Show me what you carried up my Spire.",
-  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-1r.char": "I saved this one for the top! You might wanna cover your ears!",
-  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.ancient": "The curtain falls at last, Regina of All Waters. Was it a performance, or was it real?",
-  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now - the people rejoice, and their Regina takes her bow.",
-  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You could have stayed on your island. Why climb so far from the people who need you?",
-  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Because I couldn't be sure this place would never reach them. I'd rather find out myself than wait at home.",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. Five years on the road, and still you climb. What did you expect to find at the top?",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "A good fight, then the road home. Mondstadt has waited long enough.",
-  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-0r.ancient": "Guuji. You climbed my Spire as if you were reading it. How does it end?",
-  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-1r.char": "With a twist, naturally. Do keep up. I would hate to edit you out."
+$ancientsSrc = Join-Path $repo 'klee-mod\pck-src\klee\localization\eng\ancients.json'
+if (-not (Test-Path $ancientsSrc)) {
+    throw "missing $ancientsSrc. The Architect's finale rows live there; without them the win-the-run screen softlocks."
 }
-'@)
 
 [IO.File]::WriteAllText((Join-Path $work 'klee\materials\klee_transition_mat.tres'), @'
 [gd_resource type="ShaderMaterial" load_steps=3 format=3]

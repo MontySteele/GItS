@@ -43,7 +43,7 @@ public sealed class Yae : CustomCharacterModel, IYaeCharacter
         // The rest of the base game's per-character rows (BaseLib's
         // CharacterLoc set plus bestiaryQuote); a missing row renders as its
         // raw key. CharacterLocCompletenessTests pins the set.
-        ("aromaPrinciple", "[sine][purple]How tempting. I think I will pass.[/purple][/sine]"),
+        ("aromaPrinciple", "[sine][purple]I am the Guuji of the Grand Narukami Shrine... no one's plaything...[/purple][/sine]"),
         ("banter.alive.endTurnPing", "Take your time. I am enjoying this."),
         ("banter.dead.endTurnPing", "..."),
         ("bestiaryQuote", "Hmm. That one would make a fine chapter."),

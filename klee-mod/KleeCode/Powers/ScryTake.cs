@@ -102,7 +102,7 @@ public static class ScryTake
     /// constructor, and this sentence is built per play out of a card
     /// title.</summary>
     public static string AutoTakeLine(string title) =>
-        $"Only one card left to look at: {title} taken.";
+        Vfx.KokomiPlanText.Text(Vfx.KokomiPlanText.AutoTake, ("Title", title));
 
     /// <summary>Over the player's head, and silent headless -- by the engine's
     /// own guards rather than ours (<c>KurageBeat.Say</c>).</summary>

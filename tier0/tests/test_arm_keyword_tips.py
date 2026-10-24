@@ -469,7 +469,7 @@ def test_the_companion_tip_and_the_page_open_with_one_sentence():
     assert tip == blindplay_notes.COMPANION_DEFINITION
     assert blindplay_notes.ARM_KEYWORDS["Companion"] == (
         tip + " " + blindplay_notes.COMPANION_SLOT_SENTENCE)
-    assert tip == "A card titled with a character's name, a dash, then its own."
+    assert tip == "A shared ally card, such as Jean's Gale Blade. Varka's Knights count too."
 
     # And the tip reaches every face that prints the word, on every arm.
     printed = [path.stem for path in _prototype_files()

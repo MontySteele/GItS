@@ -33,6 +33,19 @@ public static class KleeStory
         new(StoryEffectKind.RemoveEvery, 0, typeof(MegaCrit.Sts2.Core.Models.Cards.Doubt)),
     };
 
+    /// <summary>The boss lines' variant name while Dodoco is missing.</summary>
+    public const string DodocoMissingLine = "dodocoMissing";
+
+    /// <summary>Dodoco is missing: Dodoco Goes Missing fired, and neither
+    /// rescue has: Found You! (act 2), or The Knights Come Looking opening on
+    /// DODOCO_FOUND (act 3, no act-2 story event), its own test below.</summary>
+    public static readonly IReadOnlyList<StoryCondition> DodocoMissing = new[]
+    {
+        new StoryCondition(Fired: typeof(KleeDodocoGoesMissing)),
+        new StoryCondition(Fired: typeof(KleeFoundYou), Not: true),
+        new StoryCondition(Fired: typeof(KleeKnightsComeLooking), NoEventInAct: 1, Not: true),
+    };
+
     /// <summary>Mom's Last Note: "Saved the cache" (Alice's Cache, Save it
     /// for a real emergency).</summary>
     private static readonly StoryCondition SavedTheCache = new(typeof(KleeAlicesCache), "SAVE_IT");
@@ -49,29 +62,29 @@ public static class KleeStory
         Ancients = new[]
         {
             new AncientExchange("Neow", "NEOW",
-                "A child. Carrying... fire.",
-                "Don't worry! I haven't lit the fuse yet."),
+                "[sine]...little.. one...\n..so.. far.. from home...[/sine]",
+                "I'm not lost! I'm exploring! ...Is this the way up?"),
             new AncientExchange("Orobas", "OROBAS",
-                "Your trinket hums. Let me make it sing.",
-                "Ooh! Can you make it go [i]boom[/i] louder?"),
+                "Small one! Pockets full! Show show!",
+                "Okay! But don't shake them. Some of them go boom."),
             new AncientExchange("Pael", "PAEL",
-                "You have bitten off more than you can chew, little one.",
-                "But I haven't eaten anything! Do you have snacks?"),
+                "[thinky_dots]Such a little one... climbing so late...\nRest a moment. Take from me...[/thinky_dots]",
+                "You're really sleepy, huh? Klee will be quiet."),
             new AncientExchange("Tezcatara", "TEZCATARA",
-                "Warm yourself by my light.",
-                "It's so warm! Dodoco, come closer!"),
+                "Come in, come in, sweetie! Have you eaten? You look half starved.",
+                "Yes please! Klee's starving!"),
             new AncientExchange("Nonupeipe", "NONUPEIPE",
-                "Small hands. Many sparks.",
-                "I made these myself! Mom showed me how."),
+                "Come closer, little one! Let me make you dazzling.",
+                "Can I be dazzling and sparkly? Like fireworks?"),
             new AncientExchange("Tanx", "TANX",
-                "Do you fight for glory?",
-                "I'm looking for treasure! I'll bring some back for everyone."),
+                "TINY WARRIOR! WHERE IS YOUR WEAPON!?",
+                "Right here! It's a bomb! ...Wanna see?"),
             new AncientExchange("Vakuu", "VAKUU",
-                "Trade with me.",
-                "You can have this shiny pebble! But Dodoco stays with me."),
+                "Such a small one, so far up. I could make you [sine]strong[/sine]. Shall we deal?",
+                "Master Jean says no deals with strangers. ...What kind of deal?"),
             new AncientExchange("Darv", "DARV",
-                "I collect what others leave behind.",
-                "Oh! Have you seen any little round bombs? I dropped one..."),
+                "Little bomber! Dig through that pile, there's somethin' for ya in there!",
+                "Treasure hunt! Have you seen any little round bombs? I dropped one..."),
         },
 
         Lines = new CombatLines(
@@ -81,6 +94,16 @@ public static class KleeStory
             BossKill: "We did it! Did you see, Dodoco?",
             RunLoss: "Jean... can you come get me?",
             RunWin: "I made it all the way up! Mom's gonna be so proud!"),
+
+        // Dodoco is missing from Dodoco Goes Missing until Found You! (act 2)
+        // or, with no act-2 event, the knights bring it back in act 3.
+        LineVariants = new[]
+        {
+            new CombatLineVariant(StoryLines.BossEntry, DodocoMissingLine, DodocoMissing,
+                "Whoa, it's huge! Hang on, Dodoco, I'm coming!"),
+            new CombatLineVariant(StoryLines.BossKill, DodocoMissingLine, DodocoMissing,
+                "We won! Now let's go find Dodoco!"),
+        },
 
         Pairs = new[]
         {
@@ -269,7 +292,7 @@ public static class KleeStory
                     new StoryOption("SWAP_HER_BEST_BOMB", "Swap her best bomb for Dodoco.",
                         "Transform a card. Remove every [gold]Doubt[/gold].",
                         new StoryEffect(StoryEffectKind.TransformCards, 1),
-                        "It gives her a rock in return. Klee keeps the rock.")
+                        "The creature takes the bomb and lets Dodoco go. It gives her a rock, too. Klee keeps the rock.")
                     {
                         Then = DodocoHome,
                     },
@@ -339,7 +362,7 @@ public static class KleeStory
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic) },
                     },
                     new StoryOption("SAVE_IT", "Save it for a real emergency.",
-                        "Lose 5 HP. Gain a random potion. Mom's chest will still be there.",
+                        "Lose 5 HP. Gain a random potion. Klee takes Mom's chest with her.",
                         new StoryEffect(StoryEffectKind.LoseHp, 5),
                         "The chest sputters at her the whole way up. Klee carries it very, very carefully.")
                     {

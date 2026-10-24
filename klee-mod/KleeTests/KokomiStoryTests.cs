@@ -330,7 +330,7 @@ public class KokomiStoryTests
         // The paper gives the free way out no opening.
         Assert.Null(Opening(typeof(KokomiSerpentsBones), R(0, coral, "LEAVE_IT")));
 
-        // "When it follows the room, it opens: Rested, she reads it properly this time."
+        // "When it follows the room, it opens: The quiet room did her good."
         foreach (var o in E(typeof(KokomiEmptyRoom)).Options)
         {
             Assert.Equal("RESTED", Opening(typeof(KokomiReportFromGorou), R(0, typeof(KokomiEmptyRoom), o.Key)));
@@ -419,7 +419,7 @@ public class KokomiStoryTests
             K.Ancients.Select(a => a.AncientEntry));
         foreach (var a in K.Ancients)
         {
-            Assert.Contains(a.AncientLine, flat);
+            Assert.Contains(a.AncientLine.Replace("\n", "<br>"), flat);
             Assert.Contains(a.CharacterLine, flat);
             Assert.Equal(a.Ancient.ToUpperInvariant(), a.AncientEntry);
         }

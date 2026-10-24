@@ -51,6 +51,11 @@ public sealed class CharacterStory
     /// while her lines are an open pick).</summary>
     public required CombatLines? Lines { get; init; }
 
+    /// <summary>Combat lines said instead of the plain one while the run's
+    /// saved story holds (Klee's boss lines while Dodoco is missing). The
+    /// first that holds is used.</summary>
+    public IReadOnlyList<CombatLineVariant> LineVariants { get; init; } = Array.Empty<CombatLineVariant>();
+
     /// <summary>A two-character exchange at each boss, partner first.</summary>
     public required IReadOnlyList<PairExchange> Pairs { get; init; }
 
@@ -86,6 +91,13 @@ public sealed record AncientExchange(
 public sealed record CombatLines(
     string BossEntry, string LowHp, string Signature, string BossKill,
     string RunLoss, string RunWin);
+
+/// <summary>One of <see cref="CharacterStory.LineVariants"/>: the moment it
+/// replaces (<see cref="StoryLines.BossEntry"/> and the like), its name (the
+/// loc key's suffix), the saved-story tests that must ALL hold, and the
+/// words.</summary>
+public sealed record CombatLineVariant(
+    string Line, string Name, IReadOnlyList<StoryCondition> When, string Text);
 
 /// <summary>Who the partner is, what they say, and her answer. The partner
 /// speaks first unless <see cref="OwnFirst"/> (the paper's order: Varka

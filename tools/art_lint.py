@@ -604,6 +604,11 @@ GENERATOR_OWNED = {
     # is no wiki art for one of OUR meters to plan a row against.
     "ImageGen/images/furina/powers/encore.png":             "gen_meter_glyphs.py",
     "ImageGen/images/kokomi/powers/charge.png":             "gen_meter_glyphs.py",
+    # The reaction badges (2026-10-24): one element mark at full badge size
+    # in a frame of its own; the wiki's reaction icons were rows of dots.
+    "ImageGen/images/powers/aftershock.png":                "gen_reaction_badges.py",
+    "ImageGen/images/kokomi/powers/grand_strategist.png":   "gen_reaction_badges.py",
+    "ImageGen/images/varka/powers/all_four_winds.png":      "gen_reaction_badges.py",
     # R231 answered QUEUE M19 with set A (Fontaine Hydro), so Furina's energy
     # counter has art. Procedural like the salon chips and the meter glyphs and
     # for the same reason: an orb layer is a glow, a body, a caustic band, a

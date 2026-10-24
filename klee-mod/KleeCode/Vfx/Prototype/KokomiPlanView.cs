@@ -349,7 +349,7 @@ internal static class KokomiPlanView
             var index = KokomiPlanViewRows.QueueIndex(queue, card);
             if (index < 0)
             {
-                SetPrompt("That Plan is no longer waiting.");
+                SetPrompt(KokomiPlanText.Text(KokomiPlanText.NoLongerWaiting));
                 return;
             }
             // Read BEFORE the request: a flip that resolves at once must not
@@ -360,16 +360,13 @@ internal static class KokomiPlanView
             var why = KokomiPlan.RequestFlip(me, index);
             SetPrompt(why == null
                 ? KokomiPlanViewRows.FlipSent(before, behindGambit)
-                : Capitalise(why) + ".");
+                : KokomiPlan.FlipRefusalShown(me, index) ?? why);
         }
         catch (Exception e)
         {
             Log.Warn($"[{KleeMod.ModId}] plans view: flip skipped: {e}");
         }
     }
-
-    private static string Capitalise(string s) =>
-        s.Length == 0 ? s : char.ToUpperInvariant(s[0]) + s.Substring(1);
 
     private static void SetPrompt(string text)
     {
@@ -576,10 +573,10 @@ internal static class KokomiPlanView
 public static class KokomiPlanViewRows
 {
     /// <summary>The caption on a Plan with one line.</summary>
-    public const string PlanOnlyCaption = "Plan only";
+    public static string PlanOnlyCaption => KokomiPlanText.Text(KokomiPlanText.PlanOnly);
 
     /// <summary>The words beside the button glyph under the strip.</summary>
-    public const string HintCaption = "Plans";
+    public static string HintCaption => KokomiPlanText.Text(KokomiPlanText.Hint);
 
     /// <summary>The card a Plan is shown as: its own card, or the card that
     /// wrote it where it holds none. Null shows nothing.</summary>
@@ -683,7 +680,7 @@ public static class KokomiPlanViewRows
     /// line, "1. Plan line".</summary>
     public static string Caption(int index, KokomiPlan.Entry entry,
                                  bool doubleLost = false) =>
-        $"{index + 1}. {LineCaption(entry, doubleLost)}";
+        KokomiPlanText.Text(KokomiPlanText.Caption, ("N", index + 1), ("Line", LineCaption(entry, doubleLost)));
 
     /// <summary>The prompt after a flip was sent: the line it is flipping
     /// to (the caption repaints when it lands). Flipping the Plan behind
@@ -692,16 +689,14 @@ public static class KokomiPlanViewRows
     /// 2026-10-21).</summary>
     public static string FlipSent(KokomiPlan.Entry before,
                                   bool behindGambit = false) =>
-        $"{before.Title}: flipping to its "
-        + (before.Now ? "Plan line."
-           : behindGambit && before.TwoLine
-               ? "now-line. " + NowLineLosesDouble
-               : "now-line.");
+        KokomiPlanText.Text(before.Now ? KokomiPlanText.FlipToPlanLine
+                 : behindGambit && before.TwoLine ? KokomiPlanText.FlipToNowLineLosesDouble
+                 : KokomiPlanText.FlipToNowLine,
+                 ("Title", before.Title));
 
     /// <summary>The words a flip to the now-line adds behind Opening
     /// Gambit.</summary>
-    public const string NowLineLosesDouble =
-        "Opening Gambit's double damage does not reach a now-line.";
+    public static string NowLineLosesDouble => KokomiPlanText.Text(KokomiPlanText.LosesDouble);
 
     /// <summary>
     /// The words of the strip's button hint, or null for none. A controller
@@ -714,10 +709,10 @@ public static class KokomiPlanViewRows
     {
         InputType.Controller => HintCaption,
         InputType.KeyboardOnlyMode when !string.IsNullOrEmpty(key) =>
-            $"{key}: {HintCaption}",
+            KokomiPlanText.Text(KokomiPlanText.HintKey, ("Key", key!)),
         InputType.MouseAndKeyboard => string.IsNullOrEmpty(key)
             ? HintCaption
-            : $"{key}: {HintCaption}",
+            : KokomiPlanText.Text(KokomiPlanText.HintKey, ("Key", key!)),
         _ => null,
     };
 

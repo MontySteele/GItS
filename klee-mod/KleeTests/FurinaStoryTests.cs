@@ -71,7 +71,7 @@ public class FurinaStoryTests
             F.Ancients.Select(a => a.AncientEntry));
         foreach (var a in F.Ancients)
         {
-            Assert.Contains($"| {a.Ancient} | {a.AncientLine} | {a.CharacterLine} |", paper);
+            Assert.Contains($"| {a.Ancient} | {a.AncientLine.Replace("\n", "<br>")} | {a.CharacterLine} |", paper);
             Assert.Equal(a.Ancient.ToUpperInvariant(), a.AncientEntry);
         }
     }

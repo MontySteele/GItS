@@ -103,7 +103,11 @@ public class LocReferenceTests
             .Select(ModelDb.GetEntry)
             .ToHashSet(StringComparer.Ordinal);
 
-    public static SortedDictionary<string, SortedDictionary<string, string>> Build()
+    public static SortedDictionary<string, SortedDictionary<string, string>> Build() => Build(teyvatFrame: true);
+
+    /// <summary>The reference with the Teyvat frame arm on (the committed
+    /// file) or off (what a release build merges).</summary>
+    public static SortedDictionary<string, SortedDictionary<string, string>> Build(bool teyvatFrame)
     {
         var reference = new SortedDictionary<string, SortedDictionary<string, string>>(StringComparer.Ordinal);
         void Add(string table, string key, string value)
@@ -139,7 +143,7 @@ public class LocReferenceTests
             Table(Path.GetFileNameWithoutExtension(file));
         }
         var wasEnabled = TeyvatFrame.Enabled;
-        TeyvatFrame.Enabled = true;
+        TeyvatFrame.Enabled = teyvatFrame;
         try
         {
             EnglishLoc.Within(Table, null, EnglishLoc.RunInjectors);
@@ -216,6 +220,56 @@ public class LocReferenceTests
             + $"{WriteVariable}=1 dotnet test --filter LocReferenceTests and commit it.");
     }
 
+    /// <summary>
+    /// THE TEYVAT FRAME'S ROWS (the story text audit, 2026-10-23): the rows
+    /// the reference holds only because its build turns the frame arm on
+    /// (nation events, nation Ancients, the acts and their monsters). A
+    /// release build merges none of them, so a translation leaves them out
+    /// while the frame is off, and <c>tools/lint_loc_translations.py</c>
+    /// reads this list to skip them. <c>{table: [key, ...]}</c>, sorted.
+    /// </summary>
+    public static string FrameRowsPath() =>
+        Path.Combine(RepoRoot(), "klee-mod", "localization", "reference", "teyvat_frame_rows.json");
+
+    public static SortedDictionary<string, List<string>> FrameRows()
+    {
+        var on = Build(teyvatFrame: true);
+        var off = Build(teyvatFrame: false);
+        var frame = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
+        foreach (var (table, rows) in on)
+        {
+            off.TryGetValue(table, out var released);
+            var keys = rows.Keys.Where(k => released == null || !released.ContainsKey(k)).ToList();
+            if (keys.Count > 0) frame[table] = keys;
+        }
+        return frame;
+    }
+
+    [Fact]
+    public void The_committed_Teyvat_frame_row_list_is_current()
+    {
+        var json = JsonSerializer.Serialize(FrameRows(), new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        }).Replace("\r\n", "\n") + "\n";
+        var path = FrameRowsPath();
+        if (Environment.GetEnvironmentVariable(WriteVariable) == "1")
+        {
+            File.WriteAllText(path, json, new UTF8Encoding(false));
+        }
+        Assert.True(File.Exists(path), $"{path} is missing. Write it with {WriteVariable}=1 dotnet test --filter LocReferenceTests");
+        var committed = File.ReadAllText(path, Encoding.UTF8).Replace("\r\n", "\n");
+        Assert.True(committed == json,
+            $"{path} is stale. Rewrite it with {WriteVariable}=1 dotnet test --filter LocReferenceTests and commit it.");
+        // A frame row is a row of the reference, and the frame-off build
+        // still has rows of its own.
+        var reference = Build();
+        Assert.All(FrameRows(), p => Assert.All(p.Value, k => Assert.Contains(k, reference[p.Key].Keys)));
+        Assert.Contains("events", FrameRows().Keys);
+        Assert.DoesNotContain("cards", FrameRows().Keys);
+    }
+
     [Fact]
     public void The_reference_carries_every_kind_of_row()
     {
@@ -226,4 +280,29 @@ public class LocReferenceTests
         Assert.True(reference.ContainsKey("acts"));
         Assert.DoesNotContain(reference.Values.SelectMany(r => r.Keys), k => k.Contains("SEA_GLASS.VARKA", StringComparison.Ordinal));
     }
+
+    /// <summary>
+    /// The Architect's finale (2026-10-24): the five exchanges used to be a
+    /// here-string in <c>tools/build_pck.ps1</c>, outside this reference, so a
+    /// translation skipped them. They ship from
+    /// <c>klee-mod/pck-src/klee/localization/eng/ancients.json</c> now: all
+    /// fifteen rows are here, every one REPEATING ("r" on X-Y; a
+    /// non-repeating-only set softlocks the second win, KleeSelfCheck R12).
+    /// </summary>
+    [Fact]
+    public void The_Architect_finale_rows_are_in_the_reference()
+    {
+        var rows = Build()["ancients"].Keys
+            .Where(k => k.StartsWith("THE_ARCHITECT.", StringComparison.Ordinal))
+            .ToList();
+        Assert.Equal(15, rows.Count);
+        foreach (var who in new[] { "KLEE", "KOKOMI", "FURINA", "VARKA", "YAE" })
+        {
+            var key = $"THE_ARCHITECT.talk.KLEEMOD-{who}.";
+            Assert.Contains(key + "0-0r.ancient", rows);
+            Assert.Contains(key + "0-0r.next", rows);
+            Assert.Contains(key + "0-1r.char", rows);
+        }
+    }
 }
+

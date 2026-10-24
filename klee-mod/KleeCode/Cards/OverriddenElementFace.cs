@@ -91,65 +91,17 @@ public static class OverriddenElementFace
     /// recorded as they are written.</summary>
     internal static readonly HashSet<string> TokenRows = new(StringComparer.Ordinal);
 
-    /// <summary>The card whose face is being formatted on this thread.</summary>
-    [ThreadStatic] internal static CardModel? Formatting;
-
-    /// <summary>The tokens for the row <paramref name="key"/>: the card's own
-    /// reading while that card's face is being formatted, the plain names
-    /// anywhere else.</summary>
-    internal static Dictionary<string, object> TokensFor(string key)
-    {
-        var card = Formatting;
-        if (card != null && card.Id.Entry + ".description" == key)
-        {
-            var (printed, applied) = ElementsOf(card);
-            return Tokens(printed, applied);
-        }
-        return Tokens(Element.None, Element.None);
-    }
-}
-
-/// <summary>Which card a face belongs to, for the length of its formatting.
-/// The private overload is the one both public paths (the pile and the
-/// upgrade preview) run through.</summary>
-[HarmonyPatch]
-internal static class OverriddenElementFace_Card_Patch
-{
-    // `GetDescriptionForPile(PileType, DescriptionPreviewType, Creature)`,
-    // whose middle parameter is a private enum.
-    private static MethodBase TargetMethod() =>
-        AccessTools.GetDeclaredMethods(typeof(CardModel)).First(m =>
-            m.Name == "GetDescriptionForPile" && m.GetParameters().Length == 3);
-
-    [HarmonyPrefix]
-    public static void Prefix(CardModel __instance, out CardModel? __state)
-    {
-        __state = OverriddenElementFace.Formatting;
-        OverriddenElementFace.Formatting = __instance;
-    }
-
-    [HarmonyFinalizer]
-    public static void Finalizer(CardModel? __state)
-    {
-        OverriddenElementFace.Formatting = __state;
-    }
-}
-
-/// <summary>Every formatting of a token row is handed the names, so a token
-/// never prints raw.</summary>
-[HarmonyPatch(typeof(LocManager), nameof(LocManager.SmartFormat))]
-internal static class OverriddenElementFace_Format_Patch
-{
-    [HarmonyPrefix]
-    public static void Prefix(LocString locString, Dictionary<string, object> variables)
+    /// <summary>Hands a token row of <paramref name="card"/> its element
+    /// names. Never throws.</summary>
+    internal static void AddTokens(CardModel card, LocString description)
     {
         try
         {
-            if (locString.LocTable != "cards"
-                || !OverriddenElementFace.TokenRows.Contains(locString.LocEntryKey)) return;
-            foreach (var (name, value) in OverriddenElementFace.TokensFor(locString.LocEntryKey))
+            if (description.LocTable != "cards" || !TokenRows.Contains(description.LocEntryKey)) return;
+            var (printed, applied) = ElementsOf(card);
+            foreach (var (name, value) in Tokens(printed, applied))
             {
-                variables.TryAdd(name, value);
+                description.AddObj(name, value);
             }
         }
         catch (Exception)
@@ -158,4 +110,18 @@ internal static class OverriddenElementFace_Format_Patch
             // missing token itself.
         }
     }
+}
+
+/// <summary>Every card face is handed its element names as it is built.
+/// Not <c>LocManager.SmartFormat</c>: its exception filter
+/// (<c>catch ... when</c>) is refused by Harmony, so that patch never armed
+/// and every token face printed raw (live check, 2026-10-23). Every override
+/// of this hook in the mod calls base, so the postfix runs for each face, on
+/// both paths (the pile and the upgrade preview).</summary>
+[HarmonyPatch(typeof(CardModel), "AddExtraArgsToDescription")]
+internal static class OverriddenElementFace_Card_Patch
+{
+    [HarmonyPostfix]
+    public static void Postfix(CardModel __instance, LocString description) =>
+        OverriddenElementFace.AddTokens(__instance, description);
 }

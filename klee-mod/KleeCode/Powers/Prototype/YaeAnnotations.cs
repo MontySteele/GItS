@@ -41,10 +41,29 @@ public enum YaeAnnotation
 }
 
 /// <summary>The seven Annotations' names and rules, one table, read by the
-/// Masterpiece, the Reborn faces and the Edit tip.</summary>
+/// Masterpiece, the Reborn faces and the Edit tip.
+///
+/// KEYED (the localization census, 2026-10-23, step 3). Each name is its
+/// tip's title row (<c>card_keywords</c>, <c>KLEEMOD-ARM_YAE_REDINK.title</c>),
+/// each rule its body (<c>.description</c>), the Sakura reading a variant
+/// (<c>.description_sakura</c>), Red Ink on a planting card a whole variant
+/// (<c>.description_plants</c>); the Masterpiece's hover and face lines are
+/// <c>KLEEMOD-YAE_MASTERPIECE.*</c> rows, a list SmartFormat's. The numbers
+/// are vars off <see cref="YaeLaw"/>. A text that is itself an English row
+/// (the Reborn faces, the Edit prompts, the keyword fallback) reads the
+/// English (<see cref="NameEnglish"/>, <see cref="RuleEnglish"/>).</summary>
 public static class YaeAnnotationText
 {
-    public static string Name(YaeAnnotation annotation) => annotation switch
+    private const string Table = "card_keywords";
+    private const string Masterpiece = "KLEEMOD-YAE_MASTERPIECE.";
+
+    /// <summary>The numbers the rules quote, by var name.</summary>
+    private static readonly IReadOnlyDictionary<string, object> Vars = CodeText.Vars(
+        ("RedInkAmount", YaeLaw.RedInkAmount),
+        ("FoxFireDamage", YaeLaw.FoxFireDamage),
+        ("RoyaltiesPayout", YaeLaw.RoyaltiesPayout));
+
+    private static string NameTemplate(YaeAnnotation annotation) => annotation switch
     {
         YaeAnnotation.RedInk => "Red Ink",
         YaeAnnotation.Footnote => "Footnote",
@@ -56,20 +75,20 @@ public static class YaeAnnotationText
         _ => "",
     };
 
-    public static string Rule(YaeAnnotation annotation) => annotation switch
+    private static string RuleTemplate(YaeAnnotation annotation) => annotation switch
     {
         YaeAnnotation.RedInk =>
-            $"This card deals {YaeLaw.RedInkAmount} additional damage and gives "
-          + $"{YaeLaw.RedInkAmount} additional [gold]Block[/gold].",
+            "This card deals {RedInkAmount} additional damage and gives "
+          + "{RedInkAmount} additional [gold]Block[/gold].",
         YaeAnnotation.Footnote => "When this card is played, draw 1 card.",
         YaeAnnotation.DeadlineExtension => "This card has [gold]Retain[/gold].",
         YaeAnnotation.FoxFire =>
-            $"When this card is played, deal {YaeLaw.FoxFireDamage} "
+            "When this card is played, deal {FoxFireDamage} "
           + "[gold]Electro[/gold] damage to a random enemy.",
         YaeAnnotation.SakuraSeal =>
             "When this card is played, plant a [gold]Sakura[/gold].",
         YaeAnnotation.Royalties =>
-            $"When this card is played, gain {YaeLaw.RoyaltiesPayout} Energy.",
+            "When this card is played, gain {RoyaltiesPayout} Energy.",
         // Yae review r6, item 4: Reprints stack, and the hover says so.
         YaeAnnotation.Reprint =>
             "The first time this card is played each combat, play it once "
@@ -80,19 +99,68 @@ public static class YaeAnnotationText
     /// <summary>What an Annotation does on a SAKURA; empty for the ones with
     /// no Sakura reading. Review r3: Red Ink works on any kind (damage, each
     /// enemy's damage, or Block).</summary>
-    public static string SakuraRule(YaeAnnotation annotation) => annotation switch
+    private static string SakuraRuleTemplate(YaeAnnotation annotation) => annotation switch
     {
         YaeAnnotation.RedInk =>
-            $"The [gold]Sakura[/gold]'s action is {YaeLaw.RedInkAmount} "
+            "The [gold]Sakura[/gold]'s action is {RedInkAmount} "
           + "bigger.",
         YaeAnnotation.FoxFire =>
             "When the [gold]Sakura[/gold] acts, it also deals "
-          + $"{YaeLaw.FoxFireDamage} [gold]Electro[/gold] damage to a random "
+          + "{FoxFireDamage} [gold]Electro[/gold] damage to a random "
           + "enemy.",
         YaeAnnotation.DeadlineExtension =>
             "The [gold]Sakura[/gold] does not wither.",
         _ => "",
     };
+
+    private static string KeyOf(YaeAnnotation annotation) => Cards.ArmKeywordTips.KeyOf(annotation);
+
+    private static CodeRow NameRow(YaeAnnotation a) => new(Table, KeyOf(a) + ".title", NameTemplate(a));
+    private static CodeRow RuleRow(YaeAnnotation a) => new(Table, KeyOf(a) + ".description", RuleTemplate(a));
+    private static CodeRow SakuraRuleRow(YaeAnnotation a) =>
+        new(Table, KeyOf(a) + ".description_sakura", SakuraRuleTemplate(a));
+
+    /// <summary>Red Ink on a card that plants also goes to every Sakura it
+    /// plants, the card keeping its own +3: the whole box, one row.</summary>
+    private static readonly CodeRow RedInkPlantsRow = new(Table, KeyOf(YaeAnnotation.RedInk) + ".description_plants",
+        RuleTemplate(YaeAnnotation.RedInk) + " " + RedInkPlantClause);
+
+    private static readonly CodeRow ListRow = new(Table, Masterpiece + "list", "{Items:list:{}|, }");
+    private static readonly CodeRow TimesRow = new(Table, Masterpiece + "times", "{Name} x{N}");
+    private static readonly CodeRow PublishedRow = new(Table, Masterpiece + "published", PublishedHead + "{List}.");
+    private static readonly CodeRow ThisCombatRow = new(Table, Masterpiece + "this_combat", ThisCombatHead + "{Name}.");
+    private static readonly CodeRow ThisCombatTimesRow =
+        new(Table, Masterpiece + "this_combat_times", ThisCombatHead + "{Name} x{N}.");
+    private static readonly CodeRow ReprintUsedRow = new(Table, Masterpiece + "reprint_used", ReprintUsed);
+    private static readonly CodeRow SentencesRow = new(Table, Masterpiece + "sentences", "{Items:list:{}| }");
+    private static readonly CodeRow FaceRow = new(Table, Masterpiece + "face", "[gold]{Name}[/gold].");
+    private static readonly CodeRow FaceTimesRow = new(Table, Masterpiece + "face_times", "[gold]{Name}[/gold] x{N}.");
+
+    public static IEnumerable<CodeRow> Rows() =>
+        All.Select(NameRow)
+            .Concat(All.Select(RuleRow))
+            .Concat(All.Where(a => SakuraRuleTemplate(a).Length > 0).Select(SakuraRuleRow))
+            .Concat(new[]
+            {
+                RedInkPlantsRow, ListRow, TimesRow, PublishedRow, ThisCombatRow, ThisCombatTimesRow,
+                ReprintUsedRow, SentencesRow, FaceRow, FaceTimesRow,
+            });
+
+    private static string Read(CodeRow row, IReadOnlyDictionary<string, object>? vars = null) =>
+        row.English.Length == 0 ? "" : CodeText.Format(row, vars);
+
+    public static string Name(YaeAnnotation annotation) => Read(NameRow(annotation));
+
+    /// <summary>The name in English, for a row that is itself English.</summary>
+    public static string NameEnglish(YaeAnnotation annotation) => NameTemplate(annotation);
+
+    public static string Rule(YaeAnnotation annotation) => Read(RuleRow(annotation), Vars);
+
+    /// <summary>The rule in English, for a row that is itself English.</summary>
+    public static string RuleEnglish(YaeAnnotation annotation) =>
+        CodeText.FormatEnglish(RuleTemplate(annotation), Vars);
+
+    public static string SakuraRule(YaeAnnotation annotation) => Read(SakuraRuleRow(annotation), Vars);
 
     /// <summary>The seven, in the sheet's order.</summary>
     public static readonly YaeAnnotation[] All =
@@ -107,14 +175,15 @@ public static class YaeAnnotationText
     /// card reading, or its Sakura reading on a card that Edits a Sakura.
     /// PURE.</summary>
     public static string TipBody(YaeAnnotation annotation, bool onSakura) =>
-        onSakura && SakuraRule(annotation).Length > 0
+        onSakura && SakuraRuleTemplate(annotation).Length > 0
             ? SakuraRule(annotation)
             : annotation == YaeAnnotation.RedInk
-                ? Rule(annotation) + " " + RedInkPlantClause
+                ? Read(RedInkPlantsRow, Vars)
                 : Rule(annotation);
 
     /// <summary>Red Ink on a card that plants also goes to every Sakura it
-    /// plants, the card keeping its own +3.</summary>
+    /// plants, the card keeping its own +3 (the English of
+    /// <c>.description_plants</c>'s second sentence).</summary>
     public const string RedInkPlantClause =
         "If it plants, its [gold]Sakura[/gold] get it too.";
 
@@ -122,11 +191,11 @@ public static class YaeAnnotationText
     public static string Plain(string text) =>
         text.Replace("[gold]", "").Replace("[/gold]", "");
 
-    /// <summary>The card reading as a clause about the card being picked.
-    /// PURE.</summary>
+    /// <summary>The card reading as a clause about the card being picked,
+    /// in English: it is part of an Edit prompt's English row. PURE.</summary>
     public static string PromptClause(YaeAnnotation annotation)
     {
-        var rule = Plain(Rule(annotation)).TrimEnd('.');
+        var rule = Plain(RuleEnglish(annotation)).TrimEnd('.');
         rule = rule.Replace("This card", "It").Replace("this card", "it");
         return rule.Length == 0 ? rule
             : char.ToLowerInvariant(rule[0]) + rule.Substring(1);
@@ -148,11 +217,15 @@ public static class YaeAnnotationText
             }
             count[a]++;
         }
-        return string.Join(", ", order.Select(a =>
-            count[a] > 1 ? $"{Name(a)} x{count[a]}" : Name(a)));
+        if (order.Count == 0) return "";
+        var items = order.Select(a => count[a] > 1
+            ? CodeText.Format(TimesRow, CodeText.Vars(("Name", Name(a)), ("N", count[a])))
+            : Name(a)).ToList();
+        return CodeText.Format(ListRow, CodeText.Vars(("Items", items)));
     }
 
-    /// <summary>The prefix of the Masterpiece's stack line.</summary>
+    /// <summary>The prefix of the Masterpiece's stack line (the English of
+    /// <c>KLEEMOD-YAE_MASTERPIECE.published</c>).</summary>
     public const string PublishedHead = "Published: ";
 
     /// <summary>The prefix of its temporary-slot line.</summary>
@@ -172,12 +245,14 @@ public static class YaeAnnotationText
                                  int temporaryCount = 1)
     {
         var parts = new List<string>();
-        if (stack.Count > 0) parts.Add(PublishedHead + List(stack) + ".");
+        if (stack.Count > 0)
+            parts.Add(CodeText.Format(PublishedRow, CodeText.Vars(("List", List(stack)))));
         if (temporary != YaeAnnotation.None)
-            parts.Add(ThisCombatHead + Name(temporary)
-                      + (temporaryCount > 1 ? " x" + temporaryCount : "") + ".");
-        if (reprintUsed) parts.Add(ReprintUsed);
-        return string.Join(" ", parts);
+            parts.Add(temporaryCount > 1
+                ? CodeText.Format(ThisCombatTimesRow, CodeText.Vars(("Name", Name(temporary)), ("N", temporaryCount)))
+                : CodeText.Format(ThisCombatRow, CodeText.Vars(("Name", Name(temporary)))));
+        if (reprintUsed) parts.Add(CodeText.Format(ReprintUsedRow));
+        return Sentences(parts);
     }
 
     /// <summary>The card face's line: the Annotations that act when the
@@ -189,12 +264,18 @@ public static class YaeAnnotationText
             or YaeAnnotation.FoxFire or YaeAnnotation.SakuraSeal
             or YaeAnnotation.Royalties).ToList();
         if (shown.Count == 0) return "";
-        return string.Join(" ", shown.Distinct().Select(a =>
+        return Sentences(shown.Distinct().Select(a =>
         {
             var n = shown.Count(x => x == a);
-            return n > 1 ? $"[gold]{Name(a)}[/gold] x{n}." : $"[gold]{Name(a)}[/gold].";
-        }));
+            return n > 1
+                ? CodeText.Format(FaceTimesRow, CodeText.Vars(("Name", Name(a)), ("N", n)))
+                : CodeText.Format(FaceRow, CodeText.Vars(("Name", Name(a))));
+        }).ToList());
     }
+
+    /// <summary>Whole sentences, one after another: the join is its own row.</summary>
+    private static string Sentences(IReadOnlyList<string> sentences) =>
+        sentences.Count == 0 ? "" : CodeText.Format(SentencesRow, CodeText.Vars(("Items", sentences)));
 }
 
 /// <summary>
@@ -561,7 +642,7 @@ public static class YaeEditing
     public static string EditPromptTextFor(YaeAnnotation annotation) =>
         annotation == YaeAnnotation.None
             ? EditPromptText
-            : $"Choose a card to Edit: {YaeAnnotationText.Name(annotation)} "
+            : $"Choose a card to Edit: {YaeAnnotationText.NameEnglish(annotation)} "
               + $"({YaeAnnotationText.PromptClause(annotation)}). "
               + FilterClause(annotation)
               + ReplacesWarning;
@@ -576,7 +657,7 @@ public static class YaeEditing
     /// <summary>"Choose up to {Amount} cards to Edit: Red Ink (...)." PURE.
     /// </summary>
     public static string EditUpToPromptTextFor(YaeAnnotation annotation) =>
-        $"Choose up to {{Amount}} cards to Edit: {YaeAnnotationText.Name(annotation)} "
+        $"Choose up to {{Amount}} cards to Edit: {YaeAnnotationText.NameEnglish(annotation)} "
         + $"({YaeAnnotationText.PromptClause(annotation)}). "
         + FilterClause(annotation)
         + ReplacesWarning;

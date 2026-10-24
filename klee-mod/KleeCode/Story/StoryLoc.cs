@@ -32,6 +32,10 @@ public static class StoryLoc
                 rows[StoryLines.Key(own, StoryLines.RunLoss)] = l.RunLoss;
                 rows[StoryLines.Key(own, StoryLines.RunWin)] = l.RunWin;
             }
+            foreach (var v in story.LineVariants)
+            {
+                rows[StoryLines.VariantKey(own, v.Line, v.Name)] = v.Text;
+            }
             foreach (var p in story.Pairs)
             {
                 var partner = StoryRegistry.EntryOf(p.Partner);

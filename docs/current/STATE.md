@@ -210,13 +210,27 @@ for Balance." That run sent no data (0.3.12 shipped without the uploader).
 - **All the World's a Stage+ gains Retain**, as Rising Applause+ does
   (2026-10-19: "the Ancient card should keep Retain as long as the starter
   does"; 2026-10-23: "Yes to Archaic Tooth; let's send it.").
+- **Upgrade census built** (`review/active/furina-next-3-2026-10-16.md`,
+  "Upgrade census (2026-10-23)"): eight cost-only upgrades became real ones
+  (Let the People Rejoice 2 [3] a Fanfare, Critics' Darling plus 1 damage,
+  Tutti! draws 1 [2], Showstopper Spends 5 [3], Ensemble Cast+ summons 2
+  guests, The Masquerade plus 2 Block, The Show Must Go On+ gains Retain,
+  Rainfall Overture+ draws 1), and Bring the House Down is a hit, 8 [11],
+  then Spend 5 for each guest on stage: each guest acts twice. Her text
+  audit (`review/active/furina-text-audit-2026-10-23.md`) and tip trims
+  rode with it.
 - **Process:** frozen on `main`; changes go on `furina-next` with a suite
-  record.
-- **Latest record:** `review/records/furina-suite-4-2026-10-16.md` (mean
-  40.4, two runs won). Its HP figures are before the Curtain Call refund and
-  count her own Drains (GPT recheck, 2026-10-19): after the refund she loses
-  7.7 / 12.8 / 14.9% of max HP a normal fight against base 8.8 / 14.9 / 10.0,
-  so only act 3 is high.
+  record. `furina-next` was promoted 2026-10-24 on suite 5 ([USER]: "Does
+  the furina working branch have actual balance changes requiring a seat
+  round? If not, let's merge that in"; everything after the census and its
+  suite was text).
+- **Latest record:** `review/records/furina-suite-5-2026-10-23.md` (mean
+  44.0, one win, 4 of 5 at the act 3 boss; damage a turn 0.99 / 0.97 / 1.06
+  of base). Its act 3 HP figure counts her own Drain; less the Drain that
+  returns she loses 5.9 / 9.8 / 8.5% of max HP a normal fight (means)
+  against base 9.7 / 16.4 / 12.4. Showstopper, Ensemble Cast, Bring the
+  House Down and Rainfall Overture were never drafted, so their new
+  upgrades are untested.
 - **Story built** (`review/active/furina-story-2026-10-15.md`,
   `Story/FurinaStory.cs`): events, lines and the Stage Fright curse. Seen
   in play (2026-10-23).

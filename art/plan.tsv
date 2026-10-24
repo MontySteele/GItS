@@ -3406,7 +3406,7 @@ power_klee_sparkborne_magic	ImageGen/images/powers/sparkborne_magic.png	256	256	
 # power_klee_boom_badge <- Klee passive: the next blast hits harder
 power_klee_boom_badge	ImageGen/images/powers/boom_badge.png	256	256	contain	center	shortlist	1	png	Talent Pounding Surprise.png		icon	
 # power_klee_aftershock <- a reaction that sets off another blast
-power_klee_aftershock	ImageGen/images/powers/aftershock.png	256	256	contain	center	shortlist	1	png	Reaction Overloaded.png		icon	
+# power_klee_aftershock: drawn by tools/gen_reaction_badges.py (2026-10-24), not planned here
 # power_klee_return_to_sender <- a crate that blows up on whoever hit it
 power_klee_return_to_sender	ImageGen/images/powers/return_to_sender.png	256	256	contain	center	shortlist	1	png	Item Boom-Boom Unit.png		icon	
 # power_klee_look_out <- Dodoco's umbrella: Block off a Mine
@@ -3534,7 +3534,7 @@ power_kokomi_treatise	ImageGen/images/kokomi/powers/treatise.png	256	256	contain
 power_kokomi_kurage_canopy	ImageGen/images/kokomi/powers/kurage_canopy.png	256	256	contain	center	shortlist	1	png	Item Rampaging Sapphire Blue Hat Jellyfish.png		icon	
 # power_kokomi_watatsumi_resistance <- an Inazuma Hydro Vision
 # power_kokomi_grand_strategist <- a Hydro reaction
-power_kokomi_grand_strategist	ImageGen/images/kokomi/powers/grand_strategist.png	256	256	contain	center	shortlist	1	png	Reaction Vaporize.png		icon	
+# power_kokomi_grand_strategist: drawn by tools/gen_reaction_badges.py (2026-10-24), not planned here
 # power_kokomi_undercurrent_snare <- enemy rider: tangling seagrass
 power_kokomi_undercurrent_snare	ImageGen/images/kokomi/powers/undercurrent_snare.png	256	256	contain	center	shortlist	1	png	Item Seagrass.png		icon	
 # power_kokomi_juuga_guard <- Gorou's defence
@@ -3577,7 +3577,7 @@ power_varka_unwavering_banner	ImageGen/images/varka/powers/unwavering_banner.png
 # power_varka_azure_fangs_oath <- an oath out of Mondstadt's old epic
 power_varka_azure_fangs_oath	ImageGen/images/varka/powers/azure_fangs_oath.png	256	256	contain	center	shortlist	1	png	Item Fragment of Decarabian's Epic.png		icon	
 # power_varka_all_four_winds <- all four elements swirled
-power_varka_all_four_winds	ImageGen/images/varka/powers/all_four_winds.png	256	256	contain	center	shortlist	1	png	Reaction Swirl.png		icon	
+# power_varka_all_four_winds: drawn by tools/gen_reaction_badges.py (2026-10-24), not planned here
 # power_varka_oathbound_aegis <- Jean's aegis
 power_varka_oathbound_aegis	ImageGen/images/varka/powers/oathbound_aegis.png	256	256	contain	center	shortlist	1	png	Constellation People's Aegis.png		icon	
 # power_varka_dawn_winds_march <- exact name

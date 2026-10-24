@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Godot;
 using HarmonyLib;
 using KleeMod.Powers;
@@ -135,7 +136,12 @@ internal static class MeterCostBadge
     /// card's own face one line below. The page keeps the long form because a
     /// page has room for it and a badge does not.
     /// </summary>
-    private const string WholeBankPrice = "X";
+    private static string WholeBankPrice => CodeText.Format(WholeBankRow);
+
+    /// <summary>The X, keyed (the localization census, 2026-10-23, step 3).</summary>
+    private static readonly CodeRow WholeBankRow = new("card_keywords", "KLEEMOD-METER_COST.whole_bank", "X");
+
+    internal static IEnumerable<CodeRow> Rows() => new[] { WholeBankRow };
 
     private static string PriceText(CardModel card, MeterPrice price) =>
         price.Meter == Meter.Sparks && SparkCost.PricesWholeBank(card)

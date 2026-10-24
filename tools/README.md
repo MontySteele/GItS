@@ -47,6 +47,7 @@ someone types by hand, so an unreferenced script here is not necessarily dead.
 | `gen_mod_image.py` | Generate the Mods-screen identity badge, res://klee/mod_image.png (EB-161). |
 | `gen_multiplayer_hands.py` | Generate the multiplayer treasure-room hands for Klee, Furina, Kokomi and Varka. |
 | `gen_prototype_cards.py` | DEV-ONLY codegen for the prototype surface (R213 B, EB-147). |
+| `gen_reaction_badges.py` | Generate the three REACTION power badges at full badge size (derived, procedural). |
 | `gen_salon_glyphs.py` | Generate the Salon role-chip glyphs (Tier O, procedural). |
 | `gen_teyvat_ancients.py` | Generate the Teyvat arm's DRESSED ANCIENTS from `ancient-faces.tsv`. |
 | `gen_teyvat_creature_scenes.py` | Generate the Teyvat arm's STILL ENEMY BODIES from one table (`EB-811`). |

@@ -80,7 +80,7 @@ def test_the_tenko_clause_prints_the_new_strike():
     st = _state()
     Y.plant(st, 1)
     Y.level_up(st, 2)                                # Level 3
-    assert Y.tenko_line(st) == " (Sakura: 7 damage)"
+    assert Y.tenko_line(st) == " (Sakura: 7 damage in total)"
 
 
 # --- 2. Levels carry over on a replace ---------------------------------------

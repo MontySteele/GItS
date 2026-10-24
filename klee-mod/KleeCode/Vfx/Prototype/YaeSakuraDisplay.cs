@@ -77,21 +77,40 @@ public static class YaeSakuraSlots
     /// <summary>The mark for a Sakura that never withers.</summary>
     public const string InfinityMark = "∞";
 
-    public const string PlantsText = "Plants here";
-    public const string RefreshesText = "Refreshes this Sakura";
-    public const string ReplacesText = "Replaces this Sakura";
+    // KEYED (the localization census, 2026-10-23, step 3): every word the
+    // row draws is a row beside the slot's title
+    // (`KLEEMOD-YAE_SHRINE_SLOT.*`, `card_keywords`).
+    private const string Table = "card_keywords";
+    private static CodeRow Row(string leaf, string english) => new(Table, SlotTitleKey + "." + leaf, english);
+    private static readonly CodeRow PlantsRow = Row("plants", "Plants here");
+    private static readonly CodeRow RefreshesRow = Row("refreshes", "Refreshes this Sakura");
+    private static readonly CodeRow ReplacesRow = Row("replaces", "Replaces this Sakura");
+    private static readonly CodeRow RulesRow = Row("description",
+        "Each Sakura acts at the end of your turn, oldest first, then loses "
+      + "a turn. At 0 it acts again and withers.");
+    private static readonly CodeRow EmptyRow = Row("description_empty",
+        "An empty slot in your shrine. Planting a Sakura fills it.");
+    private static readonly CodeRow MarkRedInkRow = Row("mark_redink", "R");
+    private static readonly CodeRow MarkFoxFireRow = Row("mark_foxfire", "F");
+    private static readonly CodeRow MarkDeadlineRow = Row("mark_deadlineextension", "D");
+
+    public static IEnumerable<CodeRow> Rows() => new[]
+    {
+        PlantsRow, RefreshesRow, ReplacesRow, RulesRow, EmptyRow, MarkRedInkRow, MarkFoxFireRow, MarkDeadlineRow,
+    };
+
+    public static string PlantsText => CodeText.Format(PlantsRow);
+    public static string RefreshesText => CodeText.Format(RefreshesRow);
+    public static string ReplacesText => CodeText.Format(ReplacesRow);
 
     /// <summary>The hover title on a slot (<c>KleeMod</c>'s keyword table).</summary>
     public const string SlotTitleKey = "KLEEMOD-YAE_SHRINE_SLOT";
 
     /// <summary>The one-line rules on a standing Sakura's slot.</summary>
-    public const string RulesLine =
-        "Each Sakura acts at the end of your turn, oldest first, then loses "
-      + "a turn. At 0 it acts again and withers.";
+    public static string RulesLine => CodeText.Format(RulesRow);
 
     /// <summary>The one-line rules on an empty slot.</summary>
-    public const string EmptyLine =
-        "An empty slot in your shrine. Planting a Sakura fills it.";
+    public static string EmptyLine => CodeText.Format(EmptyRow);
 
     /// <summary>One slot per Sakura the shrine may hold (3, more with Sakura
     /// Channeling or Fox Ofuda), and never fewer than stand. PURE.</summary>
@@ -306,9 +325,9 @@ public static class YaeSakuraSlots
     /// <summary>The letter on an Annotation's mark. PURE.</summary>
     public static string MarkLetter(YaeAnnotation annotation) => annotation switch
     {
-        YaeAnnotation.RedInk => "R",
-        YaeAnnotation.FoxFire => "F",
-        YaeAnnotation.DeadlineExtension => "D",
+        YaeAnnotation.RedInk => CodeText.Format(MarkRedInkRow),
+        YaeAnnotation.FoxFire => CodeText.Format(MarkFoxFireRow),
+        YaeAnnotation.DeadlineExtension => CodeText.Format(MarkDeadlineRow),
         _ => "",
     };
 }
